@@ -13,6 +13,8 @@ spring:
     username: cos
     password: cos1234
   mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
     view:
       prefix: /templates/
       suffix: .mustache
