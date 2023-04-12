@@ -13,7 +13,7 @@ public class DummyObject {
         return User.builder()
                 .nickname(nickname)
                 .provider(provider)
-                .provider(providerId)
+                .providerId(providerId)
                 .email(nickname+"@"+provider+".com")
                 .profile("none")
                 .status(UserStatus.ACTIVE)

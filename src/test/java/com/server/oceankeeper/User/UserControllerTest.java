@@ -32,13 +32,10 @@ public class UserControllerTest extends DummyObject {
 
     @BeforeEach
     public void setUp(){
-        dataSetting();
-    }
-
-    private void dataSetting()
-    {
         userRepository.save(newUserWithR("overlap", "sameProvider","1234"));
     }
+
+
     @Test
     public void 회원가입정상() throws Exception{
         //given
@@ -52,6 +49,7 @@ public class UserControllerTest extends DummyObject {
         //만들어둔 회원가입 요청 dto를 json으로 매핑
         String requestBody = om.writeValueAsString(joinReqDto);
 
+        System.out.println("test : " + joinReqDto.toEntity());
 
         //when
         //json 바디 데이터를 담아서 api/join 호출
@@ -64,57 +62,56 @@ public class UserControllerTest extends DummyObject {
 
     }
 
-//    @Test
-//    public void join_fail_동일닉네임() throws Exception{
-//        //given
-//        UserReqDto.JoinReqDto joinReqDto = new UserReqDto.JoinReqDto();
-//        joinReqDto.setProvider("naver");
-//        joinReqDto.setProviderId("1234");
-//        joinReqDto.setNickname("overlap");
-//        joinReqDto.setEmail("kim@naver.com");
-//        joinReqDto.setProfile("11");
-//
-//        //만들어둔 회원가입 요청 dto를 json으로 매핑
-//        String requestBody = om.writeValueAsString(joinReqDto);
-//
-//
-//        //when
-//        //json 바디 데이터를 담아서 api/join 호출
-//        ResultActions resultActions = mvc.perform(post("/api/join").content(requestBody).contentType(MediaType.APPLICATION_JSON));
-//        //결과값의  body를 담아와서 출력해본다.
-//
-//
-//        //then
-//        resultActions.andExpect(status().isBadRequest());
-//    }
-//
-//    @Test
-//    public void join_fail_동일ProviderId() throws Exception{
-//        //given
-//        UserReqDto.JoinReqDto joinReqDto = new UserReqDto.JoinReqDto();
-//        joinReqDto.setProvider("sameProvider");
-//        joinReqDto.setProviderId("1234");
-//        joinReqDto.setNickname("test");
-//        joinReqDto.setEmail("kim@naver.com");
-//        joinReqDto.setProfile("11");
-//
-//        //만들어둔 회원가입 요청 dto를 json으로 매핑
-//        String requestBody = om.writeValueAsString(joinReqDto);
-//
-//
-//        //when
-//        //json 바디 데이터를 담아서 api/join 호출
-//        ResultActions resultActions = mvc.perform(post("/api/join").content(requestBody).contentType(MediaType.APPLICATION_JSON));
-//        //결과값의  body를 담아와서 출력해본다.
-//        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
-//        System.out.println(responseBody);
-//        ResponseDto response = om.readValue(responseBody, ResponseDto.class);
-//        System.out.println(response.getData());
-//        //then
-//        resultActions.andExpect(status().isBadRequest());
-//
-//        assertThat("{email=유효한 이메일 형식으로 작성해주세요}").isEqualTo(response.getData().toString());
-//    }
+    @Test
+    public void join_fail_동일닉네임() throws Exception{
+        //given
+        UserReqDto.JoinReqDto joinReqDto = new UserReqDto.JoinReqDto();
+        joinReqDto.setProvider("naver");
+        joinReqDto.setProviderId("1234");
+        joinReqDto.setNickname("overlap");
+        joinReqDto.setEmail("kim@naver.com");
+        joinReqDto.setProfile("11");
+
+        //만들어둔 회원가입 요청 dto를 json으로 매핑
+        String requestBody = om.writeValueAsString(joinReqDto);
+
+
+        //when
+        //json 바디 데이터를 담아서 api/join 호출
+        ResultActions resultActions = mvc.perform(post("/api/join").content(requestBody).contentType(MediaType.APPLICATION_JSON));
+        //결과값의  body를 담아와서 출력해본다.
+
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void join_fail_동일ProviderId() throws Exception{
+        //given
+        UserReqDto.JoinReqDto joinReqDto = new UserReqDto.JoinReqDto();
+        joinReqDto.setProvider("sameProvider");
+        joinReqDto.setProviderId("1234");
+        joinReqDto.setNickname("test");
+        joinReqDto.setEmail("kim@naver.com");
+        joinReqDto.setProfile("11");
+
+        //만들어둔 회원가입 요청 dto를 json으로 매핑
+        String requestBody = om.writeValueAsString(joinReqDto);
+
+
+        //when
+        //json 바디 데이터를 담아서 api/join 호출
+        ResultActions resultActions = mvc.perform(post("/api/join").content(requestBody).contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println(responseBody);
+        ResponseDto response = om.readValue(responseBody, ResponseDto.class);
+        System.out.println(response.getData());
+        //then
+        resultActions.andExpect(status().isBadRequest());
+
+        assertThat(status().isBadRequest());
+    }
 
 
 
