@@ -25,8 +25,7 @@ public class UserController {
     private final Logger log = LoggerFactory.getLogger(getClass()); //@slf4j 대신에 사용한다.
 
     @PostMapping("/join")
-    public ResponseEntity<?> mehtod(@RequestBody @Valid JoinReqDto joinReqDto, BindingResult bindingResult) {
-
+    public ResponseEntity<?> mehtod(@RequestBody JoinReqDto joinReqDto) {
         log.debug("디버그 : 회원가입 컨트롤러 호출");
         JoinResDto joinResDto = userService.join(joinReqDto);
         log.debug("디버그 : 회원가입 사용자 등록 완료");

@@ -36,13 +36,14 @@ public class UserService {
     @Transactional
     public JoinResDto join(JoinReqDto joinReqDto){
 
+        log.debug("디버그 : "+joinReqDto.toEntity()+" by UserService join");
 
         //회원가입을 했었는지 검사
         inspectDuplicatedUser(joinReqDto);
-
+        log.debug("디버그 : 중복가입 검사 통과 by UserService join");
         //닉네임이 중복되었는지 검사
         inspectDuplicatedNickName(joinReqDto);
-
+        log.debug("디버그 : 닉네임 중복 검사 통과 by UserService join");
         User userSaved = userRepository.save(joinReqDto.toEntity());
 
 
