@@ -7,24 +7,22 @@ server:
 
 spring:
   datasource:
-    url: jdbc:h2:mem:test;MODE=MySQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #나중에 환경변수 작업해놓기
+    url: jdbc:mysql://localhost:3306/OceanKeeper?serverTimezone=Asia/Seoul
+    username: cos
+    password: cos1234
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .mustache
+
   jpa:
-    open-in-view: false
     hibernate:
-      ddl-auto: create
-    properties:
-      '[hibernate.default_batch_fetch_size]': 100
-      '[hibernate.format_sql]': true
+      ddl-auto: create #create update none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
-  output:
-    ansi:
-      enabled: always
 
 logging:
   level:
