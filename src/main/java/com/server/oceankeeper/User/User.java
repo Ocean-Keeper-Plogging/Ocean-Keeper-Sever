@@ -46,6 +46,8 @@ public class User {
 
 
 
+    private String password;
+
     //todo
         //이미지 저장로직 만들어야한다.
 
@@ -59,7 +61,7 @@ public class User {
 
 
     @Builder
-    public User(long id, String nickname, String email, String profile, UserStatus status, String provider, String providerId, UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public User(long id, String nickname, String email, String profile, UserStatus status, String provider, String providerId, UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt, String password) {
         this.id = id;
         this.nickname = nickname;
         this.email = email;
@@ -70,6 +72,7 @@ public class User {
         this.role = role;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.password = password;
     }
 }
 
