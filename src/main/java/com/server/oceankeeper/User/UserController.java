@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("")
 @RestController
 public class UserController {
 
@@ -31,4 +31,6 @@ public class UserController {
         log.debug("디버그 : 회원가입 사용자 등록 완료");
         return new ResponseEntity<>(new ResponseDto<>(1, "회원가입 성공", joinResDto), HttpStatus.CREATED);
     }
+
+
 }
