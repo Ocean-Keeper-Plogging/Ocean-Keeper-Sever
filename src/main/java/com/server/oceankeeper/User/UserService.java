@@ -6,6 +6,7 @@ import com.server.oceankeeper.Exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -15,7 +16,7 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final Logger log = LoggerFactory.getLogger(getClass()); //@slf4j 대신에 사용한다.
-
+    private final BCryptPasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
     public void inspectDuplicatedUser(JoinReqDto joinReqDto){
@@ -44,7 +45,9 @@ public class UserService {
         //닉네임이 중복되었는지 검사
         inspectDuplicatedNickName(joinReqDto);
         log.debug("디버그 : 닉네임 중복 검사 통과 by UserService join");
-        User userSaved = userRepository.save(joinReqDto.toEntity());
+        User user = joinReqDto.toEntity();
+        user.setPassword(passwordEncoder.encode("-"));
+        User userSaved = userRepository.save(user);
 
 
         return new JoinResDto(userSaved);

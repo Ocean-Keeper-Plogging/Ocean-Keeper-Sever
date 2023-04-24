@@ -9,6 +9,13 @@ import lombok.Data;
 public class UserReqDto {
 
     @Data
+    public static class LoginReqDto{
+        private String providerId;
+        private String provider;
+
+    }
+
+    @Data
     public static class JoinReqDto{
         @ApiModelProperty(
                 value = "Oauth Provider",
