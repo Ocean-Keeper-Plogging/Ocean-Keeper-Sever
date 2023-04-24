@@ -1,15 +1,20 @@
 package com.server.oceankeeper.Config;
 
+import com.server.oceankeeper.Config.jwt.JwtAuthenticationFilter;
+import com.server.oceankeeper.Config.jwt.JwtAuthorizationFilter;
 import com.server.oceankeeper.User.UserEnum.UserRole;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -20,6 +25,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @AllArgsConstructor
 public class SecurityConfig {
+
+    @Bean // Ioc 컨테이너에 BCryptPasswordEncoder() 객체가 등록됨.
+    public BCryptPasswordEncoder passwordEncoder() {
+        log.debug("디버그 : BCryptPasswordEncoder 빈 등록됨");
+        return new BCryptPasswordEncoder();
+    }
 
     private final Logger log = LoggerFactory.getLogger(getClass()); //@slf4j 대신에 사용한다.
     @Bean
@@ -38,13 +49,33 @@ public class SecurityConfig {
         http.httpBasic().disable();
 
 
+        //jwt 필터 적용
+        http.apply(new CustomSecurityFilterManager());
+
         http.authorizeRequests()
-                .antMatchers("/api/s/**").authenticated()
+                //auth로 시작하는 경우 검증이 필요합니다.
+                .antMatchers("/auth/**").authenticated()
                 .antMatchers("/api/admin/**").hasRole("" + UserRole.ADMIN)
+                //swagger 적용
+                //todo - prod단계에서 지워야함
+                .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                 .anyRequest().permitAll();
+
 
         return http.build();
     }
+    //jwt 필터 등록
+    public class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity>{
+        @Override
+        public void configure(HttpSecurity builder) throws Exception {
+            AuthenticationManager authManager = builder.getSharedObject(AuthenticationManager.class);
+            builder.addFilter(new JwtAuthenticationFilter(authManager));
+            builder.addFilter(new JwtAuthorizationFilter(authManager));
+            super.configure(builder);
+        }
+    }
+
 
     public CorsConfigurationSource configurationSource() {
         log.debug("디버그 : configurationSource cors 설정이 SecurityFilterChain에 등록됨");
