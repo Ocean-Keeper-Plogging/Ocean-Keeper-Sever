@@ -34,6 +34,7 @@ class UserRepositoryTest extends DummyObject {
         joinReqDto.setNickname("test");
         joinReqDto.setEmail("kim@naver.com");
         joinReqDto.setProfile("11");
+        joinReqDto.setDeviceToken("1");
 
         User savedUser =userRepository.save(joinReqDto.toEntity());
 

@@ -32,6 +32,8 @@ public class UserReqDto {
         private String email;
         private String profile;
 
+        private String deviceToken;
+
         public User toEntity(){
             return User.builder()
                     .provider(provider)
@@ -41,6 +43,7 @@ public class UserReqDto {
                     .profile(profile)
                     .status(UserStatus.ACTIVE)
                     .role(UserRole.USER)
+                    .deviceToken(deviceToken)
                     .build();
         }
 
