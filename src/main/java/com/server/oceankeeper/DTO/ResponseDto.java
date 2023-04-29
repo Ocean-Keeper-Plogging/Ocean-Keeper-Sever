@@ -1,12 +1,10 @@
 package com.server.oceankeeper.DTO;
 
-import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiOperation;
+import com.server.oceankeeper.Domain.User.dto.UserReqDto;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import com.server.oceankeeper.DTO.User.*;
 
 
 @ApiResponses(value = {

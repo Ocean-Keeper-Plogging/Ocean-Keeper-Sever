@@ -2,8 +2,9 @@ package com.server.oceankeeper.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.DTO.ResponseDto;
-import com.server.oceankeeper.DTO.User.UserReqDto;
+import com.server.oceankeeper.Domain.User.dto.UserReqDto;
 import com.server.oceankeeper.Dummy.DummyObject;
+import com.server.oceankeeper.Domain.User.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 

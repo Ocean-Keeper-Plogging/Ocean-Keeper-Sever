@@ -1,4 +1,4 @@
-package com.server.oceankeeper.User.UserEnum;
+package com.server.oceankeeper.Domain.User.UserEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

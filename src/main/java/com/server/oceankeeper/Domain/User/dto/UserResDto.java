@@ -1,6 +1,6 @@
-package com.server.oceankeeper.DTO.User;
+package com.server.oceankeeper.Domain.User.dto;
 
-import com.server.oceankeeper.User.User;
+import com.server.oceankeeper.Domain.User.User;
 import lombok.Data;
 
 public class UserResDto {

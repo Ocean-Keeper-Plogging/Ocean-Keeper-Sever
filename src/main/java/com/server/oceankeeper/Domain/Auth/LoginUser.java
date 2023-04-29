@@ -1,10 +1,10 @@
-package com.server.oceankeeper.Config.Auth;
+package com.server.oceankeeper.Domain.Auth;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import com.server.oceankeeper.User.User;
+import com.server.oceankeeper.Domain.User.User;
 
 import java.util.ArrayList;
 import java.util.Collection;

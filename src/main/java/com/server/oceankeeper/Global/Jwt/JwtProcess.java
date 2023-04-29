@@ -1,11 +1,11 @@
-package com.server.oceankeeper.Config.jwt;
+package com.server.oceankeeper.Global.Jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.server.oceankeeper.Config.Auth.LoginUser;
-import com.server.oceankeeper.User.User;
-import com.server.oceankeeper.User.UserEnum.UserRole;
+import com.server.oceankeeper.Domain.Auth.LoginUser;
+import com.server.oceankeeper.Domain.User.User;
+import com.server.oceankeeper.Domain.User.UserEnum.UserRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

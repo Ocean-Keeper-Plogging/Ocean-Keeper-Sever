@@ -1,7 +1,7 @@
-package com.server.oceankeeper.Config.Auth;
+package com.server.oceankeeper.Domain.Auth;
 
-import com.server.oceankeeper.User.User;
-import com.server.oceankeeper.User.UserRepository;
+import com.server.oceankeeper.Domain.User.User;
+import com.server.oceankeeper.Domain.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UserDetails;

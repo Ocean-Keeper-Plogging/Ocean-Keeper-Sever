@@ -1,4 +1,4 @@
-package com.server.oceankeeper.Config.jwt;
+package com.server.oceankeeper.Global.Jwt;
 
 public class JwtConfig {
 

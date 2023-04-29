@@ -1,9 +1,7 @@
-package com.server.oceankeeper.Handler;
+package com.server.oceankeeper.Global.Handler;
 
 import com.server.oceankeeper.DTO.ResponseDto;
-import com.server.oceankeeper.Exception.CustomApiException;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import com.server.oceankeeper.Global.Exception.CustomApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

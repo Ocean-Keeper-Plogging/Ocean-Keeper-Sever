@@ -1,8 +1,8 @@
-package com.server.oceankeeper.User;
+package com.server.oceankeeper.Domain.User;
 
 
-import com.server.oceankeeper.User.UserEnum.UserRole;
-import com.server.oceankeeper.User.UserEnum.UserStatus;
+import com.server.oceankeeper.Domain.User.UserEnum.UserRole;
+import com.server.oceankeeper.Domain.User.UserEnum.UserStatus;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;

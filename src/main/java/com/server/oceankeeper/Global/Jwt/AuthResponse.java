@@ -1,4 +1,4 @@
-package com.server.oceankeeper.Config.jwt;
+package com.server.oceankeeper.Global.Jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.DTO.ResponseDto;

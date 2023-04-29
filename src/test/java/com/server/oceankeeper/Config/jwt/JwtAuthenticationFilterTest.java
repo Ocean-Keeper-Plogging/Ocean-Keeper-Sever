@@ -1,11 +1,11 @@
 package com.server.oceankeeper.Config.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.oceankeeper.DTO.User.UserReqDto;
-import com.server.oceankeeper.DTO.User.UserReqDto.*;
+import com.server.oceankeeper.Domain.User.dto.UserReqDto.*;
 import com.server.oceankeeper.Dummy.DummyObject;
-import com.server.oceankeeper.User.User;
-import com.server.oceankeeper.User.UserRepository;
+import com.server.oceankeeper.Domain.User.User;
+import com.server.oceankeeper.Domain.User.UserRepository;
+import com.server.oceankeeper.Global.Jwt.JwtConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

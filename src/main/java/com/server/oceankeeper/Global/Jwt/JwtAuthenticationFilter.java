@@ -1,10 +1,10 @@
-package com.server.oceankeeper.Config.jwt;
+package com.server.oceankeeper.Global.Jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.oceankeeper.Config.Auth.LoginUser;
+import com.server.oceankeeper.Domain.Auth.LoginUser;
 
-import com.server.oceankeeper.DTO.User.UserReqDto.*;
-import com.server.oceankeeper.DTO.User.UserResDto.*;
+import com.server.oceankeeper.Domain.User.dto.UserReqDto.*;
+import com.server.oceankeeper.Domain.User.dto.UserResDto.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
                 log.debug("디버그 : 강제 로그인 진행");
                 Authentication authentication = authenticationManager.authenticate(authenticationToken);
-
 
                 return authentication;
 

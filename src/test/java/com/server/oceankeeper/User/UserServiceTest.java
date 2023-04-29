@@ -1,8 +1,11 @@
 package com.server.oceankeeper.User;
 
-import com.server.oceankeeper.DTO.User.UserReqDto.*;
-import com.server.oceankeeper.DTO.User.UserResDto.*;
+import com.server.oceankeeper.Domain.User.dto.UserReqDto.*;
+import com.server.oceankeeper.Domain.User.dto.UserResDto.*;
 import com.server.oceankeeper.Dummy.DummyObject;
+import com.server.oceankeeper.Domain.User.User;
+import com.server.oceankeeper.Domain.User.UserRepository;
+import com.server.oceankeeper.Domain.User.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 

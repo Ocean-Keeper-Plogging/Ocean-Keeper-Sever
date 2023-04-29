@@ -1,4 +1,4 @@
-package com.server.oceankeeper.User;
+package com.server.oceankeeper.Domain.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

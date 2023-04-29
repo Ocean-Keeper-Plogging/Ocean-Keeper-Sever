@@ -1,8 +1,9 @@
 package com.server.oceankeeper.User;
 
-import com.server.oceankeeper.DTO.User.UserReqDto;
+import com.server.oceankeeper.Domain.User.dto.UserReqDto;
 import com.server.oceankeeper.Dummy.DummyObject;
-import org.junit.jupiter.api.BeforeEach;
+import com.server.oceankeeper.Domain.User.User;
+import com.server.oceankeeper.Domain.User.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

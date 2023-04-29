@@ -1,8 +1,10 @@
 package com.server.oceankeeper.Config.jwt;
 
-import com.server.oceankeeper.Config.Auth.LoginUser;
-import com.server.oceankeeper.User.User;
-import com.server.oceankeeper.User.UserEnum.UserRole;
+import com.server.oceankeeper.Domain.Auth.LoginUser;
+import com.server.oceankeeper.Domain.User.User;
+import com.server.oceankeeper.Domain.User.UserEnum.UserRole;
+import com.server.oceankeeper.Global.Jwt.JwtConfig;
+import com.server.oceankeeper.Global.Jwt.JwtProcess;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

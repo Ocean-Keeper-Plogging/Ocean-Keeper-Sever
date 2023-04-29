@@ -1,4 +1,4 @@
-package com.server.oceankeeper.Config;
+package com.server.oceankeeper.Global.Config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

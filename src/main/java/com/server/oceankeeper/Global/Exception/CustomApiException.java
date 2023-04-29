@@ -1,4 +1,4 @@
-package com.server.oceankeeper.Exception;
+package com.server.oceankeeper.Global.Exception;
 
 public class CustomApiException extends RuntimeException{
 

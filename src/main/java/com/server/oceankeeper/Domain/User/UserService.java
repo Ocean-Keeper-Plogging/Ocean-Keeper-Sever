@@ -1,8 +1,8 @@
-package com.server.oceankeeper.User;
+package com.server.oceankeeper.Domain.User;
 
-import com.server.oceankeeper.DTO.User.UserReqDto.*;
-import com.server.oceankeeper.DTO.User.UserResDto.*;
-import com.server.oceankeeper.Exception.CustomApiException;
+import com.server.oceankeeper.Domain.User.dto.UserReqDto.*;
+import com.server.oceankeeper.Domain.User.dto.UserResDto.*;
+import com.server.oceankeeper.Global.Exception.CustomApiException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

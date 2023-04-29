@@ -1,8 +1,8 @@
-package com.server.oceankeeper.DTO.User;
+package com.server.oceankeeper.Domain.User.dto;
 
-import com.server.oceankeeper.User.User;
-import com.server.oceankeeper.User.UserEnum.UserRole;
-import com.server.oceankeeper.User.UserEnum.UserStatus;
+import com.server.oceankeeper.Domain.User.User;
+import com.server.oceankeeper.Domain.User.UserEnum.UserRole;
+import com.server.oceankeeper.Domain.User.UserEnum.UserStatus;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

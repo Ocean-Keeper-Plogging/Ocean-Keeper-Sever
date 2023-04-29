@@ -1,8 +1,8 @@
-package com.server.oceankeeper.Config;
+package com.server.oceankeeper.Global.Config;
 
-import com.server.oceankeeper.Config.jwt.JwtAuthenticationFilter;
-import com.server.oceankeeper.Config.jwt.JwtAuthorizationFilter;
-import com.server.oceankeeper.User.UserEnum.UserRole;
+import com.server.oceankeeper.Global.Jwt.JwtAuthenticationFilter;
+import com.server.oceankeeper.Global.Jwt.JwtAuthorizationFilter;
+import com.server.oceankeeper.Domain.User.UserEnum.UserRole;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
