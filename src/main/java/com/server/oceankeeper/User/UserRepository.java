@@ -14,4 +14,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     public Optional<User> findByProviderAndProviderId(String provider, String providerId);
 
+    public Optional<User> findByDeviceToken(String deviceToken);
+
 }

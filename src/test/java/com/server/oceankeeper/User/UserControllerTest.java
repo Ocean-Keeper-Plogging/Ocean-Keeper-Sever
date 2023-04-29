@@ -45,6 +45,7 @@ public class UserControllerTest extends DummyObject {
         joinReqDto.setNickname("test");
         joinReqDto.setEmail("kim@naver.com");
         joinReqDto.setProfile("11");
+        joinReqDto.setDeviceToken("1");
 
         //만들어둔 회원가입 요청 dto를 json으로 매핑
         String requestBody = om.writeValueAsString(joinReqDto);
@@ -71,6 +72,7 @@ public class UserControllerTest extends DummyObject {
         joinReqDto.setNickname("overlap");
         joinReqDto.setEmail("kim@naver.com");
         joinReqDto.setProfile("11");
+        joinReqDto.setDeviceToken("1");
 
         //만들어둔 회원가입 요청 dto를 json으로 매핑
         String requestBody = om.writeValueAsString(joinReqDto);
@@ -95,6 +97,7 @@ public class UserControllerTest extends DummyObject {
         joinReqDto.setNickname("test");
         joinReqDto.setEmail("kim@naver.com");
         joinReqDto.setProfile("11");
+        joinReqDto.setDeviceToken("1");
 
         //만들어둔 회원가입 요청 dto를 json으로 매핑
         String requestBody = om.writeValueAsString(joinReqDto);
