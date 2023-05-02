@@ -1,8 +1,10 @@
 package com.server.oceankeeper.Domain.User;
 
-import com.server.oceankeeper.Domain.User.dto.UserReqDto.*;
-import com.server.oceankeeper.Domain.User.dto.UserResDto.*;
-import com.server.oceankeeper.Global.Exception.CustomApiException;
+
+
+import com.server.oceankeeper.Domain.User.dto.JoinReqDto;
+import com.server.oceankeeper.Domain.User.dto.JoinResDto;
+import com.server.oceankeeper.Global.Exception.DuplicatedResourceException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -19,26 +20,12 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    public void inspectDuplicatedUser(JoinReqDto joinReqDto){
-        Optional<User> user = userRepository.findByProviderAndProviderId(joinReqDto.getProvider(),joinReqDto.getProviderId());
-        if(user.isPresent()){
-            throw new CustomApiException("이미 회원가입이 되어있습니다.");
-        }
-    }
-
-    public void inspectDuplicatedNickName(JoinReqDto joinReqDto){
-        Optional<User> userFoundByNickname= userRepository.findByNickname(joinReqDto.getNickname());
-        //닉네임 중복된 경우
-        if(userFoundByNickname.isPresent()){
-            throw new CustomApiException("동일한 닉네임이 이미 존재합니다.");
-        }
-    }
 
     @Transactional
     public JoinResDto join(JoinReqDto joinReqDto){
 
         log.debug("디버그 : "+joinReqDto.toEntity()+" by UserService join");
-
+        inspectDuplicatedDeviceToken(joinReqDto);
         //회원가입을 했었는지 검사
         inspectDuplicatedUser(joinReqDto);
         log.debug("디버그 : 중복가입 검사 통과 by UserService join");
@@ -52,6 +39,28 @@ public class UserService {
 
         return new JoinResDto(userSaved);
     }
+
+
+
+    private void inspectDuplicatedUser(JoinReqDto joinReqDto){
+        if(userRepository.existsByProviderAndProviderId(joinReqDto.getProvider(), joinReqDto.getProviderId())) {
+            throw new DuplicatedResourceException("로그인을 시도하는 sns 계정이 이미 가입되어 있습니다.");
+        }
+    }
+
+    private void inspectDuplicatedNickName(JoinReqDto joinReqDto){
+        if(userRepository.existsByNickname(joinReqDto.getNickname())){
+            throw new DuplicatedResourceException("동일한 닉네임이 이미 존재합니다.");
+        }
+    }
+
+    private void inspectDuplicatedDeviceToken(JoinReqDto joinReqDto){
+        if(userRepository.existsByDeviceToken(joinReqDto.getDeviceToken())){
+            throw new DuplicatedResourceException("이미 회원가입되어있습니다.");
+        }
+    }
+
+
 
 
 }
