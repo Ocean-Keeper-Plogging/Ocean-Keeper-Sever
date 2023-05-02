@@ -3,9 +3,9 @@ package com.server.oceankeeper.Global.Jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.Domain.Auth.LoginUser;
 
-import com.server.oceankeeper.Domain.User.dto.UserReqDto.*;
-import com.server.oceankeeper.Domain.User.dto.UserResDto.*;
 
+import com.server.oceankeeper.Domain.User.dto.LoginReqDto;
+import com.server.oceankeeper.Domain.User.dto.LoginResDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -73,7 +73,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String jwtToken = JwtProcess.create(loginUser);
         response.addHeader(JwtConfig.HEADER, jwtToken);
 
-        LoginResDto loginResDto = new LoginResDto(loginUser.getUser());
+        LoginResDto loginResDto = new LoginResDto("로그인에 성공하였습니다.");
 
         AuthResponse.success(response, loginResDto);
     }

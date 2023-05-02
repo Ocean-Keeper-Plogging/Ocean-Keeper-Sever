@@ -1,7 +1,8 @@
 package com.server.oceankeeper.Global.Jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.oceankeeper.DTO.ResponseDto;
+
+import com.server.oceankeeper.Domain.User.dto.LoginResDto;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class AuthResponse {
     public static void success(HttpServletResponse response, Object dto){
         try{
             ObjectMapper om = new ObjectMapper();
-            ResponseDto<?> responseDto = new ResponseDto<>(1, "로그인 성공", dto);
+            LoginResDto responseDto = new LoginResDto("로그인 성공");
 
             String responseBody = om.writeValueAsString(responseDto);
             response.getWriter().println(responseBody);
@@ -27,7 +28,7 @@ public class AuthResponse {
             response.setStatus(200);
         }catch(IOException e){
             log.error("에러 : 파싱 에러 "+ e.getMessage());
-            ResponseDto<?> responseDto = new ResponseDto<>(1, "로그인 성공 응답 메시지 생성과정에서 오류가 발생했습니다.", null);
+            LoginResDto responseDto = new LoginResDto("로그인 성공 응답 메시지 생성과정에서 오류가 발생했습니다.");
             response.setContentType("application/json; charset = utf-8");
             response.setStatus(500);
         }
@@ -37,7 +38,7 @@ public class AuthResponse {
     public static void fail(HttpServletResponse response, String msg, HttpStatus httpStatus){
         try{
             ObjectMapper om = new ObjectMapper();
-            ResponseDto<?> responseDto = new ResponseDto<>(-1, msg, null);
+            LoginResDto responseDto = new LoginResDto("로그인 실패");
 
             String responseBody = om.writeValueAsString(responseDto);
             response.getWriter().println(responseBody);
@@ -47,7 +48,7 @@ public class AuthResponse {
 
         }catch(Exception e){
             log.error("에러 : 파싱 에러 "+ e.getMessage());
-            ResponseDto<?> responseDto = new ResponseDto<>(1, "로그인 실패 응답 메시지 생성과정에서 오류가 발생했습니다.", null);
+            LoginResDto responseDto = new LoginResDto("로그인 성공 응답 메시지 생성과정에서 오류가 발생했습니다.");
             response.setContentType("application/json; charset = utf-8");
             response.setStatus(500);
         }
@@ -57,7 +58,7 @@ public class AuthResponse {
     public static void unAuthentication(HttpServletResponse response, String msg, HttpStatus httpStatus){
         try{
             ObjectMapper om = new ObjectMapper();
-            ResponseDto<?> responseDto = new ResponseDto<>(-1, msg, null);
+            LoginResDto responseDto = new LoginResDto("인증되지 않은 사용자입니다.");
 
             String responseBody = om.writeValueAsString(responseDto);
             response.getWriter().println(responseBody);
@@ -67,7 +68,7 @@ public class AuthResponse {
 
         }catch(Exception e){
             log.error("에러 : 파싱 에러 "+ e.getMessage());
-            ResponseDto<?> responseDto = new ResponseDto<>(1, "인증미확인 응답 메시지 생성과정에서 오류가 발생했습니다.", null);
+            LoginResDto responseDto = new LoginResDto("인증 실패 메시지 생성과정에서 오류가 발생했습니다.");
             response.setContentType("application/json; charset = utf-8");
             response.setStatus(500);
         }

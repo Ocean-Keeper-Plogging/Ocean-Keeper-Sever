@@ -1,7 +1,8 @@
 package com.server.oceankeeper.Config.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.oceankeeper.Domain.User.dto.UserReqDto.*;
+
+import com.server.oceankeeper.Domain.User.dto.LoginReqDto;
 import com.server.oceankeeper.Dummy.DummyObject;
 import com.server.oceankeeper.Domain.User.User;
 import com.server.oceankeeper.Domain.User.UserRepository;
@@ -48,9 +49,7 @@ class JwtAuthenticationFilterTest extends DummyObject {
 
     @Test
     public void 로그인성공() throws Exception {
-        LoginReqDto loginReqDto = new LoginReqDto();
-        loginReqDto.setProvider("oceankeeper");
-        loginReqDto.setProviderId("1");
+        LoginReqDto loginReqDto = LoginReqDto.builder().provider("oceankeeper").providerId("1").build();
         String requestBody = om.writeValueAsString(loginReqDto);
 
         System.out.println("테스트 : " + loginReqDto.toString());
@@ -80,9 +79,8 @@ class JwtAuthenticationFilterTest extends DummyObject {
 
     @Test
     public void 로그인실패() throws Exception{
-        LoginReqDto loginReqDto = new LoginReqDto();
-        loginReqDto.setProvider("oceankeeper");
-        loginReqDto.setProviderId("2");
+        LoginReqDto loginReqDto = LoginReqDto.builder().provider("oceankeeper").providerId("1").build();
+
         String requestBody = om.writeValueAsString(loginReqDto);
 
         System.out.println("테스트 : " + loginReqDto.toString());

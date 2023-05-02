@@ -1,8 +1,10 @@
 package com.server.oceankeeper.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.oceankeeper.DTO.ResponseDto;
-import com.server.oceankeeper.Domain.User.dto.UserReqDto;
+
+import com.server.oceankeeper.Domain.User.dto.JoinReqDto;
+import com.server.oceankeeper.Domain.User.dto.JoinResDto;
+
 import com.server.oceankeeper.Dummy.DummyObject;
 import com.server.oceankeeper.Domain.User.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,20 +34,23 @@ public class UserControllerTest extends DummyObject {
 
     @BeforeEach
     public void setUp(){
-        userRepository.save(newUserWithR("overlap", "sameProvider","1234"));
+
+        userRepository.save(newUserWithR("overlap", "sameProvider","overlap"));
+
+
     }
 
 
     @Test
     public void 회원가입정상() throws Exception{
         //given
-        UserReqDto.JoinReqDto joinReqDto = new UserReqDto.JoinReqDto();
-        joinReqDto.setProvider("naver");
-        joinReqDto.setProviderId("1234");
-        joinReqDto.setNickname("test");
-        joinReqDto.setEmail("kim@naver.com");
-        joinReqDto.setProfile("11");
-        joinReqDto.setDeviceToken("1");
+
+        JoinReqDto joinReqDto = JoinReqDto.builder().
+                provider("naver").
+                providerId("12345").
+                nickname("test").
+                email("kim@naver.com").
+                deviceToken("1").build();
 
         //만들어둔 회원가입 요청 dto를 json으로 매핑
         String requestBody = om.writeValueAsString(joinReqDto);
@@ -66,13 +71,13 @@ public class UserControllerTest extends DummyObject {
     @Test
     public void join_fail_동일닉네임() throws Exception{
         //given
-        UserReqDto.JoinReqDto joinReqDto = new UserReqDto.JoinReqDto();
-        joinReqDto.setProvider("naver");
-        joinReqDto.setProviderId("1234");
-        joinReqDto.setNickname("overlap");
-        joinReqDto.setEmail("kim@naver.com");
-        joinReqDto.setProfile("11");
-        joinReqDto.setDeviceToken("1");
+
+        JoinReqDto joinReqDto = JoinReqDto.builder().
+                provider("naver").
+                providerId("12345").
+                nickname("overlap").
+                email("kim@naver.com").
+                deviceToken("1").build();
 
         //만들어둔 회원가입 요청 dto를 json으로 매핑
         String requestBody = om.writeValueAsString(joinReqDto);
@@ -90,14 +95,13 @@ public class UserControllerTest extends DummyObject {
 
     @Test
     public void join_fail_동일ProviderId() throws Exception{
-        //given
-        UserReqDto.JoinReqDto joinReqDto = new UserReqDto.JoinReqDto();
-        joinReqDto.setProvider("sameProvider");
-        joinReqDto.setProviderId("1234");
-        joinReqDto.setNickname("test");
-        joinReqDto.setEmail("kim@naver.com");
-        joinReqDto.setProfile("11");
-        joinReqDto.setDeviceToken("1");
+
+        JoinReqDto joinReqDto = JoinReqDto.builder().
+                provider("naver").
+                providerId("overlap").
+                nickname("1234").
+                email("kim@naver.com").
+                deviceToken("1").build();
 
         //만들어둔 회원가입 요청 dto를 json으로 매핑
         String requestBody = om.writeValueAsString(joinReqDto);
@@ -108,8 +112,8 @@ public class UserControllerTest extends DummyObject {
         ResultActions resultActions = mvc.perform(post("/api/join").content(requestBody).contentType(MediaType.APPLICATION_JSON));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println(responseBody);
-        ResponseDto response = om.readValue(responseBody, ResponseDto.class);
-        System.out.println(response.getData());
+        JoinResDto response = om.readValue(responseBody, JoinResDto.class);
+        System.out.println(response);
         //then
         resultActions.andExpect(status().isBadRequest());
 
