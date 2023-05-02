@@ -25,7 +25,7 @@ public class ProfileController {
 
     //썸네일 수정
     @ApiOperation(value = "썸네일 수정 [권한 필요]", notes = "기존 프로필 이미지 s3 수정 후 저장된 url을 반환합니다.", response = ProfileDto.class)
-    @PutMapping("/auth/profile")
+    @PutMapping("/user/profile")
     public ResponseEntity<ProfileDto> edit(@RequestPart("profile") MultipartFile profile, HttpServletRequest request) throws IOException {
         String jwtToken = request.getHeader(JwtConfig.HEADER).replace(JwtConfig.TOKEN_PREFIX, "");
         Long id = JwtProcess.toUserId(jwtToken);
@@ -43,7 +43,7 @@ public class ProfileController {
     }
 
     @ApiOperation(value = "썸네일 등록 [권한 필요 없음]", notes = "프로필 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileDto.class)
-    @PostMapping(("/profile2"))
+    @PostMapping(("/user/profile"))
     public ResponseEntity<ProfileDto> uploadProfile(@RequestPart("profile") MultipartFile profile) throws IOException{
         String url = profileService.uploadNewProfile(profile, "profile");
 

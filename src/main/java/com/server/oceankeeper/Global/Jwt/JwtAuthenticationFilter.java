@@ -29,7 +29,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager){
         super(authenticationManager);
 
-        setFilterProcessesUrl("/login");
+        //로그인
+        setFilterProcessesUrl("/auth");
         this.authenticationManager = authenticationManager;
     }
 
@@ -71,10 +72,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         LoginUser loginUser = (LoginUser) authResult.getPrincipal();
         String jwtToken = JwtProcess.create(loginUser);
-        response.addHeader(JwtConfig.HEADER, jwtToken);
 
-        LoginResDto loginResDto = new LoginResDto("로그인에 성공하였습니다.");
 
-        AuthResponse.success(response, loginResDto);
+
+        AuthResponse.success(response, jwtToken);
     }
 }

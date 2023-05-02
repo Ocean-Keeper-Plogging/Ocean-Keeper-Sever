@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -46,12 +47,15 @@ public class SecurityConfig {
         http.httpBasic().disable();
 
 
+
         //jwt 필터 적용
         http.apply(new CustomSecurityFilterManager());
 
         http.authorizeRequests()
                 //auth로 시작하는 경우 검증이 필요합니다.
-                .antMatchers("/auth/**").authenticated()
+                .antMatchers("/token/**").authenticated()
+                .antMatchers(HttpMethod.PUT, "/profile").authenticated()
+                .antMatchers(HttpMethod.POST, "/profile").permitAll()
                 .antMatchers("/api/admin/**").hasRole("" + UserRole.ADMIN)
                 //swagger 적용
                 //todo - prod단계에서 지워야함

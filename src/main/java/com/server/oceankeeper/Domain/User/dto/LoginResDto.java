@@ -9,10 +9,13 @@ import lombok.Data;
 public class LoginResDto{
 
     private final String msg;
+    private final String jwtToken;
 
     @Builder
-    public LoginResDto(String msg) {
+
+    public LoginResDto(String msg, String jwtToken) {
         this.msg = msg;
+        this.jwtToken = jwtToken;
     }
 }
 
