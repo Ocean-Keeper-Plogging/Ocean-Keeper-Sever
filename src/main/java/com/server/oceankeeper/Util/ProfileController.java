@@ -1,7 +1,7 @@
 package com.server.oceankeeper.Util;
 
-import com.server.oceankeeper.Config.jwt.JwtConfig;
-import com.server.oceankeeper.Config.jwt.JwtProcess;
+import com.server.oceankeeper.Global.Jwt.JwtConfig;
+import com.server.oceankeeper.Global.Jwt.JwtProcess;
 import com.server.oceankeeper.DTO.ResponseDto;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;

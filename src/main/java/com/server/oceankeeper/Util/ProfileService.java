@@ -1,9 +1,7 @@
 package com.server.oceankeeper.Util;
 
-import com.amazonaws.services.s3.transfer.Copy;
-import com.server.oceankeeper.Exception.CustomApiException;
-import com.server.oceankeeper.User.User;
-import com.server.oceankeeper.User.UserRepository;
+import com.server.oceankeeper.Domain.User.User;
+import com.server.oceankeeper.Domain.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

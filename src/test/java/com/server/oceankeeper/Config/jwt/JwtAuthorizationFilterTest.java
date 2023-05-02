@@ -1,19 +1,12 @@
 package com.server.oceankeeper.Config.jwt;
 
-import com.server.oceankeeper.Config.Auth.LoginUser;
-import com.server.oceankeeper.User.User;
-import com.server.oceankeeper.User.UserEnum.UserRole;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test") //application.yml 어떤 것을 쓸건지
 @AutoConfigureMockMvc
@@ -48,7 +41,7 @@ class JwtAuthorizationFilterTest {
 //        ResultActions resultActions = mvc.perform(get("/api/s/hello/test"));
 //        //then
 //        resultActions.andExpect(status().isUnauthorized());
-    }
+//        }
 
 
 }
