@@ -7,23 +7,37 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+
 @Data
 public class JoinReqDto{
     @ApiModelProperty(
             value = "Oauth Provider",
             dataType = "String",
             example = "naver")
+    @NotEmpty
     private final String provider;
     @ApiModelProperty(
             value = "Oauth Provider Id",
             dataType = "String"
     )
+    @NotEmpty
     private final String providerId;
 
+    @Pattern(regexp = "^[a-zA-Z0-9가-힣]{2,20}$", message="한글/영문/숫자로만 구성된 2~20자 이내의 닉네임을 사용해주세요")
+    @NotEmpty
     private final String nickname;
+
+
+
+    @Pattern(regexp = "^[a-zA-Z0-9]{2,10}@[a-zA-Z0-9]{2,6}\\.[a-zA-Z]{2,3}$", message = "유효한 이메일 형식으로 작성해주세요")
+    @NotEmpty
     private final String email;
+    @NotEmpty
     private final String profile;
 
+    @NotEmpty
     private final String deviceToken;
 
     @Builder
