@@ -7,14 +7,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @Slf4j
 @SpringBootApplication
-@EnableJpaAuditing
 public class OceanKeeperApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(OceanKeeperApplication.class, args);
         log.debug("디버그 : 정상적으로 가동되었습니다.");
 
     }
-
-
 }
