@@ -3,9 +3,7 @@ package com.server.oceankeeper.domain.crew;
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.BaseEntity;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,7 +12,8 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(indexes = @Index(name = "i_uuid", columnList = "uuid"))
+@Table(indexes = @Index(name = "i_uuid", columnList = "uuid", unique = true))
+@ToString(exclude = {"activity","user"})
 public class Crews extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,7 +25,7 @@ public class Crews extends BaseEntity {
     @JoinColumn(name="ACTIVITY_ID")
     private Activity activity;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name="USER_ID")
     private OUser user;
 
@@ -42,7 +41,7 @@ public class Crews extends BaseEntity {
     @Column(length = 15)
     private String phoneNumber;
 
-    private String Id1365;
+    private String id1365;
 
     @Column(length = 50)
     private String email;
@@ -63,4 +62,29 @@ public class Crews extends BaseEntity {
     private LocalDateTime finishAt;
 
     private boolean privacyAgreement;
+
+    @Builder
+    public Crews(Long id, UUID uuid, Activity activity, OUser user, CrewRole activityRole,
+                 CrewStatus crewStatus, String name, String phoneNumber, String id1365, String email,
+                 String startPoint, String transportation, String question, LocalDateTime applyAt,
+                 LocalDateTime cancelAt, LocalDateTime expiredAt, LocalDateTime finishAt, boolean privacyAgreement) {
+        this.id = id;
+        this.uuid = uuid;
+        this.activity = activity;
+        this.user = user;
+        this.activityRole = activityRole;
+        this.crewStatus = crewStatus;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.id1365 = id1365;
+        this.email = email;
+        this.startPoint = startPoint;
+        this.transportation = transportation;
+        this.question = question;
+        this.applyAt = applyAt;
+        this.cancelAt = cancelAt;
+        this.expiredAt = expiredAt;
+        this.finishAt = finishAt;
+        this.privacyAgreement = privacyAgreement;
+    }
 }

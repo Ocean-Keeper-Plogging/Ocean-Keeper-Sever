@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface CrewRepository extends JpaRepository<Crews,Long> {
+public interface CrewRepository extends JpaRepository<Crews, Long>, respository.CustomCrewRepository {
     List<Crews> findByUser(OUser user);
 }

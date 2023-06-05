@@ -1,9 +1,7 @@
-package com.server.oceankeeper.domain.profile;
+package com.server.oceankeeper.domain.image;
 
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
-import com.server.oceankeeper.domain.user.service.TokenProvider;
-import com.server.oceankeeper.domain.user.service.UserService;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.JwtTokenPayloadException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
