@@ -1,14 +1,14 @@
 package com.server.oceankeeper.domain.user.dto;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.validation.constraints.NotEmpty;
 
 @Data
-public class LoginReqDto {
+public class LogoutReqDto {
     @ApiModelProperty(value = "oauth provider id",example = "adfjanvjn1jnkjnvah", required = true)
     @NotEmpty
     private final String providerId;
@@ -20,7 +20,7 @@ public class LoginReqDto {
     private final String deviceToken;
 
     @Builder
-    public LoginReqDto(String providerId, String provider, String deviceToken) {
+    public LogoutReqDto(String providerId, String provider, String deviceToken) {
         this.providerId = providerId;
         this.provider = provider;
         this.deviceToken = deviceToken;

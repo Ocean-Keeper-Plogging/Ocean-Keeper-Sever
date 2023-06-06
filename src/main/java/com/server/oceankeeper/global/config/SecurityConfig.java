@@ -62,7 +62,11 @@ public class SecurityConfig {
 
         http.authorizeRequests()
                 //iamge
-                .antMatchers(HttpMethod.POST, "/image/profile").permitAll()
+                //.antMatchers(HttpMethod.POST, "/image/edit/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/image/profile**").permitAll()
+                .antMatchers(HttpMethod.POST, "/image/keeper**").permitAll()
+                .antMatchers(HttpMethod.POST, "/image/thumbnaile**").permitAll()
+                .antMatchers(HttpMethod.POST, "/image/story**").permitAll()
                 //auth
                 .antMatchers(HttpMethod.POST,"/auth/signup").permitAll()
                 .antMatchers(HttpMethod.POST,"/auth/login").permitAll()

@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.crew;
+package com.server.oceankeeper.domain.crew.entitiy;
 
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
@@ -86,5 +86,25 @@ public class Crews extends BaseEntity {
         this.expiredAt = expiredAt;
         this.finishAt = finishAt;
         this.privacyAgreement = privacyAgreement;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Crews)) return false;
+
+        Crews crews = (Crews) o;
+
+        if (!activity.equals(crews.activity)) return false;
+        if (!user.equals(crews.user)) return false;
+        return crewStatus == crews.crewStatus;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = activity.hashCode();
+        result = 31 * result + user.hashCode();
+        result = 31 * result + crewStatus.hashCode();
+        return result;
     }
 }

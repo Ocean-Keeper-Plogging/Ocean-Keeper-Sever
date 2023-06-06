@@ -1,10 +1,14 @@
-package com.server.oceankeeper.domain.crew;
+package com.server.oceankeeper.domain.crew.service;
 
 import com.server.oceankeeper.domain.activity.dto.request.ApplyActivityReqDto;
 import com.server.oceankeeper.domain.activity.dto.response.MyActivityDao;
 import com.server.oceankeeper.domain.activity.dto.response.MyActivityDto;
 import com.server.oceankeeper.domain.activity.entity.Activity;
+import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
+import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
+import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
+import com.server.oceankeeper.domain.crew.repository.CrewRepository;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -25,18 +29,6 @@ public class CrewService {
     public CrewService(CrewRepository crewRepository) {
         this.crewRepository = crewRepository;
     }
-//    public void addCrew(Activity activity, OUser user) {
-//        Crews crew = Crews.builder()
-//                .activity(activity)
-//                .user(user)
-//                .activityRole(CrewRole.CREW)
-//                .crewStatus(CrewStatus.IN_PROGRESS)
-//                .email(user.getEmail())
-//                .
-//                .build();
-//
-//        crewRepository.save(crew);
-//    }
 
     @Transactional
     public Crews addHost(Activity activity, OUser user) {
@@ -51,11 +43,6 @@ public class CrewService {
         log.debug("crew : {}", crew);
 
         return crewRepository.save(crew);
-    }
-
-    @Transactional
-    public List<Crews> findByUser(OUser user) {
-        return crewRepository.findByUser(user);
     }
 
     @Transactional

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
@@ -18,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class CustomUserDetailsServiceTest {
     @InjectMocks
     private CustomUserDetailsService customUserDetailsService;
@@ -29,7 +31,7 @@ class CustomUserDetailsServiceTest {
         //given
         String oauthId = "naver_providerid";
         OUser user = OUser.builder()
-                .id(1)
+                .id(1L)
                 .provider("naver")
                 .providerId("provierid")
                 .build();
@@ -44,7 +46,7 @@ class CustomUserDetailsServiceTest {
         //given
         String oauthId = "naver_providerid";
         OUser user = OUser.builder()
-                .id(1)
+                .id(1L)
                 .provider("naver")
                 .providerId("provierid")
                 .build();

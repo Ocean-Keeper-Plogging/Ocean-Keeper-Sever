@@ -8,8 +8,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ActivityRepository extends JpaRepository<Activity, Long> {
+import java.util.Optional;
+import java.util.UUID;
+
+public interface ActivityRepository extends JpaRepository<Activity, Long>, ActivityQueryDslRepository {
     //List<Activity> findByUserOrderAndStartAtAsc(OUser user);
+    Optional<Activity> findByUuid(UUID uuid);
 
     Page<?> findByActivityStatusAndLocation(ActivityStatus activityStatus,
                                             LocationTag locationTag, Pageable pageable);

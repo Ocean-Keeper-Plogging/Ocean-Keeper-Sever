@@ -2,6 +2,7 @@ package com.server.oceankeeper.global.jwt;
 
 import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.exception.ExpiredTokenException;
+import com.server.oceankeeper.global.exception.JwtExpireException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,6 +30,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             tokenProvider.validateToken(jwt);
         }catch (ExpiredTokenException e){
             log.debug("토큰 만료 에러");
+            //throw new ExpiredTokenException("토큰 만료 에러. 토큰을 재발급 받으세요");
         }
 
         filterChain.doFilter(request, response);

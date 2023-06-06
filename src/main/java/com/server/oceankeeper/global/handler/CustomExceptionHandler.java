@@ -2,10 +2,14 @@ package com.server.oceankeeper.global.handler;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.server.oceankeeper.global.exception.*;
+import com.server.oceankeeper.global.response.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -14,61 +18,81 @@ public class CustomExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @ExceptionHandler(IllegalRequestException.class)
-    public ResponseEntity<String> illegalRequestException(IllegalRequestException e) {
+    public ResponseEntity<ApiResponse> illegalRequestException(IllegalRequestException e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError(e.getMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> runtimeException(RuntimeException e) {
+    public ResponseEntity<ApiResponse> runtimeException(RuntimeException e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.createError("서버 에러"));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiResponse> httpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(ApiResponse.createError("media type이 맞지 않습니다. application/json으로 설정해주세요"));
+    }
+
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    public ResponseEntity<ApiResponse> internalAuthenticationServiceException(InternalAuthenticationServiceException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError(e.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse> httpMessageNotReadableException(RuntimeException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError("request JSON 파싱 에러"));
     }
 
     @ExceptionHandler(JwtTokenPayloadException.class)
-    public ResponseEntity<String> jwtTokenPayloadException(JwtTokenPayloadException e) {
+    public ResponseEntity<ApiResponse> jwtTokenPayloadException(JwtTokenPayloadException e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.createError("JWT 토큰 파싱 에러"));
     }
 
     @ExceptionHandler(IdNotFoundException.class)
-    public ResponseEntity<String> idNotFoundException(IdNotFoundException e) {
+    public ResponseEntity<ApiResponse> idNotFoundException(IdNotFoundException e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.createError(e.getMessage()));
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<String> forbiddenException(ForbiddenException e) {
+    public ResponseEntity<ApiResponse> forbiddenException(ForbiddenException e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.createError(e.getMessage()));
     }
 
     @ExceptionHandler(DuplicatedResourceException.class)
-    public ResponseEntity<String> duplicatedIdException(DuplicatedResourceException e) {
+    public ResponseEntity<ApiResponse> duplicatedIdException(DuplicatedResourceException e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.createError(e.getMessage()));
     }
 
     @ExceptionHandler(AmazonS3Exception.class)
-    public ResponseEntity<String> S3ArgumentException(AmazonS3Exception e) {
+    public ResponseEntity<ApiResponse> S3ArgumentException(AmazonS3Exception e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.createError(e.getMessage()));
     }
 
     @ExceptionHandler(DtoValidationException.class)
-    public ResponseEntity<String> validationApiException(DtoValidationException e) {
-        return new ResponseEntity<>(e.getMessage() + ": " + e.getErrorMap().toString(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiResponse> validationApiException(DtoValidationException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.createError(e.getMessage() + ": " + e.getErrorMap().toString()));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> resourceNotFoundException(ResourceNotFoundException e) {
+    public ResponseEntity<ApiResponse> resourceNotFoundException(ResourceNotFoundException e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.createError(e.getMessage()));
     }
 
     @ExceptionHandler(ExpiredTokenException.class)
-    public ResponseEntity<String> expiredTokenException(ExpiredTokenException e) {
+    public ResponseEntity<ApiResponse> expiredTokenException(ExpiredTokenException e) {
         log.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.createError(e.getMessage()));
     }
 }

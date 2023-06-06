@@ -22,7 +22,4 @@ public class SwaggerConfig {
                 .build()
                 .produces(Collections.singleton(MediaType.APPLICATION_JSON_VALUE));
     }
-
-
-
 }

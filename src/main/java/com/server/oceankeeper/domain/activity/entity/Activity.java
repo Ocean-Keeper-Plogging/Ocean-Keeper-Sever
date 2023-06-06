@@ -2,30 +2,27 @@ package com.server.oceankeeper.domain.activity.entity;
 
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.BaseEntity;
+import com.server.oceankeeper.global.exception.IllegalRequestException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Getter
-@Table(indexes = @Index(name = "i_uuid", columnList = "uuid"))
+@Table(indexes = @Index(name = "i_uuid", columnList = "uuid", unique = true))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Activity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-//    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-//    @JoinColumn(name = "USER_ID")
-//    private OUser user;
 
     @Embedded
     private Location location;
@@ -40,6 +37,7 @@ public class Activity extends BaseEntity {
     @Column(length = 30, nullable = false)
     private String title;
 
+    //@Column(columnDefinition = "default ''")
     private String thumbnail;
 
     @Enumerated(EnumType.STRING)
@@ -67,22 +65,23 @@ public class Activity extends BaseEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        if (!(o instanceof Activity)) return false;
+
         Activity activity = (Activity) o;
-        return id != null && Objects.equals(id, activity.id);
+
+        return uuid.equals(activity.uuid);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return uuid.hashCode();
     }
 
     @Builder
-    public Activity(OUser user, UUID uuid, LocationTag locationTag, String title,
+    public Activity(UUID uuid, LocationTag locationTag, String title,
                     String thumbnail, GarbageCategory garbageCategory, Integer quota,
                     Integer participants, LocalDate recruitStartAt, LocalDate recruitEndAt,
                     LocalDateTime startAt, ActivityStatus activityStatus, Location location) {
-        //this.user = user;
         this.uuid = uuid;
         this.locationTag = locationTag;
         this.title = title;
@@ -95,5 +94,12 @@ public class Activity extends BaseEntity {
         this.startAt = startAt;
         this.activityStatus = activityStatus;
         this.location = location;
+    }
+
+    public void addParticipant() {
+        if (quota > participants)
+            participants++;
+        else
+            throw new IllegalRequestException("정원이 찼습니다.");
     }
 }

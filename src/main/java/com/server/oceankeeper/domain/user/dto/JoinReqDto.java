@@ -16,29 +16,52 @@ public class JoinReqDto {
     @ApiModelProperty(
             value = "Oauth Provider",
             dataType = "String",
-            example = "naver")
+            example = "naver",
+            required = true)
     @NotEmpty
     private final String provider;
 
     @ApiModelProperty(
             value = "Oauth Provider Id",
-            dataType = "String"
+            dataType = "String",
+            required = true
     )
     @NotEmpty
     private final String providerId;
 
     @Pattern(regexp = "^[a-zA-Z0-9가-힣]{2,20}$", message = "한글/영문/숫자로만 구성된 2~20자 이내의 닉네임을 사용해주세요")
+    @ApiModelProperty(
+            value = "닉네임",
+            notes="한글/영문/숫자로만 구성된 2~20자 이내의 닉네임",
+            dataType = "String",
+            required = true
+    )
     @NotEmpty
     private final String nickname;
 
     @Pattern(regexp = "^[a-zA-Z0-9]{2,10}@[a-zA-Z0-9]{2,6}\\.[a-zA-Z]{2,3}$", message = "유효한 이메일 형식으로 작성해주세요")
     @NotEmpty
+    @ApiModelProperty(
+            value = "이메일",
+            dataType = "String",
+            required = true
+    )
     private final String email;
 
     @NotEmpty
+    @ApiModelProperty(
+            value = "S3 profile 이미지 경로",
+            dataType = "String",
+            required = true
+    )
     private final String profile;
 
     @NotEmpty
+    @ApiModelProperty(
+            value = "디바이스 토큰",
+            dataType = "String",
+            required = true
+    )
     private final String deviceToken;
 
     @Builder

@@ -1,24 +1,32 @@
 package com.server.oceankeeper.domain.user.service;
 
-import com.server.oceankeeper.domain.user.dto.LoginReqDto;
-import com.server.oceankeeper.domain.user.dto.TokenInfo;
-import com.server.oceankeeper.domain.user.dto.TokenRequestDto;
+import com.server.oceankeeper.domain.user.dto.*;
+import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.entitiy.RefreshToken;
+import com.server.oceankeeper.domain.user.entitiy.UserRole;
 import com.server.oceankeeper.domain.user.repository.RedisRepository;
+import com.server.oceankeeper.domain.user.repository.UserRepository;
+import com.server.oceankeeper.global.config.SecurityConfig;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,20 +35,22 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@Import(SecurityConfig.class)
+@ActiveProfiles("test")
 class LoginServiceTest {
     @InjectMocks
     private LoginService loginService;
     @Mock
     private RedisRepository refreshTokenRepository;
     @Mock
+    private UserRepository userRepository;
+    @Mock
     private TokenProvider tokenProvider;
-    @MockBean
-    private AuthenticationManagerBuilder authenticationManagerBuilder;
-    @MockBean
-    private AuthenticationManager authenticationManager;
+    @Value("${jwt.password}")
+    private String password;
 
     @Test
-    @Disabled("authenticationManagerBuilder mock 불가")
+    @WithMockUser()
     void login() throws Exception {
         LoginReqDto request = LoginReqDto.builder()
                 .deviceToken("deviceToken")
@@ -53,13 +63,24 @@ class LoginServiceTest {
                 .grantType("Bearer")
                 .accessTokenExpiresIn(1234L)
                 .build();
-        ProviderManager providerManager = new ProviderManager();
-        when(authenticationManagerBuilder.getObject()).thenReturn(providerManager);
-        when(authenticationManager.authenticate(any())).thenReturn(null);
+        OUser mockUser = OUser.builder()
+                .uuid(UUID.randomUUID())
+                .nickname("kim")
+                .deviceToken("deviceToken")
+                .build();
         when(tokenProvider.generateTokenDto(any())).thenReturn(mockToken);
+        when(userRepository.findByProviderAndProviderId(any(), any())).thenReturn(Optional.ofNullable(mockUser));
 
-        TokenInfo result = loginService.login(request);
-        assertThat(result).isEqualTo(mockToken);
+        //fake auth
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(UserRole.USER::toString);
+        UserDetails principal = new User("naver_providerid", "password", authorities);
+
+        //when
+        LoginResDto result = loginService.login(request, new UsernamePasswordAuthenticationToken(principal,password,authorities));
+
+        //then
+        assertThat(result).isEqualTo(new LoginResDto(new JoinResDto(mockUser),mockToken));
     }
 
     @Test
@@ -108,7 +129,7 @@ class LoginServiceTest {
     @Test
     void logout() {
         //given
-        LoginReqDto request = LoginReqDto.builder()
+        LogoutReqDto request = LogoutReqDto.builder()
                 .deviceToken("deviceToken")
                 .provider("provider")
                 .providerId("provideId")

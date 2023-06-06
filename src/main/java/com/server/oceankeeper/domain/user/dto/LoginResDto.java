@@ -1,25 +1,16 @@
 package com.server.oceankeeper.domain.user.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 
 @Data
+@RequiredArgsConstructor
 public class LoginResDto{
-    private final String msg;
+    private final JoinResDto user;
     private final TokenInfo token;
-
-
-    @Builder
-    public LoginResDto(String msg, TokenInfo token) {
-        this.msg = msg;
-        this.token = token;
-    }
-
-//    @Builder
-//    public LoginResDto(String msg, String jwtToken) {
-//        this.msg = msg;
-//        this.jwtToken = jwtToken;
-//    }
 }
 

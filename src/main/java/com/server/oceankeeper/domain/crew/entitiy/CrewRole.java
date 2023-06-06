@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.crew;
+package com.server.oceankeeper.domain.crew.entitiy;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

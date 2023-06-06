@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.crew;
+package com.server.oceankeeper.domain.crew.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -13,12 +13,12 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static com.server.oceankeeper.domain.activity.entity.QActivity.activity;
-import static com.server.oceankeeper.domain.crew.QCrews.crews;
+import static com.server.oceankeeper.domain.crew.entitiy.QCrews.crews;
 import static com.server.oceankeeper.domain.user.entitiy.QOUser.oUser;
 
 @RequiredArgsConstructor
 @Slf4j
-public class CustomCrewRepositoryImpl implements CustomCrewRepository {
+public class CrewQuerydslRepositoryImpl implements CrewQuerydslRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override

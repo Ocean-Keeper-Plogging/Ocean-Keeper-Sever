@@ -24,6 +24,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -40,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class),
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class)
 })
+@ActiveProfiles("test")
 public class UserControllerTest extends DummyObject {
     @Autowired
     private MockMvc mvc;
@@ -106,7 +108,7 @@ public class UserControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isConflict());
-        assertThat(responseBody).isEqualTo("동일한 닉네임이 이미 존재합니다.");
+        assertThat(responseBody).isEqualTo("{\"status\":\"FAIL\",\"message\":\"동일한 닉네임이 이미 존재합니다.\"}");
     }
 
     @Test
@@ -138,7 +140,7 @@ public class UserControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isConflict());
-        assertThat(responseBody).isEqualTo("로그인을 시도하는 sns 계정이 이미 가입되어 있습니다.");
+        assertThat(responseBody).isEqualTo("{\"status\":\"FAIL\",\"message\":\"로그인을 시도하는 sns 계정이 이미 가입되어 있습니다.\"}");
     }
 
     @Test
@@ -172,7 +174,7 @@ public class UserControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isConflict());
-        assertThat(responseBody).isEqualTo("로그인을 시도하는 sns 계정이 이미 가입되어 있습니다.");
+        assertThat(responseBody).isEqualTo("{\"status\":\"FAIL\",\"message\":\"로그인을 시도하는 sns 계정이 이미 가입되어 있습니다.\"}");
     }
 
     @Test
@@ -213,7 +215,7 @@ public class UserControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isForbidden());
-        assertThat(responseBody).isEqualTo("해당 아이디의 닉네임을 변경할 권한이 없습니다.");
+        assertThat(responseBody).isEqualTo("{\"status\":\"FAIL\",\"message\":\"해당 아이디의 닉네임을 변경할 권한이 없습니다.\"}");
     }
 
     @Test
@@ -234,6 +236,6 @@ public class UserControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(status().isConflict());
-        assertThat(responseBody).isEqualTo("동일한 닉네임이 이미 존재합니다.");
+        assertThat(responseBody).isEqualTo("{\"status\":\"FAIL\",\"message\":\"동일한 닉네임이 이미 존재합니다.\"}");
     }
 }

@@ -6,17 +6,26 @@ server:
       force: true
 
 spring:
+  config:
+    activate:
+      on-profile: prod
   datasource:
-    url: jdbc:mysql://${rds.hostname}:${rds.port}/${rds.db.name}
+    url: jdbc:mysql://${rds_hostname}:${rds_port}/${rds_db_name}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${rds.username}
-    password: ${rds.password}
+    username: ${rds_username}
+    password: ${rds_password}
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: update #create update none
     properties:
       '[hibernate.default_batch_fetch_size]': 100
+  redis:
+    host: localhost
+    port: 6379
 
 logging:
   level:

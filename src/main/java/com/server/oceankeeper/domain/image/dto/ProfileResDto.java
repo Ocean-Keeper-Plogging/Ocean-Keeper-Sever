@@ -1,13 +1,13 @@
-package com.server.oceankeeper.domain.profile.dto;
+package com.server.oceankeeper.domain.image.dto;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
 
 
-@Data
+@Getter
+@Setter
 public class ProfileResDto {
 
     @ApiModelProperty(
@@ -17,12 +17,8 @@ public class ProfileResDto {
     @NotEmpty
     private String url;
 
-    public ProfileResDto() {
-
-    }
-
     @Builder
-    public ProfileResDto(String fileFullPath, String url) {
+    public ProfileResDto(String url) {
         this.url = url;
     }
 }

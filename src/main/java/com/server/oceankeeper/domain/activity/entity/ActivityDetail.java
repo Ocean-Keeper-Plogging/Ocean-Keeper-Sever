@@ -8,7 +8,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Table(indexes = @Index(name = "i_uuid", columnList = "uuid"))
+@Table(indexes = @Index(name = "i_uuid", columnList = "uuid",unique = true))
 public class ActivityDetail {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,7 +43,7 @@ public class ActivityDetail {
 
     @Column(length = 1000)
     @Lob
-    private String materials;
+    private String preparation;
 
     @Column(length = 1000)
     private String rewards;
@@ -53,17 +53,19 @@ public class ActivityDetail {
     private String etc;
 
     @Builder
-    public ActivityDetail(Activity activity, String activityStory, String storyImage, String keeperIntroduction,
-                          String keeperImage, String transportation, String programDetails,
-                          String preparation, String rewards, String etc, UUID uuid) {
+    public ActivityDetail(Long id, Activity activity, UUID uuid, String activityStory,
+                          String storyImage, String keeperIntroduction, String keeperImage,
+                          String transportation, String programDetails, String preparation, String rewards, String etc) {
+        this.id = id;
         this.activity = activity;
+        this.uuid = uuid;
         this.activityStory = activityStory;
         this.storyImage = storyImage;
         this.keeperIntroduction = keeperIntroduction;
         this.keeperImage = keeperImage;
         this.transportation = transportation;
         this.programDetails = programDetails;
-        this.materials = preparation;
+        this.preparation = preparation;
         this.rewards = rewards;
         this.etc = etc;
     }

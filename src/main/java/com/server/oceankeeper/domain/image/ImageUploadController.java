@@ -1,14 +1,13 @@
 package com.server.oceankeeper.domain.image;
 
 import com.server.oceankeeper.domain.image.dto.ProfileResDto;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
-import com.server.oceankeeper.domain.user.service.LoginService;
-import com.server.oceankeeper.global.exception.IllegalRequestException;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,43 +17,82 @@ import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-public class MyImageUploadController {
+@RequestMapping("/image")
+@Slf4j
+public class ImageUploadController {
     private final ImageService imageService;
-    private final LoginService loginService;
-    private String dirName;
 
-    protected void setDirectoryName(String dirName) {
-        this.dirName = dirName;
+    private static final String KEEPER = "keeper";
+    private static final String PROFILE = "profile";
+    private static final String STORY = "story";
+    private static final String THUMBNAIL = "thumbnail";
+
+    @ApiOperation(value = "썸네일 수정 [권한 필요]", notes = "기존 활동 키퍼 이미지 s3 수정 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @PostMapping("/edit/keeper")
+    public ResponseEntity<ProfileResDto> editKeeper(@RequestPart(KEEPER) MultipartFile file, HttpServletRequest request) throws IOException {
+        return editFile(file, request, KEEPER);
     }
 
-    protected ResponseEntity<ProfileResDto> editFile(MultipartFile file, HttpServletRequest request) throws IOException {
-        if (file.isEmpty()) {
-            throw new IllegalRequestException("profile 이미지가 정상적으로 전송되지 않았습니다.");
-        }
-        String[] providerInfo = loginService.getProviderInfoFromHeader(request);
-        OUser user = imageService.getUserFromProviderInfo(providerInfo);
+    @ApiOperation(value = "썸네일 등록 [권한 필요 없음]", notes = "활동 키퍼 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @PostMapping("/keeper")
+    public ResponseEntity<ProfileResDto> uploadKeeper(@RequestPart(KEEPER) MultipartFile file) throws IOException {
+        return uploadFile(file, KEEPER);
+    }
 
-        //기존 파일 s3에서 삭제
-        imageService.removeProfile(user);
+    @ApiOperation(value = "프로필 수정 [권한 필요]", notes = "기존 프로필 이미지 s3 수정 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @PostMapping("/edit/profile")
+    public ResponseEntity<ProfileResDto> editProfile(@RequestPart(PROFILE) MultipartFile file, HttpServletRequest request) throws IOException {
+        log.info("ProfileImageUploadController edit :{}", request);
+        return editFile(file, request, PROFILE);
+    }
 
-        String url = imageService.uploadNewProfile(file, dirName);
+    @ApiOperation(value = "프로필 등록 [권한 필요 없음]", notes = "프로필 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @PostMapping("/profile")
+    public ResponseEntity<ProfileResDto> uploadProfile(@RequestPart(PROFILE) MultipartFile file) throws IOException {
+        log.info("ProfileImageUploadController upload");
+        return uploadFile(file, PROFILE);
+    }
 
-        imageService.updateProfile(user, url);
+    @ApiOperation(value = "썸네일 수정 [권한 필요]", notes = "기존 활동 스토리 이미지 s3 수정 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @PostMapping("/edit/story")
+    public ResponseEntity<ProfileResDto> editStory(@RequestPart(STORY) MultipartFile file, HttpServletRequest request) throws IOException {
+        return editFile(file, request, STORY);
+    }
 
-        ProfileResDto profileResDto = ProfileResDto.builder().url(url).build();
+    @ApiOperation(value = "썸네일 등록 [권한 필요 없음]", notes = "활동 스토리 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @PostMapping("/story")
+    public ResponseEntity<ProfileResDto> uploadStory(@RequestPart(STORY) MultipartFile file) throws IOException {
+        return uploadFile(file, STORY);
+    }
+
+    @ApiOperation(value = "썸네일 수정 [권한 필요]", notes = "기존 활동 썸네일 이미지 s3 수정 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @PostMapping("/edit/thumbnail")
+    public ResponseEntity<ProfileResDto> editThumbnail(@RequestPart(THUMBNAIL) MultipartFile file, HttpServletRequest request) throws IOException {
+        return editFile(file, request, THUMBNAIL);
+    }
+
+    @ApiOperation(value = "썸네일 등록 [권한 필요 없음]", notes = "활동 썸네일 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @PostMapping("/thumbnail")
+    public ResponseEntity<ProfileResDto> uploadThumbnail(@RequestPart(THUMBNAIL) MultipartFile file) throws IOException {
+        return uploadFile(file, THUMBNAIL);
+    }
+
+    private ResponseEntity<ProfileResDto> editFile(MultipartFile file, HttpServletRequest request, String dirName) throws IOException {
+        ProfileResDto profileResDto = imageService.edit(file, request, dirName);
 
         return new ResponseEntity<>(profileResDto, HttpStatus.OK);
     }
 
-    protected ResponseEntity<ProfileResDto> uploadFile(MultipartFile file) throws IOException {
-        //TODO: 파일사이즈 줄이기
-        if (file.isEmpty()) {
-            throw new IllegalRequestException("profile 이미지가 정상적으로 전송되지 않았습니다.");
-        }
+    private ResponseEntity<ProfileResDto> uploadFile(MultipartFile file, String dirName) throws IOException {
+        ProfileResDto profileResDto = imageService.upload(file, dirName);
 
-        String url = imageService.uploadNewProfile(file, dirName);
-        ProfileResDto profileResDto = ProfileResDto.builder().url(url).build();
+        return ResponseEntity.ok(profileResDto);
+    }
 
+    @ApiOperation(value = "썸네일 등록 [권한 필요 없음]", notes = "활동 썸네일 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @PostMapping("/test")
+    public ResponseEntity<ProfileResDto> test(@RequestPart("test") MultipartFile file) throws IOException {
+        ProfileResDto profileResDto = imageService.upload(file, "test");
         return ResponseEntity.ok(profileResDto);
     }
 }

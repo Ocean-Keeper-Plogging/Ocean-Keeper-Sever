@@ -1,28 +1,29 @@
 package com.server.oceankeeper.domain.user.entitiy;
 
-
 import com.server.oceankeeper.global.BaseEntity;
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-
 @Getter
 @Entity
 @NoArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode
-@Table(name = "USERS", indexes = @Index(name = "i_uuid", columnList = "uuid"))
+//@ToString(callSuper = true)
+@Table(name = "users", indexes = {
+        @Index(name = "i_uuid", columnList = "uuid", unique = true),
+        @Index(name = "i_provider", columnList = "provider"),
+        @Index(name = "i_providerId", columnList = "providerId")})
 public class OUser extends BaseEntity {
     @Id // primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "BINARY(16)", nullable = false)
+    @NotNull
+    @Column(columnDefinition = "BINARY(16)")
     private UUID uuid;
 
     @Column(nullable = false, length = 20)
@@ -38,7 +39,7 @@ public class OUser extends BaseEntity {
     @Setter
     private String profile;
 
-    @Column(length = 1000)
+    @Column(length = 1000, nullable = false)
     private String deviceToken;
 
     @Enumerated(EnumType.STRING)
@@ -53,7 +54,7 @@ public class OUser extends BaseEntity {
     private String password;
 
     @Builder
-    public OUser(long id, String nickname, String email, String profile,
+    public OUser(Long id, String nickname, String email, String profile,
                  UserStatus status, String provider, String providerId,
                  UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt,
                  String password, String deviceToken, UUID uuid) {
@@ -78,6 +79,30 @@ public class OUser extends BaseEntity {
 
     public void initializePassword(String password) {
         this.password = password;
+    }
+
+    public void changeDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OUser)) return false;
+
+        OUser user = (OUser) o;
+
+        if (!provider.equals(user.provider)) return false;
+        if (!providerId.equals(user.providerId)) return false;
+        return nickname.equals(user.nickname);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = provider.hashCode();
+        result = 31 * result + providerId.hashCode();
+        result = 31 * result + nickname.hashCode();
+        return result;
     }
 }
 

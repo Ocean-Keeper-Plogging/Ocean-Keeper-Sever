@@ -1,9 +1,11 @@
 package com.server.oceankeeper.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.oceankeeper.domain.user.dto.LoginReqDto;
-import com.server.oceankeeper.domain.user.dto.TokenInfo;
-import com.server.oceankeeper.domain.user.dto.TokenRequestDto;
+import com.server.oceankeeper.domain.user.dto.*;
+import com.server.oceankeeper.domain.user.entitiy.LoginUser;
+import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.repository.UserRepository;
+import com.server.oceankeeper.domain.user.service.CustomUserDetailsService;
 import com.server.oceankeeper.domain.user.service.LoginService;
 import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.config.SecurityConfig;
@@ -11,6 +13,7 @@ import com.server.oceankeeper.global.handler.CustomExceptionHandler;
 import com.server.oceankeeper.global.jwt.JwtAuthenticationEntryPoint;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,13 +21,17 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,7 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class),
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class)
 })
-@Import(JwtAuthenticationEntryPoint.class)
+@Import({JwtAuthenticationEntryPoint.class, CustomUserDetailsService.class})
+@ActiveProfiles("test")
 class LoginControllerTest {
     @Autowired
     private MockMvc mvc;
@@ -46,6 +54,12 @@ class LoginControllerTest {
     private TokenProvider tokenProvider;
     @MockBean
     private AccessDeniedHandler jwtAccessDeniedHandler;
+    @Value("${jwt.password}")
+    private String password;
+    @MockBean
+    private CustomUserDetailsService userDetailsService;
+    @MockBean
+    private UserRepository userRepository;
 
     @Test
     void login_success_로그인성공() throws Exception {
@@ -56,7 +70,23 @@ class LoginControllerTest {
                 .deviceToken("token")
                 .build();
         String requestBody = om.writeValueAsString(loginReqDto);
-        when(loginService.login(any())).thenReturn(new TokenInfo("Bearer", "asdf", "asdf", 1234L));
+        UUID uuid = UUID.randomUUID();
+        when(loginService.login(any(), any())).thenReturn(
+                new LoginResDto(new JoinResDto(OUser.builder().uuid(uuid).nickname("asdf").build()),
+                        new TokenInfo("Bearer", "asdf", "asdf", 1234L)));
+
+        LoginUser mockUser = new LoginUser(OUser.builder()
+                .provider("naver")
+                .providerId("id")
+                .nickname("kims")
+                .id(5L)
+                .uuid(uuid)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .password(new BCryptPasswordEncoder().encode(password))
+                .deviceToken(UUID.randomUUID().toString())
+                .build());
+        when(userDetailsService.loadUserByUsername(any())).thenReturn(mockUser);
 
         //when
         ResultActions resultActions = mvc.perform(post("/auth/login")
@@ -79,7 +109,9 @@ class LoginControllerTest {
                 .deviceToken("token")
                 .build();
         String requestBody = om.writeValueAsString(loginReqDto);
-        when(loginService.login(any())).thenReturn(new TokenInfo("Bearer", "asdf", "asdf", 1234L));
+        when(loginService.login(any(), any())).thenReturn(
+                new LoginResDto(new JoinResDto(OUser.builder().uuid(UUID.randomUUID()).nickname("asdf").build()),
+                        new TokenInfo("Bearer", "asdf", "asdf", 1234L)));
 
         //when
         ResultActions resultActions = mvc.perform(post("/auth/logout")
@@ -101,7 +133,9 @@ class LoginControllerTest {
                 .deviceToken("token")
                 .build();
         String requestBody = om.writeValueAsString(loginReqDto);
-        when(loginService.login(any())).thenReturn(new TokenInfo("Bearer", "asdf", "asdf", 1234L));
+        when(loginService.login(any(), any())).thenReturn(
+                new LoginResDto(new JoinResDto(OUser.builder().uuid(UUID.randomUUID()).nickname("asdf").build()),
+                        new TokenInfo("Bearer", "asdf", "asdf", 1234L)));
 
         //when
         ResultActions resultActions = mvc.perform(post("/auth/logout")

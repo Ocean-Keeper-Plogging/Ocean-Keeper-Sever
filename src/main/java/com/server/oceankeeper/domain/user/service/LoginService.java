@@ -1,17 +1,15 @@
 package com.server.oceankeeper.domain.user.service;
 
-import com.server.oceankeeper.domain.user.dto.LoginReqDto;
-import com.server.oceankeeper.domain.user.dto.TokenInfo;
-import com.server.oceankeeper.domain.user.dto.TokenRequestDto;
+import com.server.oceankeeper.domain.user.dto.*;
+import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.entitiy.RefreshToken;
 import com.server.oceankeeper.domain.user.repository.RedisRepository;
+import com.server.oceankeeper.domain.user.repository.UserRepository;
+import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,16 +22,13 @@ import java.util.Optional;
 @Slf4j
 public class LoginService {
     private final RedisRepository refreshTokenRepository;
+    private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    @Value("${jwt.password}")
-    private String password;
 
     @Transactional
-    public TokenInfo login(LoginReqDto loginReqDto) {
-        UsernamePasswordAuthenticationToken authenticationToken = loginReqDto.toAuthentication(password);
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        log.debug("login request :{}, auth : {}, authname :{}", loginReqDto, authentication, authentication.getName());
+    public LoginResDto login(LoginReqDto loginReqDto, Authentication authentication) {
+        OUser user = changeDeviceToken(loginReqDto);
+
         TokenInfo tokenDto = tokenProvider.generateTokenDto(authentication);
 
         RefreshToken refreshToken = RefreshToken.builder()
@@ -44,7 +39,15 @@ public class LoginService {
 
         refreshTokenRepository.save(refreshToken);
 
-        return tokenDto;
+        return new LoginResDto(new JoinResDto(user), tokenDto);
+    }
+
+    private OUser changeDeviceToken(LoginReqDto loginReqDto) {
+        OUser user = userRepository.findByProviderAndProviderId(loginReqDto.getProvider(), loginReqDto.getProviderId())
+                .orElseThrow(() -> new IdNotFoundException("해당 oauth 아이디가 없습니다."));
+        user.changeDeviceToken(loginReqDto.getDeviceToken());
+        userRepository.save(user);
+        return user;
     }
 
     /**
@@ -77,9 +80,9 @@ public class LoginService {
     }
 
     @Transactional
-    public void logout(LoginReqDto loginReqDto) {
-        final String provider = loginReqDto.getProvider();
-        final String providerId = loginReqDto.getProviderId();
+    public void logout(LogoutReqDto logoutReqDto) {
+        final String provider = logoutReqDto.getProvider();
+        final String providerId = logoutReqDto.getProviderId();
 
         //TODO : 하드코딩 제거
         final String username = provider + "_" + providerId;

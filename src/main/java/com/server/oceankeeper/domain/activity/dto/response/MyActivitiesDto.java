@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.activity.dto.request;
+package com.server.oceankeeper.domain.activity.dto.response;
 
 import lombok.*;
 
@@ -7,7 +7,6 @@ import java.util.List;
 @ToString
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class MyActivitiesDto {
-    private List<MyActivityDto> activities;
+    private final List<MyActivityDto> activities;
 }
