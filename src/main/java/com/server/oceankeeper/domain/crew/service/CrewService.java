@@ -1,6 +1,7 @@
 package com.server.oceankeeper.domain.crew.service;
 
-import com.server.oceankeeper.domain.activity.dto.request.ApplyActivityReqDto;
+import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
+import com.server.oceankeeper.domain.activity.dto.response.ApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.response.MyActivityDao;
 import com.server.oceankeeper.domain.activity.dto.response.MyActivityDto;
 import com.server.oceankeeper.domain.activity.entity.Activity;
@@ -10,6 +11,7 @@ import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
 import com.server.oceankeeper.domain.crew.repository.CrewRepository;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,7 @@ public class CrewService {
         Crews crew = Crews.builder()
                 .activity(activity)
                 .user(user)
+                .applyAt(LocalDateTime.now())
                 .uuid(UUIDGenerator.createUuid())
                 .activityRole(CrewRole.HOST)
                 .crewStatus(CrewStatus.IN_PROGRESS)
@@ -46,12 +49,17 @@ public class CrewService {
     }
 
     @Transactional
-    public Crews addCrew(ApplyActivityReqDto request, Activity activity, OUser applyUser) {
+    public Crews save(Crews crew) {
+        return crewRepository.save(crew);
+    }
+
+    @Transactional
+    public Crews addCrew(ApplyApplicationReqDto request, Activity activity, OUser applyUser) {
         Crews crew = Crews.builder()
                 .uuid(UUIDGenerator.createUuid())
                 .user(applyUser)
                 .activity(activity)
-                .crewStatus(CrewStatus.APPLY)
+                .crewStatus(CrewStatus.IN_PROGRESS)
                 .applyAt(LocalDateTime.now())
                 .email(request.getEmail())
                 .activityRole(CrewRole.CREW)
@@ -62,13 +70,16 @@ public class CrewService {
                 .transportation(request.getTransportation())
                 .question(request.getQuestion())
                 .startPoint(request.getStartPoint())
+                .dayOfBirth(request.getDayOfBirth())
                 .build();
         crewRepository.save(crew);
         return crew;
     }
 
+    @Transactional
     public List<MyActivityDto> findCrews(MyActivityParam param) {
         List<MyActivityDao> response = crewRepository.getMyActivities(param);
+        log.info("findCrews result :{}",response);
 
         List<MyActivityDto> result = new ArrayList<>();
         for (MyActivityDao dao : response) {
@@ -86,5 +97,40 @@ public class CrewService {
 
     private int calculateDDay(LocalDateTime startAt) {
         return (int) ChronoUnit.DAYS.between(LocalDate.now(), startAt.toLocalDate());
+    }
+
+    @Transactional
+    public OUser findOwner(Activity activity) {
+        Crews host = crewRepository.findByActivityAndActivityRole(activity, CrewRole.HOST)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 활동에 호스트가 존재하지 않습니다."));
+        return host.getUser();
+    }
+
+    @Transactional
+    public Crews findCrew(OUser user, Activity activity) {
+        return crewRepository.findByUserAndActivity(user, activity)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 활동에 유저가 존재하지 않습니다."));
+    }
+
+    @Transactional
+    public boolean existCrew(OUser user, Activity activity) {
+        return crewRepository.findByUserAndActivity(user, activity).isPresent();
+    }
+
+    @Transactional
+    public ApplicationReqDto findApplication(OUser user) {
+        Crews applicationInfo = crewRepository.findTopByUserOrderByCreatedAtDesc(user)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동이 존재하지 않습니다."));
+
+        return ApplicationReqDto.builder()
+                .dayOfBirth(applicationInfo.getDayOfBirth())
+                .email(applicationInfo.getEmail())
+                .id1365(applicationInfo.getId1365())
+                .name(applicationInfo.getName())
+                .phoneNumber(applicationInfo.getPhoneNumber())
+                .question(applicationInfo.getQuestion())
+                .transportation(applicationInfo.getTransportation())
+                .startPoint(applicationInfo.getStartPoint())
+                .build();
     }
 }

@@ -11,26 +11,30 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(indexes = @Index(name = "i_uuid", columnList = "uuid", unique = true))
-@ToString(exclude = {"activity","user"})
+@ToString(exclude = {"activity", "user"})
 public class Crews extends BaseEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(columnDefinition = "BINARY(16)", nullable = false)
     private UUID uuid;
 
     @ManyToOne
-    @JoinColumn(name="ACTIVITY_ID")
+    @JoinColumn(name = "ACTIVITY_ID")
     private Activity activity;
 
     @ManyToOne(cascade = CascadeType.DETACH)
-    @JoinColumn(name="USER_ID")
+    @JoinColumn(name = "USER_ID")
     private OUser user;
 
     @Column(nullable = false)
     private CrewRole activityRole;
+
+    private String dayOfBirth;
 
     @Column(nullable = false)
     private CrewStatus crewStatus;
@@ -67,7 +71,8 @@ public class Crews extends BaseEntity {
     public Crews(Long id, UUID uuid, Activity activity, OUser user, CrewRole activityRole,
                  CrewStatus crewStatus, String name, String phoneNumber, String id1365, String email,
                  String startPoint, String transportation, String question, LocalDateTime applyAt,
-                 LocalDateTime cancelAt, LocalDateTime expiredAt, LocalDateTime finishAt, boolean privacyAgreement) {
+                 LocalDateTime cancelAt, LocalDateTime expiredAt, LocalDateTime finishAt, String dayOfBirth,
+                 boolean privacyAgreement, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.uuid = uuid;
         this.activity = activity;
@@ -86,6 +91,8 @@ public class Crews extends BaseEntity {
         this.expiredAt = expiredAt;
         this.finishAt = finishAt;
         this.privacyAgreement = privacyAgreement;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     @Override

@@ -3,10 +3,7 @@ package com.server.oceankeeper.domain.activity.entity;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.BaseEntity;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -17,6 +14,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Setter //TODO : 개선
 @Table(indexes = @Index(name = "i_uuid", columnList = "uuid", unique = true))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Activity extends BaseEntity {
@@ -81,7 +79,8 @@ public class Activity extends BaseEntity {
     public Activity(UUID uuid, LocationTag locationTag, String title,
                     String thumbnail, GarbageCategory garbageCategory, Integer quota,
                     Integer participants, LocalDate recruitStartAt, LocalDate recruitEndAt,
-                    LocalDateTime startAt, ActivityStatus activityStatus, Location location) {
+                    LocalDateTime startAt, ActivityStatus activityStatus, Location location,
+                    LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.uuid = uuid;
         this.locationTag = locationTag;
         this.title = title;
@@ -94,6 +93,8 @@ public class Activity extends BaseEntity {
         this.startAt = startAt;
         this.activityStatus = activityStatus;
         this.location = location;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public void addParticipant() {

@@ -30,8 +30,8 @@ public class CrewQuerydslRepositoryImpl implements CrewQuerydslRepository {
                         crews.activity.startAt.as("startAt"),
                         crews.activity.location.name.as("location")))
                 .from(crews)
-                .innerJoin(crews.user, oUser)
-                .innerJoin(crews.activity, activity)
+                .join(crews.user, oUser)
+                .join(crews.activity, activity)
                 .where(
                         oUser.uuid.eq(myActivityParam.getUuid()),
                         crews.activity.startAt.goe(myActivityParam.getNow()),

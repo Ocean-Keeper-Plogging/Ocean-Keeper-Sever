@@ -44,10 +44,10 @@ class CrewRepositoryTest extends DummyObject {
         OUser kim = newUserWithR("kim", "naver", "kimproviderId", UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120002"));
         em.persist(kim);
 
-        OUser lee = newUserWithR("lee", "naver", "leeproviderId", UUID.randomUUID());
+        OUser lee = newUserWithR("lee", "naver", "leeproviderId", UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120003"));
         userRepository.save(lee);
 
-        OUser park = newUserWithR("park", "naver", "parkproviderId", UUID.randomUUID());
+        OUser park = newUserWithR("park", "naver", "parkproviderId", UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120004"));
         userRepository.save(park);
 
         Activity activity1 = newMockActivity(5, ActivityStatus.OPEN);
@@ -80,7 +80,19 @@ class CrewRepositoryTest extends DummyObject {
                 CrewStatus.IN_PROGRESS);
         List<MyActivityDao> result = crewRepository.getMyActivities(param);
 
+        MyActivityParam param2 = new MyActivityParam(LocalDateTime.now(),
+                UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120003"),
+                CrewStatus.IN_PROGRESS);
+        List<MyActivityDao> result2 = crewRepository.getMyActivities(param2);
+
+        MyActivityParam param3 = new MyActivityParam(LocalDateTime.now(),
+                UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120004"),
+                CrewStatus.IN_PROGRESS);
+        List<MyActivityDao> result3 = crewRepository.getMyActivities(param3);
+
         assertThat(result.size()).isEqualTo(3);
+        assertThat(result2.size()).isEqualTo(1);
+        assertThat(result3.size()).isEqualTo(1);
         System.out.println(result);
     }
 }

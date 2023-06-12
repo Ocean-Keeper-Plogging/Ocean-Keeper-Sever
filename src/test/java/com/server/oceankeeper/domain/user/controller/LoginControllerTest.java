@@ -11,6 +11,7 @@ import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.config.SecurityConfig;
 import com.server.oceankeeper.global.handler.CustomExceptionHandler;
 import com.server.oceankeeper.global.jwt.JwtAuthenticationEntryPoint;
+import com.server.oceankeeper.util.TokenUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

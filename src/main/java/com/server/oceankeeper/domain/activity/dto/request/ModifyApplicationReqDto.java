@@ -12,23 +12,7 @@ import javax.validation.constraints.Pattern;
 @Setter
 @RequiredArgsConstructor
 @Builder
-public class ApplyActivityReqDto {
-    @ApiModelProperty(
-            value = "활동 아이디",
-            example = "7a8d01c6009011eebe560242ac120002",
-            required = true
-    )
-    @NotEmpty
-    private final String activityId;
-
-    @ApiModelProperty(
-            value = "활동 신청할 유저 아이디",
-            example = "61382407f8804444ad017a8def7b5127",
-            required = true
-    )
-    @NotEmpty
-    private final String userId;
-
+public class ModifyApplicationReqDto {
     @ApiModelProperty(
             value = "활동 신청할 유저 이름",
             example = "김둘리"

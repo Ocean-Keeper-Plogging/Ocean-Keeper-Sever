@@ -65,7 +65,7 @@ public class SecurityConfig {
                 //.antMatchers(HttpMethod.POST, "/image/edit/**").authenticated()
                 .antMatchers(HttpMethod.POST, "/image/profile**").permitAll()
                 .antMatchers(HttpMethod.POST, "/image/keeper**").permitAll()
-                .antMatchers(HttpMethod.POST, "/image/thumbnaile**").permitAll()
+                .antMatchers(HttpMethod.POST, "/image/thumbnail**").permitAll()
                 .antMatchers(HttpMethod.POST, "/image/story**").permitAll()
                 //auth
                 .antMatchers(HttpMethod.POST,"/auth/signup").permitAll()

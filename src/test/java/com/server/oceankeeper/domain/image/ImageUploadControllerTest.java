@@ -13,6 +13,7 @@ import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import com.server.oceankeeper.global.handler.CustomExceptionHandler;
 import com.server.oceankeeper.global.jwt.JwtAuthenticationEntryPoint;
+import com.server.oceankeeper.util.TokenUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -65,6 +66,8 @@ class ImageUploadControllerTest {
     private AccessDeniedHandler jwtAccessDeniedHandler;
     @MockBean
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @MockBean
+    private TokenUtil tokenUtil;
 
     @Test
     @WithMockUser

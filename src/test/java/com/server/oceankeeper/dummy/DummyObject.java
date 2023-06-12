@@ -51,6 +51,8 @@ public class DummyObject {
                 .deviceToken(genRandomString())
                 .password("_")
                 .role(UserRole.USER)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .uuid(uuid)
                 .build();
     }
@@ -68,6 +70,8 @@ public class DummyObject {
                 .recruitStartAt(LocalDate.now())
                 .startAt(LocalDateTime.now().plusDays(10))
                 .title("activity "+ genRandomString())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -91,6 +95,8 @@ public class DummyObject {
                 .name(user.getNickname())
                 .email(user.getEmail())
                 .applyAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 }

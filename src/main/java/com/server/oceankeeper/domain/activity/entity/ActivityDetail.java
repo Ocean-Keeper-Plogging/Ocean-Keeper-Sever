@@ -8,6 +8,7 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Setter //TODO : 개선
 @Table(indexes = @Index(name = "i_uuid", columnList = "uuid",unique = true))
 public class ActivityDetail {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

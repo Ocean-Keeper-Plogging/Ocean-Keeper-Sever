@@ -48,6 +48,12 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError("request JSON 파싱 에러"));
     }
 
+    @ExceptionHandler(UuidValidException.class)
+    public ResponseEntity<ApiResponse> uuidValidException(UuidValidException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError("요청 id 에러"));
+    }
+
     @ExceptionHandler(JwtTokenPayloadException.class)
     public ResponseEntity<ApiResponse> jwtTokenPayloadException(JwtTokenPayloadException e) {
         log.error(e.getMessage());

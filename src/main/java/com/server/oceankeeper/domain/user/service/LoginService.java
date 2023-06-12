@@ -95,11 +95,4 @@ public class LoginService {
 
         refreshTokenRepository.delete(refreshToken.get());
     }
-
-    @Transactional
-    public String[] getProviderInfoFromHeader(HttpServletRequest request) {
-        String jwt = tokenProvider.resolveToken(request);
-        String[] providerInfo = tokenProvider.getProviderInfo(jwt);
-        return providerInfo;
-    }
 }

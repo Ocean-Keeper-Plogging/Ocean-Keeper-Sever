@@ -1,8 +1,6 @@
 package com.server.oceankeeper.domain.activity.service;
 
-import com.server.oceankeeper.domain.activity.dto.request.ApplyActivityReqDto;
-import com.server.oceankeeper.domain.activity.dto.request.LocationDto;
-import com.server.oceankeeper.domain.activity.dto.request.RegisterActivityReqDto;
+import com.server.oceankeeper.domain.activity.dto.request.*;
 import com.server.oceankeeper.domain.activity.dto.response.ApplyActivityResDto;
 import com.server.oceankeeper.domain.activity.dto.response.MyActivityDto;
 import com.server.oceankeeper.domain.activity.dto.response.RegisterActivityResDto;
@@ -17,6 +15,7 @@ import com.server.oceankeeper.domain.user.entitiy.UserRole;
 import com.server.oceankeeper.domain.user.entitiy.UserStatus;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
+import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.util.UUIDGenerator;
@@ -74,6 +73,7 @@ class ActivityServiceTest extends DummyObject {
     }
 
     @Test
+    @DisplayName("활동 등록")
     void registerActivity() {
         //given
         RegisterActivityReqDto request = getRegisterActivityRequest();
@@ -105,6 +105,31 @@ class ActivityServiceTest extends DummyObject {
         assertThat(resultActivity.getTitle()).isEqualTo(request.getTitle());
         assertThat(resultActivity.getLocation()).isEqualTo(request.getLocation().toEntity());
         assertThat(resultActivity.getParticipants()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("활동 수정")
+    void modifyActivity() {
+        //given
+        ModifyActivityReqDto request = getModifyActivityRequest();
+        Activity expectActivity = request.toActivityEntity();
+        ActivityDetail expectActivityDetail = request.toActivityDetailEntity();
+        OUser expectUser = createUser();
+        when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
+        when(activityDetailRepository.findByActivity(any())).thenReturn(Optional.of(expectActivityDetail));
+        when(crewService.findOwner(any())).thenReturn(expectUser);
+        String activityId = UUIDGenerator.changeUuidToString(expectActivity.getUuid());
+
+        //when
+        //then
+        activityService.modifyActivity(activityId, request, expectUser);
+    }
+
+    private Crews createCrew(Activity expectActivity, OUser expectUser) {
+        return Crews.builder()
+                .activity(expectActivity)
+                .user(expectUser)
+                .build();
     }
 
     @Test
@@ -170,7 +195,38 @@ class ActivityServiceTest extends DummyObject {
         when(crewService.addCrew(any(), any(), any())).thenReturn(newCrew);
 
         //when
-        ApplyActivityReqDto request = ApplyActivityReqDto.builder()
+        ApplyApplicationReqDto request = getApplicationRequest();
+        ApplyActivityResDto response = activityService.applyActivity(request);
+
+        //then
+        System.out.println("response : " + response);
+        assertThat(response.getApplicationId()).isEqualTo(UUIDGenerator.changeUuidToString(newCrew.getUuid()));
+        assertThat(mockActivity.getParticipants()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("활동 지원서 수정")
+    void modifyApplication() {
+        //given
+        ModifyApplicationReqDto request = getModifyApplicationRequest();
+        RegisterActivityReqDto mockActivity = getRegisterActivityRequest();
+        Activity expectActivity = mockActivity.toActivityEntity();
+        ActivityDetail expectActivityDetail = mockActivity.toActivityDetailEntity();
+
+        OUser expectUser = createUser();
+        Crews expectedCrew = createCrew(expectActivity, expectUser);
+
+        when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
+        when(crewService.findCrew(any(),any())).thenReturn(expectedCrew);
+        String activityId = UUIDGenerator.changeUuidToString(expectActivity.getUuid());
+
+        //when
+        //then
+        activityService.modifyApplication(activityId, request, expectUser);
+    }
+
+    private ApplyApplicationReqDto getApplicationRequest() {
+        return ApplyApplicationReqDto.builder()
                 .activityId("123ea182ffcd11edbe560242ac120002")
                 .dayOfBirth("20010101")
                 .email("kim@naver.com")
@@ -182,12 +238,6 @@ class ActivityServiceTest extends DummyObject {
                 .userId("831ea182ffcd11edbe560242ac120002")
                 .privacyAgreement(true)
                 .build();
-        ApplyActivityResDto response = activityService.applyActivity(request);
-
-        //then
-        System.out.println("response : " + response);
-        assertThat(response.getApplicationId()).isEqualTo(UUIDGenerator.changeUuidToString(newCrew.getUuid()));
-        assertThat(mockActivity.getParticipants()).isEqualTo(2);
     }
 
     @Test
@@ -208,21 +258,42 @@ class ActivityServiceTest extends DummyObject {
         when(userRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockUser));
 
         //when
-        ApplyActivityReqDto request = ApplyActivityReqDto.builder()
-                .activityId("123ea182ffcd11edbe560242ac120002")
-                .dayOfBirth("20010101")
-                .email("kim@naver.com")
-                .id1365("kim-id1365")
-                .phoneNumber("01012345678")
-                .transportation("자차 (카쉐어링불가능)")
-                .question(null)
-                .startPoint("서울시")
-                .userId("831ea182ffcd11edbe560242ac120002")
-                .privacyAgreement(true)
-                .build();
+        ApplyApplicationReqDto request = getApplicationRequest();
 
         //then
         assertThrows(IllegalRequestException.class, () -> activityService.applyActivity(request));
+    }
+
+
+    @Test
+    @DisplayName("이미 지원한 활동에 지원")
+    void applyActivity_fail_apply_again() {
+        //given
+        Activity mockActivity = Activity.builder()
+                .quota(5)
+                .participants(3)
+                .uuid(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120002"))
+                .build();
+        when(activityRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockActivity));
+
+        OUser mockUser = OUser.builder()
+                .id(123L)
+                .uuid(UUIDGenerator.changeUuidFromString("831ea182ffcd11edbe560242ac120002"))
+                .build();
+        when(userRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockUser));
+        ApplyApplicationReqDto request = getApplicationRequest();
+        Crews newCrew = Crews.builder()
+                .id(10L)
+                .uuid(UUID.randomUUID())
+                .build();
+        when(crewService.addCrew(any(), any(), any())).thenReturn(newCrew);
+        activityService.applyActivity(request);
+
+        //when
+        when(crewService.existCrew(any(),any())).thenReturn(true);
+
+        //then
+        assertThrows(DuplicatedResourceException.class, () -> activityService.applyActivity(request));
     }
 
     private RegisterActivityReqDto getRegisterActivityRequest() {
@@ -246,6 +317,42 @@ class ActivityServiceTest extends DummyObject {
                 .preparation("긴 상하의")
                 .rewards("점심제공")
                 .etc("오세요")
+                .build();
+    }
+
+    private ModifyActivityReqDto getModifyActivityRequest() {
+        return ModifyActivityReqDto.builder()
+                .title("title2")
+                .location(new LocationDto("함덕", "제주시", 234.2, 123.1))
+                .transportation("자차")
+                .garbageCategory(GarbageCategory.COASTAL)
+                .locationTag(LocationTag.EAST)
+                .recruitStartAt(LocalDate.now())
+                .recruitEndAt(LocalDate.now().plusDays(5))
+                .startAt(LocalDateTime.now().plusHours(10))
+                //.thumbnailUrl("")
+                .keeperIntroduction("hi")
+                //.keeperImageUrl("")
+                .activityStory("new story")
+                //.storyImageUrl("")
+                .quota(5)
+                .programDetails("12시 집결")
+                .preparation("긴 상하의")
+                .rewards("점심제공")
+                .etc("오세요")
+                .build();
+    }
+
+    private ModifyApplicationReqDto getModifyApplicationRequest() {
+        return ModifyApplicationReqDto.builder()
+                .dayOfBirth("20010101")
+                .email("kim@naver.com")
+                .id1365("kim-id1365")
+                .phoneNumber("01012345678")
+                .transportation("자차 (카쉐어링가능)")
+                .question(null)
+                .startPoint("경기도")
+                .privacyAgreement(true)
                 .build();
     }
 }

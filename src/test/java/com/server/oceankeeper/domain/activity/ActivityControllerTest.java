@@ -2,13 +2,20 @@ package com.server.oceankeeper.domain.activity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.domain.activity.controller.ActivityController;
-import com.server.oceankeeper.domain.activity.dto.response.MyActivitiesDto;
+import com.server.oceankeeper.domain.activity.dto.request.*;
+import com.server.oceankeeper.domain.activity.dto.response.ApplicationReqDto;
+import com.server.oceankeeper.domain.activity.dto.response.ApplyActivityResDto;
 import com.server.oceankeeper.domain.activity.dto.response.MyActivityDto;
+import com.server.oceankeeper.domain.activity.dto.response.RegisterActivityResDto;
+import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
+import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import com.server.oceankeeper.domain.activity.service.ActivityService;
+import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.config.SecurityConfig;
 import com.server.oceankeeper.global.handler.CustomExceptionHandler;
 import com.server.oceankeeper.global.jwt.JwtAuthenticationEntryPoint;
+import com.server.oceankeeper.util.TokenUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,20 +23,26 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = ActivityController.class, includeFilters = {
@@ -50,6 +63,8 @@ class ActivityControllerTest {
     private AccessDeniedHandler accessDeniedHandler;
     @MockBean
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @MockBean
+    private TokenUtil tokenUtil;
 
     @Test
     @WithMockUser
@@ -71,6 +86,205 @@ class ActivityControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(get("/activity/user/1")
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("활동 수정하기")
+    void edit() throws Exception {
+        when(activityService.getMyActivity(any())).thenReturn(List.of(
+                new MyActivityDto("1", 11,
+                        "This is flogging",
+                        LocalDateTime.now(),
+                        "제주도 능금해변"
+                ),
+                new MyActivityDto("2", 12,
+                        "This is flogging 2",
+                        LocalDateTime.now().plusDays(3),
+                        "제주도 능금해변"
+                )
+        ));
+
+        //when
+        ResultActions resultActions = mvc.perform(put("/activity/user/1")
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("활동 등록")
+    @WithMockUser
+    void registerActivity() throws Exception {
+        when(activityService.registerActivity(any())).thenReturn(
+                new RegisterActivityResDto("activityId")
+        );
+
+        RegisterActivityReqDto request = RegisterActivityReqDto.builder()
+                .userId("831ea182ffcd11edbe560242ac120002")
+                .title("title")
+                .location(new LocationDto("함덕", "제주시", 123.1, 123.1))
+                .transportation("카셰어링 연결 예정")
+                .garbageCategory(GarbageCategory.COASTAL)
+                .locationTag(LocationTag.EAST)
+                .recruitStartAt(LocalDate.now())
+                .recruitEndAt(LocalDate.now().plusDays(5))
+                .startAt(LocalDateTime.now().plusHours(10))
+                //.thumbnailUrl("")
+                .keeperIntroduction("hi")
+                //.keeperImageUrl("")
+                .activityStory("story")
+                //.storyImageUrl("")
+                .quota(5)
+                .programDetails("12시 집결")
+                .preparation("긴 상하의")
+                .rewards("점심제공")
+                .etc("오세요")
+                .build();
+        String requestStr = om.writeValueAsString(request);
+
+        //when
+        ResultActions resultActions = mvc.perform(post("/activity/recruitment")
+                        .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("활동 지원")
+    @WithMockUser
+    void applyActivity() throws Exception {
+        when(activityService.applyActivity(any())).thenReturn(
+                new ApplyActivityResDto("activityId","applicationId")
+        );
+
+        ApplyApplicationReqDto request = ApplyApplicationReqDto.builder()
+                .activityId("activityId")
+                .userId("userId")
+                .privacyAgreement(true)
+                .build();
+        String requestStr = om.writeValueAsString(request);
+
+        //when
+        ResultActions resultActions = mvc.perform(post("/activity/recruitment/application")
+                .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("활동 지원 프라이버시 동의 확인없음")
+    @WithMockUser
+    void applyActivity_no_privacy_agreement() throws Exception {
+        when(activityService.applyActivity(any())).thenReturn(
+                new ApplyActivityResDto("activityId","applicationId")
+        );
+
+        ApplyApplicationReqDto request = ApplyApplicationReqDto.builder()
+                .activityId("activityId")
+                .userId("userId")
+                .build();
+        String requestStr = om.writeValueAsString(request);
+
+        //when
+        ResultActions resultActions = mvc.perform(post("/activity/recruitment/application")
+                .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("활동 수정")
+    @WithMockUser
+    void modifyActivity() throws Exception {
+        when(tokenUtil.getProviderInfoFromHeader(any())).thenReturn(OUser.builder().build());
+        doNothing().when(activityService).modifyActivity(any(),any(),any());
+
+        ModifyActivityReqDto request = ModifyActivityReqDto.builder()
+                .title("title")
+                .location(new LocationDto("함덕", "제주시", 123.1, 123.1))
+                .transportation("카셰어링 연결 예정")
+                .garbageCategory(GarbageCategory.COASTAL)
+                .locationTag(LocationTag.EAST)
+                .recruitStartAt(LocalDate.now())
+                .recruitEndAt(LocalDate.now().plusDays(5))
+                .startAt(LocalDateTime.now().plusHours(10))
+                //.thumbnailUrl("")
+                .keeperIntroduction("hi")
+                //.keeperImageUrl("")
+                .activityStory("story")
+                //.storyImageUrl("")
+                .quota(5)
+                .programDetails("12시 집결")
+                .preparation("긴 상하의")
+                .rewards("점심제공")
+                .etc("오세요")
+                .build();
+        String requestStr = om.writeValueAsString(request);
+
+        //when
+        ResultActions resultActions = mvc.perform(put("/activity/recruitment/1")
+                        .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("활동 지원서 수정")
+    @WithMockUser
+    void modifyApplication() throws Exception {
+        when(tokenUtil.getProviderInfoFromHeader(any())).thenReturn(OUser.builder().build());
+        doNothing().when(activityService).modifyApplication(any(),any(),any());
+
+        ModifyApplicationReqDto request = ModifyApplicationReqDto.builder()
+                .privacyAgreement(true)
+                .build();
+        String requestStr = om.writeValueAsString(request);
+
+        //when
+        ResultActions resultActions = mvc.perform(put("/activity/recruitment/application/1")
+                        .content(requestStr)
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("마지막 활동 지원서 불러오기")
+    @WithMockUser
+    void getLastApplication() throws Exception {
+        when(tokenUtil.getProviderInfoFromHeader(any())).thenReturn(OUser.builder().build());
+        when(activityService.getLastApplication(any())).thenReturn(ApplicationReqDto.builder().build());
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/activity/recruitment/application/last")
                 .contentType(MediaType.APPLICATION_JSON));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("Response body : " + responseBody);

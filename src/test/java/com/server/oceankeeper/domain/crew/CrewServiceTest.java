@@ -1,6 +1,6 @@
 package com.server.oceankeeper.domain.crew;
 
-import com.server.oceankeeper.domain.activity.dto.request.ApplyActivityReqDto;
+import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
@@ -44,11 +44,11 @@ class CrewServiceTest extends DummyObject {
                 .user(mockUser)
                 .id(1L)
                 .activityRole(CrewRole.CREW)
-                .crewStatus(CrewStatus.APPLY)
+                .crewStatus(CrewStatus.IN_PROGRESS)
                 .uuid(UUID.randomUUID())
                 .build();
         when(crewRepository.save(any())).thenReturn(mockCrew);
-        ApplyActivityReqDto request = ApplyActivityReqDto.builder()
+        ApplyApplicationReqDto request = ApplyApplicationReqDto.builder()
                 .email("kim@naver.com")
                 .name("김둘리")
                 .phoneNumber("01012341234")
@@ -64,7 +64,7 @@ class CrewServiceTest extends DummyObject {
 
         //then
         assertThat(result).isEqualTo(mockCrew);
-        assertThat(result.getCrewStatus()).isEqualTo(CrewStatus.APPLY);
+        assertThat(result.getCrewStatus()).isEqualTo(CrewStatus.IN_PROGRESS);
     }
 
     @Test
