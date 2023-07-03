@@ -12,6 +12,7 @@ public enum ErrorCode {
     NOT_FOUND_TOKEN(101, "NOT_FOUND_TOKEN"),
     MALFORMED_ERROR(102, "MALFORMED_ERROR"),
 
+    SUCCESS(200, "SUCCESS"),
     INVALID_REQUEST(400, "INVALID_REQUEST");
 
     private final int code;

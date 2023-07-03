@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.activity.dto.response;
+package com.server.oceankeeper.domain.activity.dto;
 
 import lombok.*;
 

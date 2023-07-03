@@ -5,7 +5,7 @@ import com.server.oceankeeper.domain.activity.controller.ActivityController;
 import com.server.oceankeeper.domain.activity.dto.request.*;
 import com.server.oceankeeper.domain.activity.dto.response.ApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.response.ApplyActivityResDto;
-import com.server.oceankeeper.domain.activity.dto.response.MyActivityDto;
+import com.server.oceankeeper.domain.activity.dto.response.MyScheduledActivityDto;
 import com.server.oceankeeper.domain.activity.dto.response.RegisterActivityResDto;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
@@ -23,18 +23,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -71,13 +66,13 @@ class ActivityControllerTest {
     @DisplayName("내가 속한 활동 리스트 가져오기")
     public void getMyActivity() throws Exception {
         //given
-        when(activityService.getMyActivity(any())).thenReturn(List.of(
-                new MyActivityDto("1", 11,
+        when(activityService.getMyScheduleActivity(any())).thenReturn(List.of(
+                new MyScheduledActivityDto("1", 11,
                         "This is flogging",
                         LocalDateTime.now(),
                         "제주도 능금해변"
                 ),
-                new MyActivityDto("2", 12,
+                new MyScheduledActivityDto("2", 12,
                         "This is flogging 2",
                         LocalDateTime.now().plusDays(3),
                         "제주도 능금해변"
@@ -97,13 +92,13 @@ class ActivityControllerTest {
     @Test
     @DisplayName("활동 수정하기")
     void edit() throws Exception {
-        when(activityService.getMyActivity(any())).thenReturn(List.of(
-                new MyActivityDto("1", 11,
+        when(activityService.getMyScheduleActivity(any())).thenReturn(List.of(
+                new MyScheduledActivityDto("1", 11,
                         "This is flogging",
                         LocalDateTime.now(),
                         "제주도 능금해변"
                 ),
-                new MyActivityDto("2", 12,
+                new MyScheduledActivityDto("2", 12,
                         "This is flogging 2",
                         LocalDateTime.now().plusDays(3),
                         "제주도 능금해변"
@@ -160,6 +155,23 @@ class ActivityControllerTest {
 
         //then
         resultActions.andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("활동 모집 취소")
+    @WithMockUser
+    void cancelActivity() throws Exception {
+        doNothing().when(activityService).cancelActivity(any(),any());
+
+        //when
+        ResultActions resultActions = mvc.perform(delete("/activity/recruitment")
+                        .param("activity-id","831ea182ffcd11edbe560242ac120002")
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isOk());
     }
 
     @Test
@@ -243,7 +255,7 @@ class ActivityControllerTest {
         String requestStr = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(put("/activity/recruitment/1")
+        ResultActions resultActions = mvc.perform(patch("/activity/recruitment/1")
                         .content(requestStr)
                 .contentType(MediaType.APPLICATION_JSON));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
@@ -266,7 +278,7 @@ class ActivityControllerTest {
         String requestStr = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(put("/activity/recruitment/application/1")
+        ResultActions resultActions = mvc.perform(patch("/activity/recruitment/application/1")
                         .content(requestStr)
                 .contentType(MediaType.APPLICATION_JSON));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();

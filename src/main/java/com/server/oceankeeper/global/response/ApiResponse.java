@@ -17,7 +17,10 @@ public class ApiResponse {
     private ErrorCode status;
     private String message;
 
-    // 예외 발생으로 API 호출 실패시 반환
+    public static ApiResponse createSuccess(String message) {
+        return new ApiResponse(ErrorCode.SUCCESS, message);
+    }
+
     public static ApiResponse createError(String message) {
         return new ApiResponse(ErrorCode.FAIL, message);
     }

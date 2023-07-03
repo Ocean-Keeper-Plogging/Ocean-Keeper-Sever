@@ -1,13 +1,9 @@
 package com.server.oceankeeper.domain.activity.entity;
 
-import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.BaseEntity;
-import com.server.oceankeeper.global.exception.IllegalRequestException;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -98,9 +94,11 @@ public class Activity extends BaseEntity {
     }
 
     public void addParticipant() {
-        if (quota > participants)
-            participants++;
-        else
-            throw new IllegalRequestException("정원이 찼습니다.");
+        participants++;
+    }
+
+    public void removeParticipant() {
+        if (participants >= 1)
+            participants--;
     }
 }

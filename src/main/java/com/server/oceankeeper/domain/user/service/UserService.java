@@ -1,6 +1,9 @@
 package com.server.oceankeeper.domain.user.service;
 
 
+import com.server.oceankeeper.domain.statistics.entity.ActivityEventType;
+import com.server.oceankeeper.domain.statistics.entity.EventPublisher;
+import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.user.dto.JoinReqDto;
 import com.server.oceankeeper.domain.user.dto.JoinResDto;
 import com.server.oceankeeper.domain.user.dto.UserIdAndNicknameReqDto;
@@ -8,7 +11,6 @@ import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
-import com.server.oceankeeper.global.exception.JwtTokenPayloadException;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -33,13 +35,14 @@ public class UserService {
     @Transactional
     public JoinResDto join(JoinReqDto joinReqDto) {
         log.debug("디버그 : " + joinReqDto + " by UserService join");
-        inspectDuplicatedDeviceToken(joinReqDto.getDeviceToken());
+        //inspectDuplicatedDeviceToken(joinReqDto.getDeviceToken());
         inspectDuplicatedUser(joinReqDto);
         inspectDuplicatedNickname(joinReqDto.getNickname());
         OUser user = joinReqDto.toEntity();
         user.initializePassword(passwordEncoder.encode(password)); //TODO: 더 나은 보안 방법이 없을까 고민
         OUser userSaved = userRepository.save(user);
 
+        EventPublisher.raise(new ActivityEvent(this, userSaved, ActivityEventType.USER_JOINED_EVENT));
         return new JoinResDto(userSaved);
     }
 

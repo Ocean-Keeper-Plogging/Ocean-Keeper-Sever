@@ -3,6 +3,8 @@ package com.server.oceankeeper.domain.crew;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
+import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
+import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
 import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
@@ -10,6 +12,7 @@ import com.server.oceankeeper.domain.crew.repository.CrewRepository;
 import com.server.oceankeeper.domain.crew.service.CrewService;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.dummy.DummyObject;
+import com.server.oceankeeper.util.UUIDGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +40,7 @@ class CrewServiceTest extends DummyObject {
 
     @Test
     void addCrew() {
-        Activity mockActivity = newMockActivity(5, ActivityStatus.OPEN);
+        Activity mockActivity = newMockActivity(5, ActivityStatus.OPEN,LocationTag.JEJU, GarbageCategory.COASTAL,UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120013"));
         OUser mockUser = newMockUser(1L, "kim", "naver", "providerId", UUID.randomUUID());
         Crews mockCrew = Crews.builder()
                 .activity(mockActivity)
@@ -69,7 +72,7 @@ class CrewServiceTest extends DummyObject {
 
     @Test
     void addHost() {
-        Activity mockActivity = newMockActivity(5, ActivityStatus.OPEN);
+        Activity mockActivity = newMockActivity(5, ActivityStatus.OPEN, LocationTag.EAST,GarbageCategory.COASTAL,UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120012"));
         OUser mockUser = newMockUser(1L, "kim", "naver", "providerId", UUID.randomUUID());
         Crews mockCrew = Crews.builder()
                 .activity(Activity.builder().build())
@@ -83,17 +86,5 @@ class CrewServiceTest extends DummyObject {
         Crews result = crewService.addHost(mockActivity, mockUser);
         assertThat(result).isEqualTo(mockCrew);
         assertThat(result.getCrewStatus()).isEqualTo(CrewStatus.IN_PROGRESS);
-    }
-
-    @Test
-    @DisplayName("날짜 계산하기")
-    public void calculateDDay() {
-        LocalDateTime end = LocalDateTime.now().plusDays(10).plusYears(1);
-
-        int days = ReflectionTestUtils.invokeMethod(crewService, "calculateDDay", end);
-
-        System.out.println("day : " + days);
-
-        assertThat(days).isEqualTo(376);
     }
 }

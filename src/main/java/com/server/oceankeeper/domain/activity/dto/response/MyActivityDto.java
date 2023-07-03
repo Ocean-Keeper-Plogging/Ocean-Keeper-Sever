@@ -1,50 +1,40 @@
 package com.server.oceankeeper.domain.activity.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
+import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
+import com.server.oceankeeper.domain.activity.entity.LocationTag;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
-@ToString
-@Getter
-@Builder
+@Data
 @AllArgsConstructor
 public class MyActivityDto {
-    @ApiModelProperty(
-            value = "활동 고유 아이디",
-            example = "61e2cd48008d11eebe560242ac120002"
-    )
-    private final String id;
+    private final List<MyActivityDetail> activities;
 
-    @ApiModelProperty(
-            value = "활동 남은 날짜",
-            example = "11"
-    )
-    private final Integer dDay;
+    @Data
+    @AllArgsConstructor
+    public static class MyActivityDetail {
+        private final String activityId;
 
-    @ApiModelProperty(
-            value = "활동 타이틀",
-            example = "금능해변 플로깅 프로젝트"
-    )
-    private final String title;
+        private final String title;
 
-    @ApiModelProperty(
-            value = "활동 시작 시각",
-            example = "2023-03-20T12:00:00"
-    )
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private final LocalDateTime startDay;
+        private final String hostNickname;
+        private final Integer quota;
+        private final Integer participants;
 
-    @ApiModelProperty(
-            value = "활동 지역",
-            example = "제주도 능금해변"
-    )
-    private final String location;
+        private String activityImageUrl;
+
+        private final LocalDate recruitStartAt;
+        private final LocalDate recruitEndAt;
+
+        private final LocalDateTime startAt;
+
+        private final ActivityStatus status;
+
+        private String location;
+    }
 }

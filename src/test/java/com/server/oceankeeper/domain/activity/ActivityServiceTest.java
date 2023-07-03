@@ -1,12 +1,18 @@
-package com.server.oceankeeper.domain.activity.service;
+package com.server.oceankeeper.domain.activity;
 
+import com.server.oceankeeper.domain.activity.dto.MyActivityDao;
 import com.server.oceankeeper.domain.activity.dto.request.*;
 import com.server.oceankeeper.domain.activity.dto.response.ApplyActivityResDto;
-import com.server.oceankeeper.domain.activity.dto.response.MyActivityDto;
+import com.server.oceankeeper.domain.activity.dto.response.MyScheduledActivityDto;
 import com.server.oceankeeper.domain.activity.dto.response.RegisterActivityResDto;
-import com.server.oceankeeper.domain.activity.entity.*;
+import com.server.oceankeeper.domain.activity.entity.Activity;
+import com.server.oceankeeper.domain.activity.entity.ActivityDetail;
+import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
+import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import com.server.oceankeeper.domain.activity.repository.ActivityDetailRepository;
 import com.server.oceankeeper.domain.activity.repository.ActivityRepository;
+import com.server.oceankeeper.domain.activity.service.ActivityService;
+import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.crew.repository.CrewRepository;
 import com.server.oceankeeper.domain.crew.service.CrewService;
@@ -17,7 +23,6 @@ import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
-import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.util.UUIDGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,16 +31,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,6 +76,35 @@ class ActivityServiceTest extends DummyObject {
                 .status(UserStatus.ACTIVE)
                 .updatedAt(LocalDateTime.now())
                 .build();
+    }
+
+    private static long userId = 2L;
+
+    private OUser createRandomUser() {
+        return OUser.builder()
+                .uuid(UUIDGenerator.createUuid())
+                .id(userId++)
+                .deviceToken("devicetoken" + createRandomString())
+                .email("kim" + createRandomString() + "@naver.com")
+                .providerId("providerId" + createRandomString())
+                .provider("naver")
+                .nickname("kim" + createRandomString())
+                .createdAt(LocalDateTime.now().minusMinutes(30))
+                .password("123")
+                .role(UserRole.USER)
+                .profile("profile@naver.com")
+                .status(UserStatus.ACTIVE)
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    private String createRandomString() {
+        int targetStringLength = 10;
+        Random random = new Random();
+        return random.ints('a', 'z' + 1)
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 
     @Test
@@ -108,6 +143,95 @@ class ActivityServiceTest extends DummyObject {
     }
 
     @Test
+    @DisplayName("활동 모집 취소")
+    void cancelActivity() {
+        //given
+        RegisterActivityReqDto request = getRegisterActivityRequest();
+        Activity expectActivity = request.toActivityEntity();
+        ActivityDetail expectActivityDetail = request.toActivityDetailEntity();
+        OUser expectUser = createUser();
+        Crews host = getHost(expectActivity, expectUser);
+        List<Crews> crews = List.of(getCrew(expectActivity, createRandomUser()),
+                getCrew(expectActivity, createRandomUser()),
+                getCrew(expectActivity, createRandomUser()));
+        when(activityRepository.findByUuid(any())).thenReturn(Optional.ofNullable(expectActivity));
+        when(crewService.findApplication(any(), (Activity) any())).thenReturn(host);
+        when(crewService.findCrews(any())).thenReturn(crews);
+        doNothing().when(crewService).deleteByHost(any());
+
+        //when
+        //then
+        activityService.cancelActivity(UUIDGenerator.changeUuidToString(expectActivity.getUuid()), expectUser);
+    }
+
+    @Test
+    @DisplayName("날짜 계산하기")
+    public void calculateDDay() {
+        LocalDateTime end = LocalDateTime.now().plusDays(10).plusYears(1);
+
+        int days = ReflectionTestUtils.invokeMethod(activityService, "calculateDDay", end);
+
+        System.out.println("day : " + days);
+
+        assertThat(days).isEqualTo(376);
+    }
+
+    private Crews getHost(Activity activity, OUser user) {
+        return Crews.builder()
+                .user(user)
+                .activity(activity)
+                .activityRole(CrewRole.HOST)
+                .uuid(UUID.randomUUID())
+                .createdAt(LocalDateTime.now().minusMinutes(10))
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    private Crews getCrew(Activity activity, OUser user) {
+        return Crews.builder()
+                .user(user)
+                .activity(activity)
+                .activityRole(CrewRole.CREW)
+                .uuid(UUID.randomUUID())
+                .createdAt(LocalDateTime.now().minusMinutes(5))
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    @Test
+    @DisplayName("활동 상세 조회")
+    void getActivityDetail() {
+        //given
+        RegisterActivityReqDto request = getRegisterActivityRequest();
+        Activity expectActivity = request.toActivityEntity();
+        ActivityDetail expectActivityDetail = request.toActivityDetailEntity();
+        expectActivity.addParticipant(); //fake 참여자 넣기
+
+        //when
+        when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
+        when(activityDetailRepository.findByActivity(any())).thenReturn(Optional.of(expectActivityDetail));
+
+        //then
+        var result = activityService.getActivityDetail(UUIDGenerator.changeUuidToString(expectActivity.getUuid()));
+
+        assertThat(result.getActivityStory()).isEqualTo(request.getActivityStory());
+        assertThat(result.getEtc()).isEqualTo(request.getEtc());
+        assertThat(result.getGarbageCategory()).isEqualTo(request.getGarbageCategory());
+        assertThat(result.getKeeperIntroduction()).isEqualTo(request.getKeeperIntroduction());
+        assertThat(result.getLocationTag()).isEqualTo(request.getLocationTag());
+        assertThat(result.getPreparation()).isEqualTo(request.getPreparation());
+        assertThat(result.getProgramDetails()).isEqualTo(request.getProgramDetails());
+        assertThat(result.getQuota()).isEqualTo(request.getQuota());
+        assertThat(result.getRecruitStartAt()).isEqualTo(request.getRecruitStartAt());
+        assertThat(result.getRecruitEndAt()).isEqualTo(request.getRecruitEndAt());
+        assertThat(result.getStartAt()).isEqualTo(request.getStartAt());
+        assertThat(result.getRewards()).isEqualTo(request.getRewards());
+        assertThat(result.getTitle()).isEqualTo(request.getTitle());
+        assertThat(result.getLocation()).isEqualTo(request.getLocation());
+        assertThat(result.getParticipants()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("활동 수정")
     void modifyActivity() {
         //given
@@ -134,7 +258,7 @@ class ActivityServiceTest extends DummyObject {
 
     @Test
     @DisplayName("registerActivity_fail_유저못찾음")
-    void registerActivity_fail_noFoundUser() {
+    void registerActivityFailNoFoundUser() {
         //given
         RegisterActivityReqDto request = getRegisterActivityRequest();
         when(userRepository.findByUuid(any())).thenThrow(IdNotFoundException.class);
@@ -144,31 +268,48 @@ class ActivityServiceTest extends DummyObject {
     }
 
     @Test
-    @DisplayName("나의 활동 찾기")
+    @DisplayName("나의 다가오는 일정 찾기")
     void getMyActivity() {
         //given
-        OUser mockUser = newMockUser(123L, "kim", "naver", "providerid1", UUID.randomUUID());
-        List<MyActivityDto> mockResult = List.of(
-                MyActivityDto.builder()
-                        .id("id")
+        final OUser mockUser = newMockUser(123L, "kim", "naver", "providerid1", UUID.randomUUID());
+        final String uuid1 = UUIDGenerator.changeUuidToString(UUIDGenerator.createUuid());
+        final String uuid2 = UUIDGenerator.changeUuidToString(UUIDGenerator.createUuid());
+        final LocalDateTime currentTime=LocalDateTime.now();
+        List<MyScheduledActivityDto> expectResult = Arrays.asList(
+                MyScheduledActivityDto.builder()
+                        .id(uuid1)
                         .location("제주")
                         .dDay(5)
-                        .startDay(LocalDateTime.now().plusDays(5))
+                        .startDay(currentTime.plusDays(5))
                         .title("테스트")
                         .build(),
-                MyActivityDto.builder()
-                        .id("id2")
+                MyScheduledActivityDto.builder()
+                        .id(uuid2)
                         .location("제주2")
-                        .dDay(5)
-                        .startDay(LocalDateTime.now().plusDays(6))
+                        .dDay(6)
+                        .startDay(currentTime.plusDays(6))
                         .title("테스트2")
                         .build()
         );
-        when(crewService.findCrews(any())).thenReturn(mockResult);
+        List<MyActivityDao> mockMyActivity = Arrays.asList(
+                MyActivityDao.builder()
+                        .uuid(UUIDGenerator.changeUuidFromString(uuid1))
+                        .location("제주")
+                        .startAt(currentTime.plusDays(5))
+                        .title("테스트")
+                        .build(),
+                MyActivityDao.builder()
+                        .uuid(UUIDGenerator.changeUuidFromString(uuid2))
+                        .location("제주2")
+                        .startAt(currentTime.plusDays(6))
+                        .title("테스트2")
+                        .build()
+        );
+        when(activityRepository.getMyActivitiesLimit5(any())).thenReturn(mockMyActivity);
 
         //when
-        List<MyActivityDto> result = activityService.getMyActivity(UUIDGenerator.changeUuidToString(mockUser.getUuid()));
-        assertThat(result).isEqualTo(mockResult);
+        List<MyScheduledActivityDto> result = activityService.getMyScheduleActivity(UUIDGenerator.changeUuidToString(mockUser.getUuid()));
+        assertThat(result).isEqualTo(expectResult);
     }
 
     @Test
@@ -217,7 +358,7 @@ class ActivityServiceTest extends DummyObject {
         Crews expectedCrew = createCrew(expectActivity, expectUser);
 
         when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
-        when(crewService.findCrew(any(),any())).thenReturn(expectedCrew);
+        when(crewService.findApplication(any(), (Activity) any())).thenReturn(expectedCrew);
         String activityId = UUIDGenerator.changeUuidToString(expectActivity.getUuid());
 
         //when
@@ -239,31 +380,6 @@ class ActivityServiceTest extends DummyObject {
                 .privacyAgreement(true)
                 .build();
     }
-
-    @Test
-    @DisplayName("활동 지원 정원초과")
-    void applyActivity_fail() {
-        //given
-        Activity mockActivity = Activity.builder()
-                .quota(5)
-                .participants(5)
-                .uuid(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120002"))
-                .build();
-        when(activityRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockActivity));
-
-        OUser mockUser = OUser.builder()
-                .id(123L)
-                .uuid(UUIDGenerator.changeUuidFromString("831ea182ffcd11edbe560242ac120002"))
-                .build();
-        when(userRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockUser));
-
-        //when
-        ApplyApplicationReqDto request = getApplicationRequest();
-
-        //then
-        assertThrows(IllegalRequestException.class, () -> activityService.applyActivity(request));
-    }
-
 
     @Test
     @DisplayName("이미 지원한 활동에 지원")
@@ -290,10 +406,60 @@ class ActivityServiceTest extends DummyObject {
         activityService.applyActivity(request);
 
         //when
-        when(crewService.existCrew(any(),any())).thenReturn(true);
+        when(crewService.existCrew(any(), any())).thenReturn(true);
 
         //then
         assertThrows(DuplicatedResourceException.class, () -> activityService.applyActivity(request));
+    }
+
+    @Test
+    @DisplayName("지원하였으나 취소할 경우 문제 없이 취소된다")
+    void cancelApplication_success() {
+        //given
+        Activity mockActivity = Activity.builder()
+                .quota(5)
+                .participants(3)
+                .uuid(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120002"))
+                .build();
+        when(activityRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockActivity));
+
+        OUser mockUser = OUser.builder()
+                .id(123L)
+                .uuid(UUIDGenerator.changeUuidFromString("831ea182ffcd11edbe560242ac120002"))
+                .build();
+        when(userRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockUser));
+        ApplyApplicationReqDto request = getApplicationRequest();
+        Crews newCrew = Crews.builder()
+                .activity(mockActivity)
+                .user(mockUser)
+                .id(10L)
+                .uuid(UUID.randomUUID())
+                .build();
+        when(crewService.addCrew(any(), any(), any())).thenReturn(newCrew);
+        ApplyActivityResDto result = activityService.applyActivity(request);
+        when(crewService.findApplication(any(), anyString())).thenReturn(newCrew);
+
+        //when
+        activityService.cancelApplication(result.getApplicationId(), mockUser);
+
+        //then
+        assertThat(mockActivity.getParticipants()).isEqualTo(3); //하나 줄어듦
+    }
+
+    @Test
+    @DisplayName("본인의 것이 아닌 다른 사람의 활동을 삭제할 경우 예외가 발생한다.")
+    void cancelApplication_fail() {
+        //given
+        when(crewService.findApplication(any(), anyString())).thenThrow(IdNotFoundException.class);
+        OUser fakeUser = OUser.builder()
+                .id(125L)
+                .uuid(UUIDGenerator.changeUuidFromString("831ea182ffcd11edbe560242ac121112"))
+                .build();
+
+        //when
+        //then
+        assertThrows(IdNotFoundException.class,
+                () -> activityService.cancelApplication(UUIDGenerator.changeUuidToString(UUID.randomUUID()), fakeUser));
     }
 
     private RegisterActivityReqDto getRegisterActivityRequest() {

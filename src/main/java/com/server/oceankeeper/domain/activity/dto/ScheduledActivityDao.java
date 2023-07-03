@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.activity.dto.response;
+package com.server.oceankeeper.domain.activity.dto;
 
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
@@ -11,7 +11,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ActivityDao {
+public class ScheduledActivityDao {
     private UUID activityId;
 
     private String title;

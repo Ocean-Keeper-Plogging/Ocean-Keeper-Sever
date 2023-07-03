@@ -6,7 +6,6 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -15,15 +14,14 @@ import java.util.UUID;
 //@ToString(callSuper = true)
 @Table(name = "users", indexes = {
         @Index(name = "i_uuid", columnList = "uuid", unique = true),
-        @Index(name = "i_provider", columnList = "provider"),
-        @Index(name = "i_providerId", columnList = "providerId")})
+        @Index(name = "i_provider_providerid", columnList = "provider, providerId", unique = true)})
 public class OUser extends BaseEntity {
     @Id // primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
-    @Column(columnDefinition = "BINARY(16)")
+    @Column(columnDefinition = "BINARY(16)", nullable = false)
     private UUID uuid;
 
     @Column(nullable = false, length = 20)

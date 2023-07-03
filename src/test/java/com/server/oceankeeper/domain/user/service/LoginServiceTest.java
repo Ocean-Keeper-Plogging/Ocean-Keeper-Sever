@@ -13,18 +13,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
@@ -77,10 +73,10 @@ class LoginServiceTest {
         UserDetails principal = new User("naver_providerid", "password", authorities);
 
         //when
-        LoginResDto result = loginService.login(request, new UsernamePasswordAuthenticationToken(principal,password,authorities));
+        LoginResDto result = loginService.login(request, new UsernamePasswordAuthenticationToken(principal, password, authorities));
 
         //then
-        assertThat(result).isEqualTo(new LoginResDto(new JoinResDto(mockUser),mockToken));
+        assertThat(result).isEqualTo(new LoginResDto(new JoinResDto(mockUser), mockToken));
     }
 
     @Test

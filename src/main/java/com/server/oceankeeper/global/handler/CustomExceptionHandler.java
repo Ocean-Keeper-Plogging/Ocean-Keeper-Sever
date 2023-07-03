@@ -3,6 +3,7 @@ package com.server.oceankeeper.global.handler;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.server.oceankeeper.global.exception.*;
 import com.server.oceankeeper.global.response.ApiResponse;
+import org.hibernate.exception.GenericJDBCException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,12 @@ public class CustomExceptionHandler {
     public ResponseEntity<ApiResponse> jwtTokenPayloadException(JwtTokenPayloadException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.createError("JWT 토큰 파싱 에러"));
+    }
+
+    @ExceptionHandler(GenericJDBCException.class)
+    public ResponseEntity<ApiResponse> GenericJDBCExceptionException(GenericJDBCException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.createError("내부 쿼리 수행 에러"));
     }
 
     @ExceptionHandler(IdNotFoundException.class)

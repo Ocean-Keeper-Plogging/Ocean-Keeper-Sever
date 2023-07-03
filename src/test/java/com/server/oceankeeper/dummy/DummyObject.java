@@ -19,7 +19,7 @@ public class DummyObject {
     static String encPassword = passwordEncoder.encode("-");
 
     //리포지토리까지 사용할 경우의 객체
-    protected OUser newUserWithR(String nickname, String provider, String providerId,UUID uuid) {
+    protected OUser newUserWithR(String nickname, String provider, String providerId, UUID uuid) {
         return OUser.builder()
                 .uuid(uuid)
                 .nickname(nickname)
@@ -57,19 +57,20 @@ public class DummyObject {
                 .build();
     }
 
-    protected Activity newMockActivity(int quota, ActivityStatus activityStatus) {
+    protected Activity newMockActivity(int quota, ActivityStatus activityStatus,
+                                       LocationTag locationTag, GarbageCategory garbageCategory,UUID uuid) {
         return Activity.builder()
                 .participants(1)
-                .quota(5)
-                .uuid(UUID.randomUUID())
+                .quota(quota)
+                .uuid(uuid)
                 .activityStatus(activityStatus)
-                .garbageCategory(GarbageCategory.COASTAL)
+                .garbageCategory(garbageCategory)
                 .location(new Location(123.1, 123.2, "제주", "제주" + genRandomString()))
-                .locationTag(LocationTag.JEJU)
+                .locationTag(locationTag)
                 .recruitEndAt(LocalDate.now().plusDays(5))
                 .recruitStartAt(LocalDate.now())
                 .startAt(LocalDateTime.now().plusDays(10))
-                .title("activity "+ genRandomString())
+                .title("activity " + genRandomString())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

@@ -13,13 +13,18 @@ public enum ActivityStatus {
 
     private final String value;
 
-    public static ActivityStatus getStatus(String status){
-        switch (status){
-            case "open":return OPEN;
-            case "closed":return CLOSE;
-            case "cancel":return CANCEL;
-            case "all":return ALL;
-            default:return null;
+    public static ActivityStatus getStatus(String status) {
+        switch (status) {
+            case "open":
+                return OPEN;
+            case "closed":
+                return CLOSE;
+            case "cancel":
+                return CANCEL;
+            case "all":
+                return ALL;
+            default:
+                return null;
         }
     }
 }

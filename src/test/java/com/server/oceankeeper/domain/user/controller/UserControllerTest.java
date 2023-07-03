@@ -1,7 +1,6 @@
 package com.server.oceankeeper.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.oceankeeper.domain.user.controller.UserController;
 import com.server.oceankeeper.domain.user.dto.JoinReqDto;
 import com.server.oceankeeper.domain.user.dto.JoinResDto;
 import com.server.oceankeeper.domain.user.dto.UserIdAndNicknameReqDto;
@@ -39,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @WebMvcTest(value = UserController.class, includeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class),
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class)
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class),
 })
 @ActiveProfiles("test")
 public class UserControllerTest extends DummyObject {

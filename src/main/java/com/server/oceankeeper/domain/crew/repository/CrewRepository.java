@@ -8,11 +8,18 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface CrewRepository extends CrudRepository<Crews,Long>, CrewQuerydslRepository {
+public interface CrewRepository extends CrudRepository<Crews, Long> {
     List<Crews> findByActivity(Activity activity);
+
+    Optional<Crews> findByUserAndUuid(OUser user, UUID uuid);
+
     Optional<Crews> findTopByUserOrderByCreatedAtDesc(OUser user);
+
     Optional<Crews> findByActivityAndActivityRole(Activity activity, CrewRole activityRole);
 
     Optional<Crews> findByUserAndActivity(OUser user, Activity activity);
+
+    Optional<Crews> findByUuid(UUID uuid);
 }

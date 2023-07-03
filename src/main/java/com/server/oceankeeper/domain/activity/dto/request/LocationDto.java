@@ -11,6 +11,7 @@ import javax.validation.constraints.NotEmpty;
 @Setter
 @Builder
 @AllArgsConstructor
+@EqualsAndHashCode
 public class LocationDto {
     @ApiModelProperty(
             value = "위치",
@@ -38,7 +39,7 @@ public class LocationDto {
     )
     private final Double longitude;
 
-    public Location toEntity(){
+    public Location toEntity() {
         return Location.builder()
                 .latitude(latitude)
                 .longitude(longitude)
@@ -47,5 +48,10 @@ public class LocationDto {
                 .build();
     }
 
-
+    public LocationDto(Location entity) {
+        this.latitude = entity.getLatitude();
+        this.longitude = entity.getLongitude();
+        this.detail = entity.getDetail();
+        this.location = entity.getName();
+    }
 }

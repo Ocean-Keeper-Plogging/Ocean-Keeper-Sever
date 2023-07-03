@@ -7,6 +7,6 @@ import java.util.List;
 @ToString
 @Getter
 @AllArgsConstructor
-public class MyActivitiesDto {
-    private final List<MyActivityDto> activities;
+public class MyScheduledActivitiesDto {
+    private final List<MyScheduledActivityDto> activities;
 }
