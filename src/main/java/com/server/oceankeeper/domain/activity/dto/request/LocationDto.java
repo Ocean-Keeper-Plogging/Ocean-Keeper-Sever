@@ -4,8 +4,6 @@ import com.server.oceankeeper.domain.activity.entity.Location;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import javax.validation.constraints.NotEmpty;
-
 @ToString
 @Getter
 @Setter
@@ -15,17 +13,9 @@ import javax.validation.constraints.NotEmpty;
 public class LocationDto {
     @ApiModelProperty(
             value = "위치",
-            example = "함덕 해수욕장",
-            required = true
-    )
-    @NotEmpty
-    private final String location;
-
-    @ApiModelProperty(
-            value = "위치",
             example = "제주 제주시 조천읍 조함해안로 525"
     )
-    private final String detail;
+    private final String address;
 
     @ApiModelProperty(
             value = "위도",
@@ -43,15 +33,13 @@ public class LocationDto {
         return Location.builder()
                 .latitude(latitude)
                 .longitude(longitude)
-                .detail(detail)
-                .name(location)
+                .address(address)
                 .build();
     }
 
     public LocationDto(Location entity) {
         this.latitude = entity.getLatitude();
         this.longitude = entity.getLongitude();
-        this.detail = entity.getDetail();
-        this.location = entity.getName();
+        this.address = entity.getAddress();
     }
 }

@@ -1,6 +1,5 @@
 package com.server.oceankeeper.domain.activity.entity;
 
-import com.google.common.base.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,11 +20,8 @@ public class Location {
     @Column
     private Double longitude;
 
-    @Column(length = 50, nullable = false)
-    private String name;
-
     @Column(length = 50)
-    private String detail;
+    private String address;
 
     @Override
     public boolean equals(Object o) {
@@ -34,11 +30,11 @@ public class Location {
 
         Location location = (Location) o;
 
-        return name.equals(location.name);
+        return address.equals(location.address);
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return address.hashCode();
     }
 }

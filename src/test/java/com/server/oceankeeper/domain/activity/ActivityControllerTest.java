@@ -126,7 +126,7 @@ class ActivityControllerTest {
         RegisterActivityReqDto request = RegisterActivityReqDto.builder()
                 .userId("831ea182ffcd11edbe560242ac120002")
                 .title("title")
-                .location(new LocationDto("함덕", "제주시", 123.1, 123.1))
+                .location(new LocationDto("제주시", 123.1, 123.1))
                 .transportation("카셰어링 연결 예정")
                 .garbageCategory(GarbageCategory.COASTAL)
                 .locationTag(LocationTag.EAST)
@@ -234,7 +234,7 @@ class ActivityControllerTest {
 
         ModifyActivityReqDto request = ModifyActivityReqDto.builder()
                 .title("title")
-                .location(new LocationDto("함덕", "제주시", 123.1, 123.1))
+                .location(new LocationDto("제주시", 123.1, 123.1))
                 .transportation("카셰어링 연결 예정")
                 .garbageCategory(GarbageCategory.COASTAL)
                 .locationTag(LocationTag.EAST)

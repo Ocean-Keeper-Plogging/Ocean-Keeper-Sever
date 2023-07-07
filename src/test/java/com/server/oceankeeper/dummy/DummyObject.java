@@ -65,7 +65,7 @@ public class DummyObject {
                 .uuid(uuid)
                 .activityStatus(activityStatus)
                 .garbageCategory(garbageCategory)
-                .location(new Location(123.1, 123.2, "제주", "제주" + genRandomString()))
+                .location(new Location(123.1, 123.2, "제주" + genRandomString()))
                 .locationTag(locationTag)
                 .recruitEndAt(LocalDate.now().plusDays(5))
                 .recruitStartAt(LocalDate.now())

@@ -294,13 +294,13 @@ class ActivityServiceTest extends DummyObject {
         List<MyActivityDao> mockMyActivity = Arrays.asList(
                 MyActivityDao.builder()
                         .uuid(UUIDGenerator.changeUuidFromString(uuid1))
-                        .location("제주")
+                        .address("제주")
                         .startAt(currentTime.plusDays(5))
                         .title("테스트")
                         .build(),
                 MyActivityDao.builder()
                         .uuid(UUIDGenerator.changeUuidFromString(uuid2))
-                        .location("제주2")
+                        .address("제주2")
                         .startAt(currentTime.plusDays(6))
                         .title("테스트2")
                         .build()
@@ -466,7 +466,7 @@ class ActivityServiceTest extends DummyObject {
         return RegisterActivityReqDto.builder()
                 .userId("831ea182ffcd11edbe560242ac120002")
                 .title("title")
-                .location(new LocationDto("함덕", "제주시", 123.1, 123.1))
+                .location(new LocationDto("제주시", 123.1, 123.1))
                 .transportation("카셰어링 연결 예정")
                 .garbageCategory(GarbageCategory.COASTAL)
                 .locationTag(LocationTag.EAST)
@@ -489,7 +489,7 @@ class ActivityServiceTest extends DummyObject {
     private ModifyActivityReqDto getModifyActivityRequest() {
         return ModifyActivityReqDto.builder()
                 .title("title2")
-                .location(new LocationDto("함덕", "제주시", 234.2, 123.1))
+                .location(new LocationDto("제주시", 234.2, 123.1))
                 .transportation("자차")
                 .garbageCategory(GarbageCategory.COASTAL)
                 .locationTag(LocationTag.EAST)

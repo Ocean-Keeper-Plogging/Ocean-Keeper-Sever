@@ -14,5 +14,5 @@ public class MyActivityDao {
     private UUID uuid;
     private String title;
     private LocalDateTime startAt;
-    private String location;
+    private String address;
 }

@@ -1,8 +1,6 @@
 package com.server.oceankeeper.domain.activity.dto.response;
 
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
-import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
-import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -35,6 +33,6 @@ public class MyActivityDto {
 
         private final ActivityStatus status;
 
-        private String location;
+        private String address;
     }
 }

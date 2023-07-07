@@ -73,7 +73,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                                 activity.recruitEndAt.as("recruitEndAt"),
                                 activity.startAt.as("startAt"),
                                 activity.activityStatus.as("status"),
-                                activity.location.name.as("location")
+                                activity.location.address.as("address")
                         ))
                 .from(crews)
                 .innerJoin(crews.activity, activity)
@@ -115,7 +115,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                         crews.activity.uuid.as("uuid"),
                         crews.activity.title.as("title"),
                         crews.activity.startAt.as("startAt"),
-                        crews.activity.location.name.as("location")))
+                        crews.activity.location.address.as("address")))
                 .from(crews)
                 .join(crews.user, oUser)
                 .join(crews.activity, activity)

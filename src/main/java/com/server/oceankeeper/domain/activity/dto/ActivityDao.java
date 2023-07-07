@@ -27,5 +27,5 @@ public class ActivityDao {
     private final LocalDateTime startAt;
     private final ActivityStatus status;
 
-    private String location;
+    private String address;
 }

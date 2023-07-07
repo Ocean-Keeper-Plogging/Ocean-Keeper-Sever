@@ -63,7 +63,7 @@ public class ActivityService {
             MyScheduledActivityDto myActivity = MyScheduledActivityDto.builder()
                     .id(UUIDGenerator.changeUuidToString(dao.getUuid()))
                     .dDay(calculateDDay(dao.getStartAt()))
-                    .location(dao.getLocation())
+                    .location(dao.getAddress())
                     .startDay(dao.getStartAt())
                     .title(dao.getTitle())
                     .build();
@@ -271,7 +271,7 @@ public class ActivityService {
                 r.getRecruitEndAt(),
                 r.getStartAt(),
                 r.getStatus(),
-                r.getLocation())).collect(Collectors.toList()));
+                r.getAddress())).collect(Collectors.toList()));
     }
 
     @Transactional
