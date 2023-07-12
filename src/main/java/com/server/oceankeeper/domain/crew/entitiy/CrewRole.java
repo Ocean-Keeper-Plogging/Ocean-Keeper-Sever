@@ -1,6 +1,5 @@
 package com.server.oceankeeper.domain.crew.entitiy;
 
-import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -11,6 +10,7 @@ public enum CrewRole {
     private final String value;
 
     public static CrewRole getRole(String role) {
+        if (role == null) return null;
         switch (role) {
             case "host":
                 return HOST;

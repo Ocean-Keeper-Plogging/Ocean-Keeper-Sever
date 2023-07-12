@@ -256,7 +256,7 @@ public class ActivityService {
         CrewRole role = CrewRole.getRole(status);
         Slice<ActivityDao> response = activityRepository.getMyActivities(UUIDGenerator.changeUuidFromString(userId),
                 activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
-                status.equals("closed") ? ActivityStatus.CLOSE : ActivityStatus.OPEN,
+                status == null ? null : status.equals("closed") ? ActivityStatus.CLOSE : ActivityStatus.OPEN,
                 role, PageRequest.ofSize(pageSize != null ? pageSize : 1));
         log.debug("getMyActivities response :{}", response);
 

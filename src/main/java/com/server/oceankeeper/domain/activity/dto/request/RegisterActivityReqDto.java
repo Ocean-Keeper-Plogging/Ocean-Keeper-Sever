@@ -47,17 +47,17 @@ public class RegisterActivityReqDto {
     @NotEmpty
     private final String transportation;
 
+
     @ApiModelProperty(
             value = "모집 카테고리 선택",
-            example = "연안 쓰레기",
+            example = "COASTAL,FLOATING,DEPOSITED,ETC",
             required = true
     )
     @NotNull
     private final GarbageCategory garbageCategory;
-
     @ApiModelProperty(
             value = "모집 지역 선택",
-            example = "제주번쩍",
+            example = "WEST,EAST,SOUTH,JEJU,ETC",
             required = true
     )
     @NotNull
@@ -107,8 +107,7 @@ public class RegisterActivityReqDto {
 
     @ApiModelProperty(
             value = "모집 키퍼 사진 s3 링크",
-            example = "https://s3-backend-git.s3.ap-northeast-2.amazonaws.com/profile/5a13e770-ed8c-42ad-b19d-2d0f756aa2adawesomeface.png",
-            required = true
+            example = "https://s3-backend-git.s3.ap-northeast-2.amazonaws.com/profile/5a13e770-ed8c-42ad-b19d-2d0f756aa2adawesomeface.png"
     )
     private final String keeperImageUrl;
 
@@ -123,8 +122,7 @@ public class RegisterActivityReqDto {
 
     @ApiModelProperty(
             value = "활동 스토리 사진 s3 링크",
-            example = "https://s3-backend-git.s3.ap-northeast-2.amazonaws.com/profile/5a13e770-ed8c-42ad-b19d-2d0f756aa2adawesomeface.png",
-            required = true
+            example = "https://s3-backend-git.s3.ap-northeast-2.amazonaws.com/profile/5a13e770-ed8c-42ad-b19d-2d0f756aa2adawesomeface.png"
     )
     private final String storyImageUrl;
 

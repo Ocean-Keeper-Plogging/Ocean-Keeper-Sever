@@ -44,9 +44,9 @@ public class ActivityController {
     @GetMapping(value = "/user/{userId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MyActivityDto> getMyActivity(@PathVariable String userId,
+                                                       @RequestParam(value = "activity-id", required = false) String activityId,
                                                        @RequestParam(required = false) String status,
-                                                       @RequestParam(required = false) Integer size,
-                                                       @RequestParam(value = "activity-id", required = false) String activityId) {
+                                                       @RequestParam(required = false) Integer size) {
         MyActivityDto result = activityService.getMyActivities(userId, activityId, status, size);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

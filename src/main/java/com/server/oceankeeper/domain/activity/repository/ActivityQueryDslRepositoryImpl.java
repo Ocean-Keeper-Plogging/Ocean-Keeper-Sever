@@ -49,7 +49,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .where(condition(status, activity.activityStatus::eq),
                         condition(tag, activity.locationTag::eq),
                         condition(category, activity.garbageCategory::eq),
-                        condition(CrewRole.HOST,crews.activityRole::eq),
+                        condition(CrewRole.HOST, crews.activityRole::eq),
                         ltUuid(activityId)
                 ) //for no offset scrolling, use activity id
                 .orderBy(activity.uuid.desc())
@@ -79,10 +79,10 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .innerJoin(crews.activity, activity)
                 .innerJoin(crews.user, oUser)
                 .where(condition(userId, oUser.uuid::eq)
-                                .and(condition(activityStatus, activity.activityStatus::eq)
-                                        .and(condition(crewRole, crews.activityRole::eq))),
-                        ltUuid(activityId)
-                ) //for no offset scrolling, use activity id
+                        , condition(activityStatus, activity.activityStatus::eq)
+                        , condition(crewRole, crews.activityRole::eq)
+                        , ltUuid(activityId) //for no offset scrolling, use activity id
+                )
                 .orderBy(activity.uuid.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
@@ -123,7 +123,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                         oUser.uuid.eq(myActivityParam.getUserUuid()),
                         crews.activity.recruitStartAt.loe(myActivityParam.getTime()),
                         crews.activity.recruitEndAt.goe(myActivityParam.getTime()),
-                        crews.crewStatus.eq(myActivityParam.getCrewStatus()))
+                        condition(myActivityParam.getCrewStatus(), crews.crewStatus::eq))
                 .orderBy(crews.activity.startAt.asc())
                 .limit(5)
                 .fetch();

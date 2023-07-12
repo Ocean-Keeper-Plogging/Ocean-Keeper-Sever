@@ -188,6 +188,24 @@ class ActivityRepositoryTest extends DummyObject {
     }
 
     @Test
+    @DisplayName("김이 속한 전체 활동 중 열려있는 활동을 조회한다")
+    void testCrewOpenActivities() throws Exception {
+        //Given
+
+        //When
+        Slice<ActivityDao> result = activityRepository
+                .getMyActivities(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
+                        null, ActivityStatus.OPEN, null, Pageable.ofSize(15));
+
+        //Then
+        assertThat(result.getContent().size()).isEqualTo(6);
+        assertThat(result.getContent().get(0).getActivityId())
+                .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
+        assertThat(result.getContent().get(1).getActivityId())
+                .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120011"));
+    }
+
+    @Test
     @DisplayName("김이 속한 전체 활동을 조회한다")
     void testCrewActivities() throws Exception {
         //Given
@@ -195,10 +213,10 @@ class ActivityRepositoryTest extends DummyObject {
         //When
         Slice<ActivityDao> result = activityRepository
                 .getMyActivities(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
-                        null, ActivityStatus.OPEN, CrewRole.CREW, Pageable.ofSize(15));
+                        null, null, null, Pageable.ofSize(15));
 
         //Then
-        assertThat(result.getContent().size()).isEqualTo(2);
+        assertThat(result.getContent().size()).isEqualTo(7);
         assertThat(result.getContent().get(0).getActivityId())
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
         assertThat(result.getContent().get(1).getActivityId())
