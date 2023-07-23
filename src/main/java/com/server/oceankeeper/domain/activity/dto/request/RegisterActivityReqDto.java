@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 public class RegisterActivityReqDto {
     @ApiModelProperty(
             value = "활동 등록 유저 아이디",
+            example = "11ee2962ed293b2a869b0f30e7d4f7c1",
             required = true
     )
     @NotEmpty
@@ -27,7 +28,8 @@ public class RegisterActivityReqDto {
 
     @ApiModelProperty(
             value = "활동명",
-            required = true
+            required = true,
+            example = "my 활동"
     )
     @NotEmpty
     private final String title;
@@ -49,15 +51,15 @@ public class RegisterActivityReqDto {
 
 
     @ApiModelProperty(
-            value = "모집 카테고리 선택",
-            example = "COASTAL,FLOATING,DEPOSITED,ETC",
+            value = "모집 카테고리 선택. COASTAL,FLOATING,DEPOSITED,ETC 중 하나",
+            example = "COASTAL",
             required = true
     )
     @NotNull
     private final GarbageCategory garbageCategory;
     @ApiModelProperty(
-            value = "모집 지역 선택",
-            example = "WEST,EAST,SOUTH,JEJU,ETC",
+            value = "모집 지역 선택 WEST,EAST,SOUTH,JEJU,ETC 중 하나",
+            example = "WEST",
             required = true
     )
     @NotNull
@@ -65,7 +67,7 @@ public class RegisterActivityReqDto {
 
     @ApiModelProperty(
             value = "모집 기간 시작일",
-            example = "2023-07-11T00:00:00",
+            example = "2023-07-11",
             required = true
     )
     @NotNull
@@ -74,7 +76,7 @@ public class RegisterActivityReqDto {
 
     @ApiModelProperty(
             value = "모집 기간 종료",
-            example = "2023-07-13T23:59:59",
+            example = "2023-07-13",
             required = true
     )
     @NotNull
@@ -92,7 +94,7 @@ public class RegisterActivityReqDto {
 
     @ApiModelProperty(
             value = "썸네일 사진 s3 링크",
-            example = "https://s3-backend-git.s3.ap-northeast-2.amazonaws.com/profile/5a13e770-ed8c-42ad-b19d-2d0f756aa2adawesomeface.png",
+            example = "https://oceankeeper-test.s3.ap-northeast-2.amazonaws.com/thumbnail/098638dd-6a9f-42ae-89ce-7cb431670b45thumbnail.jpg",
             required = true
     )
     private final String thumbnailUrl;
@@ -107,7 +109,7 @@ public class RegisterActivityReqDto {
 
     @ApiModelProperty(
             value = "모집 키퍼 사진 s3 링크",
-            example = "https://s3-backend-git.s3.ap-northeast-2.amazonaws.com/profile/5a13e770-ed8c-42ad-b19d-2d0f756aa2adawesomeface.png"
+            example = "https://oceankeeper-test.s3.ap-northeast-2.amazonaws.com/keeper/6e3896a9-041f-4387-b9ea-31ddb95f0479awesomeface.png"
     )
     private final String keeperImageUrl;
 
@@ -116,13 +118,13 @@ public class RegisterActivityReqDto {
             example = "안녕하세요. 00 활동입니다.",
             required = true
     )
-    @Length(max=10)
+    @Length(max = 10)
     @NotEmpty
     private final String activityStory;
 
     @ApiModelProperty(
             value = "활동 스토리 사진 s3 링크",
-            example = "https://s3-backend-git.s3.ap-northeast-2.amazonaws.com/profile/5a13e770-ed8c-42ad-b19d-2d0f756aa2adawesomeface.png"
+            example = "https://oceankeeper-test.s3.ap-northeast-2.amazonaws.com/story/b8846440-348c-463f-a356-4945eeadea02awesomeface.png"
     )
     private final String storyImageUrl;
 

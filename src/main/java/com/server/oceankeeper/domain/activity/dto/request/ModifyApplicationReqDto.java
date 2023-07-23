@@ -14,7 +14,7 @@ import javax.validation.constraints.Pattern;
 @Builder
 public class ModifyApplicationReqDto {
     @ApiModelProperty(
-            value = "활동 신청할 유저 이름",
+            value = "활동 신청 수정할 유저 이름",
             example = "김둘리"
     )
     private final String name;

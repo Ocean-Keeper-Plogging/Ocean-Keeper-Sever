@@ -12,6 +12,7 @@ import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.response.ApiResponse;
 import com.server.oceankeeper.util.TokenUtil;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,9 @@ public class ActivityController {
             notes = "내가 참여하거나 생성한 활동을 정렬하여 보여줍니다", response = MyScheduledActivitiesDto.class)
     @GetMapping(value = "/schedule/user/{userId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MyScheduledActivitiesDto> getMyScheduleActivity(@PathVariable String userId) {
+    public ResponseEntity<MyScheduledActivitiesDto> getMyScheduleActivity(
+            @ApiParam(value = "특정 활동 id", required = true, defaultValue = "11ee2962ed293b2a869b0f30e7d4f7c1")
+            @PathVariable String userId) {
         List<MyScheduledActivityDto> list = activityService.getMyScheduleActivity(userId);
         return new ResponseEntity<>(new MyScheduledActivitiesDto(list), HttpStatus.OK);
     }
@@ -43,36 +46,47 @@ public class ActivityController {
     @ApiOperation(value = "내 활동 보기 [권한 필요]", notes = "내가 참여하거나 생성한 활동을 정렬하여 보여줍니다", response = MyActivityDto.class)
     @GetMapping(value = "/user/{userId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MyActivityDto> getMyActivity(@PathVariable String userId,
-                                                       @RequestParam(value = "activity-id", required = false) String activityId,
-                                                       @RequestParam(required = false) String status,
-                                                       @RequestParam(required = false) Integer size) {
+    public ResponseEntity<MyActivityDto> getMyActivity(
+            @ApiParam(value = "특정 활동 id", required = true, defaultValue = "11ee2962ed293b2a869b0f30e7d4f7c1")
+            @PathVariable String userId,
+            @ApiParam(name = "activity-id", value = "특정 활동 id",
+                    defaultValue = "11ee2964f8473afb9cf1650479121d20")
+            @RequestParam(value = "activity-id", required = false) String activityId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Integer size) {
         MyActivityDto result = activityService.getMyActivities(userId, activityId, status, size);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @ApiOperation(value = "활동 보기 [권한 필요]", notes = "활동을 간략하게 보여줍니다.", response = ScheduledActivityResDto.class, responseContainer = "List")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<ScheduledActivityResDto>> getActivity(@RequestParam String status,
-                                                                     @RequestParam(value = "location-tag", required = false)
-                                                                     LocationTag locationTag,
-                                                                     @RequestParam(value = "garbage-category", required = false)
-                                                                     GarbageCategory garbageCategory,
-                                                                     @RequestParam(value = "size", required = false) Integer pageSize,
-                                                                     @RequestParam(value = "activity-id", required = false) String activityId) {
+    public ResponseEntity<List<ScheduledActivityResDto>> getActivity(
+            @ApiParam(name = "status", value = "open/closed/all 중 하나로 확인 대상 활동 상태", required = true)
+            @RequestParam String status,
+            @ApiParam(name = "location-tag", value = "WEST/EAST/SOUTH/JEJU/ETC 중 하나로 활동 지역태그")
+            @RequestParam(value = "location-tag", required = false)
+            LocationTag locationTag,
+            @ApiParam(name = "garbage-category", value = "COASTAL/FLOATING/DEPOSITED/ETC 중 하나로 쓰레기 종류")
+            @RequestParam(value = "garbage-category", required = false)
+            GarbageCategory garbageCategory,
+            @ApiParam(name = "size", value = "한번에 확인할 페이지 사이즈. default:1")
+            @RequestParam(value = "size", required = false) Integer pageSize,
+            @ApiParam(name = "activity-id", value = "activity 아이디")
+            @RequestParam(value = "activity-id", required = false) String activityId) {
         List<ScheduledActivityResDto> response = activityService.getActivities(activityId, status, locationTag, garbageCategory, pageSize);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "특정 활동 지원서 보기 [권한 필요]", notes = "특정한 활동 지원서 하나를 상세하게 보여줍니다.",
-            response = ActivityDetailResDto.class)
+    @ApiOperation(value = "특정 활동 상세 보기 [권한 필요]", notes = "특정한 활동 하나를 상세하게 보여줍니다.", response = ActivityDetailResDto.class)
     @GetMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ActivityDetailResDto> getActivityDetail(@RequestParam("activity-id") String activityId) {
+    public ResponseEntity<ActivityDetailResDto> getActivityDetail(
+            @ApiParam(name = "activity-id", value = "activity 아이디", defaultValue = "11ee2964f8473afb9cf1650479121d20", required = true)
+            @RequestParam("activity-id") String activityId) {
         ActivityDetailResDto response = activityService.getActivityDetail(activityId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "특정 활동 상세 보기 [권한 필요]", notes = "특정한 활동 하나를 상세하게 보여줍니다.", response = ApplicationReqDto.class)
+    @ApiOperation(value = "특정 활동 지원서 보기 [권한 필요]", notes = "특정한 활동 지원서 하나를 상세하게 보여줍니다.", response = ApplicationReqDto.class)
     @GetMapping(value = "/detail/application", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApplicationReqDto> getApplication(@RequestParam("application-id") String applicationId) {
         ApplicationReqDto response = activityService.getApplication(applicationId);
@@ -101,9 +115,11 @@ public class ActivityController {
     @PatchMapping(value = "/recruitment/{activityId}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse> modifyActivity(@PathVariable String activityId,
-                                                      @RequestBody @Valid ModifyActivityReqDto activity,
-                                                      HttpServletRequest request) {
+    public ResponseEntity<ApiResponse> modifyActivity(
+            @ApiParam(name = "activityId", value = "지원서 id", defaultValue = "11ee2964f8473afb9cf1650479121d20", required = true)
+            @PathVariable String activityId,
+            @RequestBody @Valid ModifyActivityReqDto activity,
+            HttpServletRequest request) {
         OUser user = tokenUtil.getProviderInfoFromHeader(request);
         activityService.modifyActivity(activityId, activity, user);
         return new ResponseEntity<>(ApiResponse.createSuccess("활동 수정 완료"), HttpStatus.OK);
@@ -113,9 +129,11 @@ public class ActivityController {
     @PatchMapping(value = "/recruitment/application/{applicationId}",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse> modifyApplication(@PathVariable String applicationId,
-                                                         @RequestBody @Valid ModifyApplicationReqDto activity,
-                                                         HttpServletRequest request) {
+    public ResponseEntity<ApiResponse> modifyApplication(
+            @ApiParam(name = "applicationId", value = "지원서 id", defaultValue = "11ee2968b912f9be9cf11179b5b80610", required = true)
+            @PathVariable String applicationId,
+            @RequestBody @Valid ModifyApplicationReqDto activity,
+            HttpServletRequest request) {
         OUser user = tokenUtil.getProviderInfoFromHeader(request);
         activityService.modifyApplication(applicationId, activity, user);
         return new ResponseEntity<>(ApiResponse.createSuccess("활동 지원서 수정 완료"), HttpStatus.OK);
@@ -135,7 +153,9 @@ public class ActivityController {
             response = ApiResponse.class)
     @DeleteMapping(value = "/recruitment/application/cancel",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse> cancelApplication(@RequestParam("application-id") String applicationId,
+    public ResponseEntity<ApiResponse> cancelApplication(
+            @ApiParam(name = "application-id", value = "지원 취소할 지원서 id", defaultValue = "11ee2968b912f9be9cf11179b5b80610", required = true)
+            @RequestParam("application-id") String applicationId,
                                                          HttpServletRequest request) {
         OUser user = tokenUtil.getProviderInfoFromHeader(request);
         activityService.cancelApplication(applicationId, user);
@@ -146,8 +166,10 @@ public class ActivityController {
             response = ApiResponse.class)
     @DeleteMapping(value = "/recruitment",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse> cancelActivity(@RequestParam("activity-id") String activityId,
-                                                         HttpServletRequest request) {
+    public ResponseEntity<ApiResponse> cancelActivity(
+            @ApiParam(name = "activity-id", value = "취소할 활동 id", defaultValue = "11ee2964f8473afb9cf1650479121d20", required = true)
+            @RequestParam("activity-id") String activityId,
+                                                      HttpServletRequest request) {
         OUser user = tokenUtil.getProviderInfoFromHeader(request);
         activityService.cancelActivity(activityId, user);
         return new ResponseEntity<>(ApiResponse.createSuccess("활동 모집 삭제 완료"), HttpStatus.OK);

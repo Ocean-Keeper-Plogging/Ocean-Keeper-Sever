@@ -50,6 +50,7 @@ public class UserController {
         return new ResponseEntity<>("", HttpStatus.CREATED);
     }
 
+    //TODO: Implement user withdrawal
     @ApiOperation(value = "회원 탈퇴 [미구현][권한 필요]", notes = "회원을 탈퇴합니다.")
     @DeleteMapping(value = "/auth/withdrawal", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> withdrawal(@RequestBody @Valid JoinReqDto joinReqDto, BindingResult bindingResult) {

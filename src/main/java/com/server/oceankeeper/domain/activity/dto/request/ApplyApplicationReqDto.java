@@ -15,7 +15,7 @@ import javax.validation.constraints.Pattern;
 public class ApplyApplicationReqDto {
     @ApiModelProperty(
             value = "활동 아이디",
-            example = "7a8d01c6009011eebe560242ac120002",
+            example = "11ee2964f8473afb9cf1650479121d20",
             required = true
     )
     @NotEmpty

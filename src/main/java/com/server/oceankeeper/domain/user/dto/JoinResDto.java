@@ -11,12 +11,12 @@ import lombok.RequiredArgsConstructor;
 public class JoinResDto{
     @ApiModelProperty(
             value = "유저 아이디",
-            example = "11ee03f57b24205d895965850c8e95ef"
+            example = "11ee2962ed293b2a869b0f30e7d4f7c1"
     )
     private final String id;
     @ApiModelProperty(
             value = "유저 닉네임",
-            example = "park"
+            example = "user1"
     )
     private final String nickname;
 

@@ -131,7 +131,7 @@ public class ActivityService {
         ActivityStatus activityStatus = ActivityStatus.getStatus(status);
         Slice<ScheduledActivityDao> response = activityRepository.getAllActivities(activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
                 activityStatus, locationTag, garbageCategory, PageRequest.ofSize(pageSize != null ? pageSize : 1));
-        log.debug("getScheduledActivities response :{}", response);
+        log.debug("getActivities response :{}", response);
         return response.stream().map(r -> new ScheduledActivityResDto(
                 UUIDGenerator.changeUuidToString(r.getActivityId()),
                 r.getTitle(),
