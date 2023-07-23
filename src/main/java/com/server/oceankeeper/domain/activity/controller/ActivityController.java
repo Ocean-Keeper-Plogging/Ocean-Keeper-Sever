@@ -40,7 +40,7 @@ public class ActivityController {
         return new ResponseEntity<>(new MyScheduledActivitiesDto(list), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "내 활동 보기 [권한 필요]", notes = "내가 참여하거나 생성한 활동을 정렬하여 보여줍니다", response = MyScheduledActivitiesDto.class)
+    @ApiOperation(value = "내 활동 보기 [권한 필요]", notes = "내가 참여하거나 생성한 활동을 정렬하여 보여줍니다", response = MyActivityDto.class)
     @GetMapping(value = "/user/{userId}",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MyActivityDto> getMyActivity(@PathVariable String userId,
@@ -51,7 +51,7 @@ public class ActivityController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "활동 보기 [권한 필요]", notes = "활동을 간략하게 보여줍니다.", response = ScheduledActivityResDto.class)
+    @ApiOperation(value = "활동 보기 [권한 필요]", notes = "활동을 간략하게 보여줍니다.", response = ScheduledActivityResDto.class, responseContainer = "List")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ScheduledActivityResDto>> getActivity(@RequestParam String status,
                                                                      @RequestParam(value = "location-tag", required = false)

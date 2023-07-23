@@ -14,6 +14,9 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
@@ -23,6 +26,11 @@ public class CustomExceptionHandler {
     public ResponseEntity<ApiResponse> illegalRequestException(IllegalRequestException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError(e.getMessage()));
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    protected ResponseEntity<ApiResponse> handleNoHandlerFoundException(NoHandlerFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.createError("해당 페이지가 존재하지 않습니다"));
     }
 
     @ExceptionHandler(RuntimeException.class)

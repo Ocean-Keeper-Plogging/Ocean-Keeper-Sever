@@ -51,7 +51,7 @@ public class LoginController {
     }
 
     @ApiOperation(value = "로그아웃 [권한 필요]", notes = "oauth 정보와 device token으로 로그아웃을 요청합니다. 리프레시 토큰을 무효화합니다."
-            , response = TokenInfo.class)
+            , response = String.class)
     @PostMapping(value = "/auth/logout",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
 @ToString
@@ -36,12 +37,9 @@ public class MyScheduledActivityDto {
 
     @ApiModelProperty(
             value = "활동 시작 시각",
-            example = "2023-03-20T12:00:00"
+            example = "03.20(월) 13시 시작"
     )
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private final LocalDateTime startDay;
+    private final String startDay;
 
     @ApiModelProperty(
             value = "활동 지역",

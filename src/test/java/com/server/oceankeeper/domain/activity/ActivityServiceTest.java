@@ -280,14 +280,14 @@ class ActivityServiceTest extends DummyObject {
                         .id(uuid1)
                         .location("제주")
                         .dDay(5)
-                        .startDay(currentTime.plusDays(5))
+                        .startDay(ReflectionTestUtils.invokeMethod(activityService, "getStartDay", currentTime.plusDays(5)))
                         .title("테스트")
                         .build(),
                 MyScheduledActivityDto.builder()
                         .id(uuid2)
                         .location("제주2")
                         .dDay(6)
-                        .startDay(currentTime.plusDays(6))
+                        .startDay(ReflectionTestUtils.invokeMethod(activityService, "getStartDay", currentTime.plusDays(6)))
                         .title("테스트2")
                         .build()
         );

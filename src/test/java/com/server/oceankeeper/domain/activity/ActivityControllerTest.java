@@ -69,12 +69,12 @@ class ActivityControllerTest {
         when(activityService.getMyScheduleActivity(any())).thenReturn(List.of(
                 new MyScheduledActivityDto("1", 11,
                         "This is flogging",
-                        LocalDateTime.now(),
+                        LocalDateTime.now().toString(),
                         "제주도 능금해변"
                 ),
                 new MyScheduledActivityDto("2", 12,
                         "This is flogging 2",
-                        LocalDateTime.now().plusDays(3),
+                        LocalDateTime.now().plusDays(3).toString(),
                         "제주도 능금해변"
                 )
         ));
@@ -95,12 +95,12 @@ class ActivityControllerTest {
         when(activityService.getMyScheduleActivity(any())).thenReturn(List.of(
                 new MyScheduledActivityDto("1", 11,
                         "This is flogging",
-                        LocalDateTime.now(),
+                        LocalDateTime.now().toString(),
                         "제주도 능금해변"
                 ),
                 new MyScheduledActivityDto("2", 12,
                         "This is flogging 2",
-                        LocalDateTime.now().plusDays(3),
+                        LocalDateTime.now().plusDays(3).toString(),
                         "제주도 능금해변"
                 )
         ));
@@ -172,6 +172,21 @@ class ActivityControllerTest {
 
         //then
         resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("api명 에러")
+    @WithMockUser
+    void errorApiName() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(delete("/activity/recruitment1")
+                .param("activity-id","831ea182ffcd11edbe560242ac120002")
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isNotFound());
     }
 
     @Test

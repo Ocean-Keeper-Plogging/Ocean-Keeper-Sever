@@ -64,12 +64,62 @@ public class ActivityService {
                     .id(UUIDGenerator.changeUuidToString(dao.getUuid()))
                     .dDay(calculateDDay(dao.getStartAt()))
                     .location(dao.getAddress())
-                    .startDay(dao.getStartAt())
+                    .startDay(getStartDay(dao.getStartAt()))
                     .title(dao.getTitle())
                     .build();
             result.add(myActivity);
         }
         return result;
+    }
+
+    private String getStartDay(LocalDateTime date) {
+        StringBuilder result = new StringBuilder();
+
+        final String dayOfWeek = date.getDayOfWeek().name();
+        final int day = date.getDayOfMonth();
+        final int month = date.getMonth().getValue();
+        final int hour = date.getHour();
+        final int minute = date.getMinute();
+
+        result.append(month).append(".");
+        result.append(day);
+        result.append("(").append(toKorean(dayOfWeek)).append(") ");
+        result.append(hour).append("시");
+        if(minute!=0){
+            result.append(minute).append("분");
+        }
+        result.append(" 시작");
+        log.info("date {} => get start day {}", date, result);
+
+        return result.toString();
+    }
+
+    private static final String MONDAY = "MONDAY";
+    private static final String TUESDAY = "TUESDAY";
+    private static final String WEDNESDAY = "WEDNESDAY";
+    private static final String THURSDAY = "THURSDAY";
+    private static final String FRIDAY = "FRIDAY";
+    private static final String SATURDAY = "SATURDAY";
+    private static final String SUNDAY = "SUNDAY";
+    private String toKorean(String dayOfWeek) {
+        switch (dayOfWeek) {
+            case MONDAY:
+                return "월";
+            case TUESDAY:
+                return "화";
+            case WEDNESDAY:
+                return "수";
+            case THURSDAY:
+                return "목";
+            case FRIDAY:
+                return "금";
+            case SATURDAY:
+                return "토";
+            case SUNDAY:
+                return "일";
+            default:
+                return "";
+        }
     }
 
     private int calculateDDay(LocalDateTime startAt) {
@@ -280,7 +330,7 @@ public class ActivityService {
         Crews host = crewService.findApplication(user, activity);
 
         //해당 크루가 호스트인지 확인
-        if(!host.getActivityRole().equals(CrewRole.HOST))
+        if (!host.getActivityRole().equals(CrewRole.HOST))
             throw new IllegalRequestException("해당 요청은 호스트만 가능합니다.");
 
         //해당 활동에 속한 모두에게 활동 취소됨을 알림
