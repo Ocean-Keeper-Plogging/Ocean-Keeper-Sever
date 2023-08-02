@@ -124,7 +124,7 @@ public class ActivityController {
             HttpServletRequest request) {
         OUser user = tokenUtil.getProviderInfoFromHeader(request);
         activityService.modifyActivity(activityId, activity, user);
-        return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPostResponse("활동 수정 완료"));
+        return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPatchResponse("활동 수정 완료"));
     }
 
     @ApiOperation(value = "활동 지원서 수정 [권한 필요]", notes = "작성한 활동 지원서를 수정합니다", response = String.class)
