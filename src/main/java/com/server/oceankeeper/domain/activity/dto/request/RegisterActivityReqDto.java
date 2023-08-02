@@ -131,7 +131,7 @@ public class RegisterActivityReqDto {
     @ApiModelProperty(
             value = "정원",
             example = "10",
-            dataType = "int",
+            dataType = "integer",
             required = true
     )
     @NotNull

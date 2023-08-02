@@ -2,7 +2,7 @@ package com.server.oceankeeper.domain.activity.repository;
 
 import com.server.oceankeeper.domain.activity.dto.ActivityDao;
 import com.server.oceankeeper.domain.activity.dto.MyActivityDao;
-import com.server.oceankeeper.domain.activity.dto.ScheduledActivityDao;
+import com.server.oceankeeper.domain.activity.dto.AllActivityDao;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ActivityQueryDslRepository {
-    Slice<ScheduledActivityDao> getAllActivities(UUID activityId, ActivityStatus status, LocationTag tag, GarbageCategory category, Pageable pageable);
+    Slice<AllActivityDao> getAllActivities(UUID activityId, ActivityStatus status, LocationTag tag, GarbageCategory category, Pageable pageable);
 
     Slice<ActivityDao> getMyActivities(UUID userId, UUID activityId, ActivityStatus activityStatus, CrewRole crewRole, Pageable pageable);
 

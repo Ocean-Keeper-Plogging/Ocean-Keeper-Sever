@@ -17,6 +17,6 @@ public class TokenInfo {
     @ApiModelProperty(value = "refresh 토큰", notes = "토큰을 재발행하기 위한 토큰. 현재 미사용",
             example = "eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE2NzUwMDIzOTN9.pQRoblyv8N1EEELJxQzbtKEkS0nE6AO6y8TZPwao5nuvbwYG4Ct81FSihK_rXMEQqlk5ZgHhZbiPJdc5oUHF-g")
     private final String refreshToken;
-    @ApiModelProperty(value = "토큰 만료 시각", notes = "토큰이 만료되는 시각")
+    @ApiModelProperty(value = "토큰 만료 시각", example = "12341231213", dataType = "long", notes = "토큰이 만료되는 시각")
     private final Long accessTokenExpiresIn;
 }

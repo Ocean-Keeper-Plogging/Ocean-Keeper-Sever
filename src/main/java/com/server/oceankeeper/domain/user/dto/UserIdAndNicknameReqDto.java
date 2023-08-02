@@ -10,14 +10,14 @@ import javax.validation.constraints.Pattern;
 public class UserIdAndNicknameReqDto {
     @ApiModelProperty(
             value = "유저 아이디",
-            dataType = "String",
+            dataType = "string",
             example = "e17555251202464fb5ce0435312f1841",
             required = true)
     @NotEmpty
     private final String userId;
     @ApiModelProperty(
             value = "변경할 신규 닉네임",
-            dataType = "String",
+            dataType = "string",
             notes = "한글/영문/숫자로만 구성된 2~20자 이내의 닉네임 필요",
             example = "NewNickName",
             required = true)

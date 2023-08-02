@@ -1,8 +1,13 @@
 package com.server.oceankeeper.global.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.oceankeeper.global.response.ApiResponse;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.server.oceankeeper.global.response.APIResponse;
+import com.server.oceankeeper.global.response.ErrorCode;
+import com.server.oceankeeper.global.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -23,6 +28,10 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("Utf-8");
-        response.getWriter().write(new ObjectMapper().writeValueAsString(ApiResponse.createError("토큰 없음")));
+        response.getWriter().write(new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .writeValueAsString(APIResponse.createErrResponse(HttpStatus.UNAUTHORIZED,
+                        new ErrorResponse(HttpStatus.UNAUTHORIZED.getReasonPhrase(),"토큰 없음", ErrorCode.NOT_FOUND_TOKEN))));
     }
 }

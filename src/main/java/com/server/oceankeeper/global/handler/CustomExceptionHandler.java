@@ -2,7 +2,9 @@ package com.server.oceankeeper.global.handler;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.server.oceankeeper.global.exception.*;
-import com.server.oceankeeper.global.response.ApiResponse;
+import com.server.oceankeeper.global.response.APIResponse;
+import com.server.oceankeeper.global.response.ErrorCode;
+import com.server.oceankeeper.global.response.ErrorResponse;
 import org.hibernate.exception.GenericJDBCException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,115 +14,224 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @ExceptionHandler(IllegalRequestException.class)
-    public ResponseEntity<ApiResponse> illegalRequestException(IllegalRequestException e) {
+    @ExceptionHandler({MethodArgumentNotValidException.class,ValidationException.class})
+    public ResponseEntity<APIResponse<ErrorResponse>> validationException(Exception e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                "필수 파라미터가 잘못되었습니다.",
+                                ErrorCode.INVALID_REQUEST)));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<APIResponse<ErrorResponse>> missingParamException(MissingServletRequestParameterException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                "필수 파라미터가 누락되었습니다.",
+                                ErrorCode.INVALID_REQUEST)));
+    }
+
+    @ExceptionHandler(IllegalRequestException.class)
+    public ResponseEntity<APIResponse<ErrorResponse>> illegalRequestException(IllegalRequestException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.INVALID_REQUEST)));
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
-    protected ResponseEntity<ApiResponse> handleNoHandlerFoundException(NoHandlerFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.createError("해당 페이지가 존재하지 않습니다"));
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiResponse> runtimeException(RuntimeException e) {
+    protected ResponseEntity<APIResponse<ErrorResponse>> handleNoHandlerFoundException(NoHandlerFoundException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.createError("서버 에러"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(APIResponse.createErrResponse(HttpStatus.NOT_FOUND,
+                        new ErrorResponse(
+                                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                                "해당 페이지가 존재하지 않습니다",
+                                ErrorCode.NOT_FOUND_HANDLER)));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ApiResponse> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> httpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(ApiResponse.createError("해당 메소드를 지원하지 않습니다. 파라미터를 확인해주세요."));
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(APIResponse.createErrResponse(HttpStatus.METHOD_NOT_ALLOWED,
+                        new ErrorResponse(
+                                HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase(),
+                                "해당 메소드를 지원하지 않습니다. 파라미터를 확인해주세요.",
+                                ErrorCode.NOT_SUPPORTED_METHOD)));
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<ApiResponse> httpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> httpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                .body(ApiResponse.createError("media type이 맞지 않습니다. application/json으로 설정해주세요"));
+                .body(APIResponse.createErrResponse(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                        new ErrorResponse(
+                                HttpStatus.UNSUPPORTED_MEDIA_TYPE.getReasonPhrase(),
+                                "요청 media type이 맞지 않습니다.",
+                                ErrorCode.NOT_SUPPORTED_MEDIA_TYPE)));
     }
 
     @ExceptionHandler(InternalAuthenticationServiceException.class)
-    public ResponseEntity<ApiResponse> internalAuthenticationServiceException(InternalAuthenticationServiceException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> internalAuthenticationServiceException(InternalAuthenticationServiceException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.INVALID_REQUEST)));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse> httpMessageNotReadableException(RuntimeException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> httpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError("request JSON 파싱 에러. request body를 확인해주세요."));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                "request JSON 파싱 에러. request body를 확인해주세요.",
+                                ErrorCode.INVALID_REQUEST)));
     }
 
     @ExceptionHandler(UuidValidException.class)
-    public ResponseEntity<ApiResponse> uuidValidException(UuidValidException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> uuidValidException(UuidValidException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.createError("요청 id 에러"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                "요청 id 에러. " + e.getMessage(),
+                                ErrorCode.INVALID_REQUEST)));
     }
 
     @ExceptionHandler(JwtTokenPayloadException.class)
-    public ResponseEntity<ApiResponse> jwtTokenPayloadException(JwtTokenPayloadException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> jwtTokenPayloadException(JwtTokenPayloadException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.createError("JWT 토큰 파싱 에러"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(APIResponse.createErrResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                        new ErrorResponse(
+                                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.FAIL_TOKEN_PARSING)));
     }
 
     @ExceptionHandler(GenericJDBCException.class)
-    public ResponseEntity<ApiResponse> GenericJDBCExceptionException(GenericJDBCException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> GenericJDBCExceptionException(GenericJDBCException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.createError("내부 쿼리 수행 에러"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(APIResponse.createErrResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                        new ErrorResponse(
+                                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                                "내부 쿼리 수행 에러. 관리자 문의",
+                                ErrorCode.FAIL_QUERY)));
     }
 
     @ExceptionHandler(IdNotFoundException.class)
-    public ResponseEntity<ApiResponse> idNotFoundException(IdNotFoundException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> idNotFoundException(IdNotFoundException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.createError(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(APIResponse.createErrResponse(HttpStatus.NOT_FOUND,
+                        new ErrorResponse(
+                                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.NOT_FOUND_USER)));
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ApiResponse> forbiddenException(ForbiddenException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> forbiddenException(ForbiddenException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiResponse.createError(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(APIResponse.createErrResponse(HttpStatus.FORBIDDEN,
+                        new ErrorResponse(
+                                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.NOT_FOUND_USER)));
     }
 
     @ExceptionHandler(DuplicatedResourceException.class)
-    public ResponseEntity<ApiResponse> duplicatedIdException(DuplicatedResourceException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> duplicatedIdException(DuplicatedResourceException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.createError(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(APIResponse.createErrResponse(HttpStatus.CONFLICT,
+                        new ErrorResponse(
+                                HttpStatus.CONFLICT.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.DUPLICATED_REQUEST)));
     }
 
     @ExceptionHandler(AmazonS3Exception.class)
-    public ResponseEntity<ApiResponse> S3ArgumentException(AmazonS3Exception e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> S3ArgumentException(AmazonS3Exception e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.createError(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(APIResponse.createErrResponse(HttpStatus.NOT_FOUND,
+                        new ErrorResponse(
+                                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.NOT_FOUND_RESOURCE)));
     }
 
     @ExceptionHandler(DtoValidationException.class)
-    public ResponseEntity<ApiResponse> validationApiException(DtoValidationException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> validationApiException(DtoValidationException e) {
+        log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.createError(e.getMessage() + ": " + e.getErrorMap().toString()));
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                e.getMessage() + ": " + e.getErrorMap().toString(),
+                                ErrorCode.INVALID_REQUEST)));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse> resourceNotFoundException(ResourceNotFoundException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> resourceNotFoundException(ResourceNotFoundException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.createError(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(APIResponse.createErrResponse(HttpStatus.NOT_FOUND,
+                        new ErrorResponse(
+                                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.NOT_FOUND_RESOURCE)));
     }
 
     @ExceptionHandler(ExpiredTokenException.class)
-    public ResponseEntity<ApiResponse> expiredTokenException(ExpiredTokenException e) {
+    public ResponseEntity<APIResponse<ErrorResponse>> expiredTokenException(ExpiredTokenException e) {
         log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.createError(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(APIResponse.createErrResponse(HttpStatus.UNAUTHORIZED,
+                        new ErrorResponse(
+                                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.UNAUTHORIZED_ERROR)));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<APIResponse<ErrorResponse>> allException(Exception e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(APIResponse.createErrResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                        new ErrorResponse(
+                                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+                                "서버 에러. 관리자 문의",
+                                ErrorCode.FAIL)));
     }
 }

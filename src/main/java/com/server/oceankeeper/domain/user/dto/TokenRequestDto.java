@@ -31,6 +31,6 @@ public class TokenRequestDto {
     private final String refreshToken;
 
     @NotNull
-    @ApiModelProperty(value = "access token 만료 시각", example = "1685378476451", required = true)
+    @ApiModelProperty(value = "access token 만료 시각", example = "1685378476451", dataType = "long", required = true)
     private final Long accessTokenExpiresIn;
 }

@@ -5,7 +5,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.server.oceankeeper.domain.activity.dto.ActivityDao;
 import com.server.oceankeeper.domain.activity.dto.MyActivityDao;
-import com.server.oceankeeper.domain.activity.dto.ScheduledActivityDao;
+import com.server.oceankeeper.domain.activity.dto.AllActivityDao;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
@@ -32,9 +32,9 @@ import static com.server.oceankeeper.domain.user.entitiy.QOUser.oUser;
 public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepository {
     private final JPAQueryFactory queryFactory;
 
-    public Slice<ScheduledActivityDao> getAllActivities(UUID activityId, ActivityStatus status, LocationTag tag, GarbageCategory category, Pageable pageable) {
-        List<ScheduledActivityDao> result = queryFactory.select(
-                        Projections.fields(ScheduledActivityDao.class,
+    public Slice<AllActivityDao> getAllActivities(UUID activityId, ActivityStatus status, LocationTag tag, GarbageCategory category, Pageable pageable) {
+        List<AllActivityDao> result = queryFactory.select(
+                        Projections.fields(AllActivityDao.class,
                                 activity.uuid.as("activityId"),
                                 activity.title.as("title"),
                                 activity.locationTag.as("locationTag"),
@@ -42,7 +42,11 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                                 oUser.nickname.as("hostNickname"),
                                 activity.quota.as("quota"),
                                 activity.participants.as("participants"),
-                                activity.thumbnail.as("activityImageUrl")))
+                                activity.thumbnail.as("activityImageUrl"),
+                                activity.recruitStartAt,
+                                activity.recruitEndAt,
+                                activity.startAt
+                                ))
                 .from(crews)
                 .innerJoin(crews.activity, activity)
                 .innerJoin(crews.user, oUser)

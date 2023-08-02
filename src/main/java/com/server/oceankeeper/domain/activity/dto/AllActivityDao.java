@@ -4,6 +4,8 @@ import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @ToString
@@ -11,7 +13,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScheduledActivityDao {
+public class AllActivityDao {
     private UUID activityId;
 
     private String title;
@@ -23,4 +25,8 @@ public class ScheduledActivityDao {
     private Integer participants;
 
     private String activityImageUrl;
+
+    private LocalDate recruitStartAt;
+    private LocalDate recruitEndAt;
+    private LocalDateTime startAt;
 }

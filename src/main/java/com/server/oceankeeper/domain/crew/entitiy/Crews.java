@@ -23,11 +23,11 @@ public class Crews extends BaseEntity {
     @Column(columnDefinition = "BINARY(16)", nullable = false)
     private UUID uuid;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ACTIVITY_ID")
     private Activity activity;
 
-    @ManyToOne(cascade = CascadeType.DETACH)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
     @JoinColumn(name = "USER_ID")
     private OUser user;
 

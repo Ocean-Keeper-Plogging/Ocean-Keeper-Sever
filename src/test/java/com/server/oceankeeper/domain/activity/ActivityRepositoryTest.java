@@ -2,7 +2,7 @@ package com.server.oceankeeper.domain.activity;
 
 import com.server.oceankeeper.domain.activity.dto.ActivityDao;
 import com.server.oceankeeper.domain.activity.dto.MyActivityDao;
-import com.server.oceankeeper.domain.activity.dto.ScheduledActivityDao;
+import com.server.oceankeeper.domain.activity.dto.AllActivityDao;
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
@@ -28,7 +28,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -229,7 +231,7 @@ class ActivityRepositoryTest extends DummyObject {
         //Given
 
         //When
-        Slice<ScheduledActivityDao> result = activityRepository
+        Slice<AllActivityDao> result = activityRepository
                 .getAllActivities(null, ActivityStatus.OPEN, null, null, Pageable.ofSize(15));
 
         //Then
@@ -239,6 +241,7 @@ class ActivityRepositoryTest extends DummyObject {
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
         assertThat(result.getContent().get(1).getActivityId())
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120011"));
+        assertThat(result.stream().map(AllActivityDao::getActivityId).collect(Collectors.toList())).isSortedAccordingTo(Comparator.reverseOrder());
     }
 
     @Test
@@ -247,7 +250,7 @@ class ActivityRepositoryTest extends DummyObject {
         //Given
 
         //When
-        Slice<ScheduledActivityDao> result = activityRepository
+        Slice<AllActivityDao> result = activityRepository
                 .getAllActivities(null, null, null, GarbageCategory.COASTAL, Pageable.ofSize(15));
 
         //Then
@@ -263,7 +266,7 @@ class ActivityRepositoryTest extends DummyObject {
         //Given
 
         //When
-        Slice<ScheduledActivityDao> result = activityRepository
+        Slice<AllActivityDao> result = activityRepository
                 .getAllActivities(null, null, LocationTag.EAST, null, Pageable.ofSize(15));
 
         //Then

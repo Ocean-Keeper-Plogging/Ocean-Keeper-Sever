@@ -12,6 +12,7 @@ import com.server.oceankeeper.global.config.SecurityConfig;
 import com.server.oceankeeper.global.handler.CustomExceptionHandler;
 import com.server.oceankeeper.global.jwt.JwtAuthenticationEntryPoint;
 import com.server.oceankeeper.util.TokenUtil;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -126,7 +127,8 @@ class LoginControllerTest {
     }
 
     @Test
-    void logout_fail_권한실패() throws Exception {
+    @DisplayName("로그아웃 요청했으나 권한이 없어 실패한다.")
+    void logout_fail_no_access() throws Exception {
         //given
         LoginReqDto loginReqDto = LoginReqDto.builder()
                 .provider("naver")
@@ -142,6 +144,7 @@ class LoginControllerTest {
         ResultActions resultActions = mvc.perform(post("/auth/logout")
                 .content(requestBody)
                 .contentType(MediaType.APPLICATION_JSON));
+
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("Response body : " + responseBody);
 

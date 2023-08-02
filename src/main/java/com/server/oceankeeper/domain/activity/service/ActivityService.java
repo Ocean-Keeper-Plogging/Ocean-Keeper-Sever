@@ -1,8 +1,8 @@
 package com.server.oceankeeper.domain.activity.service;
 
 import com.server.oceankeeper.domain.activity.dto.ActivityDao;
+import com.server.oceankeeper.domain.activity.dto.AllActivityDao;
 import com.server.oceankeeper.domain.activity.dto.MyActivityDao;
-import com.server.oceankeeper.domain.activity.dto.ScheduledActivityDao;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyActivityReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyApplicationReqDto;
@@ -85,7 +85,7 @@ public class ActivityService {
         result.append(day);
         result.append("(").append(toKorean(dayOfWeek)).append(") ");
         result.append(hour).append("시");
-        if(minute!=0){
+        if (minute != 0) {
             result.append(minute).append("분");
         }
         result.append(" 시작");
@@ -101,6 +101,7 @@ public class ActivityService {
     private static final String FRIDAY = "FRIDAY";
     private static final String SATURDAY = "SATURDAY";
     private static final String SUNDAY = "SUNDAY";
+
     private String toKorean(String dayOfWeek) {
         switch (dayOfWeek) {
             case MONDAY:
@@ -127,12 +128,13 @@ public class ActivityService {
     }
 
     @Transactional
-    public List<ScheduledActivityResDto> getActivities(String activityId, String status, LocationTag locationTag, GarbageCategory garbageCategory, Integer pageSize) {
+    public GetActivityResDto getActivities(String activityId, String status, LocationTag locationTag, GarbageCategory garbageCategory, Integer pageSize) {
+        log.info("JBJB getActivities param : activity id : {}, status : {}, pageSize : {}", activityId, status, pageSize);
         ActivityStatus activityStatus = ActivityStatus.getStatus(status);
-        Slice<ScheduledActivityDao> response = activityRepository.getAllActivities(activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
+        Slice<AllActivityDao> response = activityRepository.getAllActivities(activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
                 activityStatus, locationTag, garbageCategory, PageRequest.ofSize(pageSize != null ? pageSize : 1));
         log.debug("getActivities response :{}", response);
-        return response.stream().map(r -> new ScheduledActivityResDto(
+        List<AllActivityResDto> activities = response.stream().map(r -> new AllActivityResDto(
                 UUIDGenerator.changeUuidToString(r.getActivityId()),
                 r.getTitle(),
                 r.getLocationTag(),
@@ -140,7 +142,14 @@ public class ActivityService {
                 r.getHostNickname(),
                 r.getQuota(),
                 r.getParticipants(),
-                r.getActivityImageUrl())).collect(Collectors.toList());
+                r.getActivityImageUrl(),
+                r.getRecruitStartAt().toString(),
+                r.getRecruitEndAt().toString(),
+                getStartDay(r.getStartAt()))).collect(Collectors.toList());
+        log.debug("getActivities activities :{}", response);
+        return new GetActivityResDto(activities,
+                new GetActivityResDto.Meta(activities.size(), !response.hasNext()));
+
     }
 
     @Transactional
@@ -163,7 +172,8 @@ public class ActivityService {
         return new RegisterActivityResDto(UUIDGenerator.changeUuidToString(activity.getUuid()));
     }
 
-    private OUser getUser(String userId) {
+    @Transactional
+    public OUser getUser(String userId) {
         return userRepository.findByUuid(UUIDGenerator.changeUuidFromString(userId))
                 .orElseThrow(() -> new IdNotFoundException("해당 아이디가 존재하지 않습니다."));
     }

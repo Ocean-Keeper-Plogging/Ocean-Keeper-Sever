@@ -2,6 +2,7 @@ package com.server.oceankeeper.domain.user.controller;
 
 import com.server.oceankeeper.domain.user.dto.*;
 import com.server.oceankeeper.domain.user.service.LoginService;
+import com.server.oceankeeper.global.response.APIResponse;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -37,10 +38,10 @@ public class LoginController {
     @ApiResponses({
             @ApiResponse(code = 201, message = "로그인 성공. 로그인 유저 정보 및 jwt 반환"),
             @ApiResponse(code = 500, message = "서버 에러")})
-    public ResponseEntity<LoginResDto> login(@RequestBody @Valid LoginReqDto loginReqDto, BindingResult bindingResult) {
+    public ResponseEntity<APIResponse<LoginResDto>> login(@RequestBody @Valid LoginReqDto loginReqDto, BindingResult bindingResult) {
         Authentication authentication = getAuthentication(loginReqDto);
         LoginResDto response = loginService.login(loginReqDto, authentication);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(APIResponse.createPostResponse(response));
     }
 
     private Authentication getAuthentication(LoginReqDto loginReqDto) {
@@ -59,9 +60,9 @@ public class LoginController {
             @ApiResponse(code = 201, message = "로그아웃 성공"),
             @ApiResponse(code = 401, message = "권한 없음"),
             @ApiResponse(code = 500, message = "서버 에러")})
-    public ResponseEntity<String> logout(@RequestBody @Valid LogoutReqDto logoutReqDto, BindingResult bindingResult) {
+    public ResponseEntity<APIResponse<String>> logout(@RequestBody @Valid LogoutReqDto logoutReqDto, BindingResult bindingResult) {
         loginService.logout(logoutReqDto);
-        return new ResponseEntity<>(null, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(APIResponse.createPostResponse("로그아웃 성공"));
     }
 
     @ApiOperation(value = "토큰 재발행", notes = "리프레시 토큰으로 액세스 토큰 재발행을 요청합니다.", response = TokenInfo.class)
@@ -72,8 +73,8 @@ public class LoginController {
             @ApiResponse(code = 201, message = "토큰 재발행 성공"),
             @ApiResponse(code = 401, message = "권한 없음"),
             @ApiResponse(code = 500, message = "서버 에러")})
-    public ResponseEntity<?> reissue(@RequestBody @Valid TokenRequestDto tokenRequestDto, BindingResult bindingResult) {
+    public ResponseEntity<APIResponse<TokenInfo>> reissue(@RequestBody @Valid TokenRequestDto tokenRequestDto, BindingResult bindingResult) {
         TokenInfo response = loginService.reissue(tokenRequestDto);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(APIResponse.createPostResponse(response));
     }
 }

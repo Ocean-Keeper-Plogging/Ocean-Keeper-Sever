@@ -15,7 +15,7 @@ import javax.validation.constraints.Pattern;
 public class JoinReqDto {
     @ApiModelProperty(
             value = "Oauth Provider",
-            dataType = "String",
+            dataType = "string",
             example = "naver",
             required = true)
     @NotEmpty
@@ -23,7 +23,7 @@ public class JoinReqDto {
 
     @ApiModelProperty(
             value = "Oauth Provider Id",
-            dataType = "String",
+            dataType = "string",
             required = true
     )
     @NotEmpty
@@ -33,7 +33,7 @@ public class JoinReqDto {
     @ApiModelProperty(
             value = "닉네임",
             notes="한글/영문/숫자로만 구성된 2~20자 이내의 닉네임",
-            dataType = "String",
+            dataType = "string",
             required = true
     )
     @NotEmpty
@@ -43,7 +43,7 @@ public class JoinReqDto {
     @NotEmpty
     @ApiModelProperty(
             value = "이메일",
-            dataType = "String",
+            dataType = "string",
             required = true
     )
     private final String email;
@@ -51,7 +51,7 @@ public class JoinReqDto {
     @NotEmpty
     @ApiModelProperty(
             value = "S3 profile 이미지 경로",
-            dataType = "String",
+            dataType = "string",
             required = true
     )
     private final String profile;
@@ -59,7 +59,7 @@ public class JoinReqDto {
     @NotEmpty
     @ApiModelProperty(
             value = "디바이스 토큰",
-            dataType = "String",
+            dataType = "string",
             required = true
     )
     private final String deviceToken;

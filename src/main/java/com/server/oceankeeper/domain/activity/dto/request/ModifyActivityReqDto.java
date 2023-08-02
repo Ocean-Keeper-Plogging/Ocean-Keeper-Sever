@@ -98,8 +98,8 @@ public class ModifyActivityReqDto {
 
     @ApiModelProperty(
             value = "정원",
-            example = "10",
-            dataType = "int"
+            example = "10"
+            //dataType = "integer"
     )
     private final Integer quota;
 
