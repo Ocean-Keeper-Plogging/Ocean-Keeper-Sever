@@ -145,7 +145,8 @@ public class ActivityService {
                 r.getActivityImageUrl(),
                 r.getRecruitStartAt().toString(),
                 r.getRecruitEndAt().toString(),
-                getStartDay(r.getStartAt()))).collect(Collectors.toList());
+                getStartDay(r.getStartAt()),
+                r.getLocation())).collect(Collectors.toList());
         log.debug("getActivities activities :{}", response);
         return new GetActivityResDto(activities,
                 new GetActivityResDto.Meta(activities.size(), !response.hasNext()));

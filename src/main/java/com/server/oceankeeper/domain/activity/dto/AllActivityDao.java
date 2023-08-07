@@ -29,4 +29,6 @@ public class AllActivityDao {
     private LocalDate recruitStartAt;
     private LocalDate recruitEndAt;
     private LocalDateTime startAt;
+
+    private String location;
 }

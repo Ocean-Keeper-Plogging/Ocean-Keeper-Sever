@@ -45,7 +45,8 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                                 activity.thumbnail.as("activityImageUrl"),
                                 activity.recruitStartAt,
                                 activity.recruitEndAt,
-                                activity.startAt
+                                activity.startAt,
+                                activity.location.address.as("location")
                                 ))
                 .from(crews)
                 .innerJoin(crews.activity, activity)

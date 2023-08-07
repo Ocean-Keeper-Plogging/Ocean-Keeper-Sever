@@ -14,6 +14,7 @@ public enum ActivityStatus {
     private final String value;
 
     public static ActivityStatus getStatus(String status) {
+        if (status == null) return null;
         switch (status) {
             case "open":
                 return OPEN;

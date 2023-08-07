@@ -79,9 +79,17 @@ public class AllActivityResDto {
             required = true
     )
     private final String recruitEndAt;
+
     @ApiModelProperty(
             value = "활동 시작 시각",
             required = true
     )
     private final String startAt;
+
+    @ApiModelProperty(
+            value = "활동 위치",
+            example = "제주 제주시 한림읍 협재리 2497-1",
+            required = true
+    )
+    private final String location;
 }

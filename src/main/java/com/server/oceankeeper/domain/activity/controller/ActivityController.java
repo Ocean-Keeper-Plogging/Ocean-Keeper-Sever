@@ -62,8 +62,8 @@ public class ActivityController {
     @ApiOperation(value = "활동 보기 [권한 필요]", notes = "활동을 간략하게 보여줍니다.", response = GetActivityResDto.class, responseContainer = "List")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<APIResponse<GetActivityResDto>> getActivity(
-            @ApiParam(name = "status", value = "open/closed/all 중 하나로 확인 대상 활동 상태", required = true)
-            @RequestParam String status,
+            @ApiParam(name = "status", value = "open/closed/all 중 하나로 확인 대상 활동 상태")
+            @RequestParam(required = false) String status,
             @ApiParam(name = "location-tag", value = "WEST/EAST/SOUTH/JEJU/ETC 중 하나로 활동 지역태그")
             @RequestParam(value = "location-tag", required = false)
             LocationTag locationTag,
@@ -74,7 +74,8 @@ public class ActivityController {
             @RequestParam(value = "size", required = false) Integer pageSize,
             @ApiParam(name = "activity-id", value = "activity 아이디")
             @RequestParam(value = "activity-id", required = false) String activityId) {
-        status = status.toLowerCase();
+        if (status != null)
+            status = status.toLowerCase();
         GetActivityResDto response = activityService.getActivities(activityId, status, locationTag, garbageCategory, pageSize);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createGetResponse(response));
     }
