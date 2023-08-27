@@ -5,6 +5,7 @@ import com.server.oceankeeper.domain.activity.service.ActivityService;
 import com.server.oceankeeper.domain.message.dto.MessageDao;
 import com.server.oceankeeper.domain.message.dto.request.MessageSendReqDto;
 import com.server.oceankeeper.domain.message.dto.request.PrivateMessageSendReqDto;
+import com.server.oceankeeper.domain.message.dto.response.MessageDetailResDto;
 import com.server.oceankeeper.domain.message.dto.response.MessageSendResDto;
 import com.server.oceankeeper.domain.message.dto.response.PostResDto;
 import com.server.oceankeeper.domain.message.dto.response.PrivateMessageSendResDto;
@@ -12,6 +13,7 @@ import com.server.oceankeeper.domain.message.entity.MessageType;
 import com.server.oceankeeper.domain.message.entity.OMessage;
 import com.server.oceankeeper.domain.message.repository.MessageRepository;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import com.server.oceankeeper.util.TokenUtil;
 import com.server.oceankeeper.util.UUIDGenerator;
 import com.server.oceankeeper.util.UserAccessValidationUtil;
@@ -101,5 +103,12 @@ public class MessageService {
 
     public PrivateMessageSendResDto sendPrivateMessage(PrivateMessageSendReqDto userId) {
         return null;
+    }
+
+    @Transactional
+    public MessageDetailResDto getMessage(Long messageId) {
+        OMessage message = messageRepository.findById(messageId)
+                .orElseThrow(()->new ResourceNotFoundException("메세지 아이디에 해당하는 메세지가 없습니다"));
+        return MessageDetailResDto.fromEntity(message);
     }
 }

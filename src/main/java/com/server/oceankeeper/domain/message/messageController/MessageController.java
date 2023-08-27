@@ -1,7 +1,9 @@
 package com.server.oceankeeper.domain.message.messageController;
 
+import com.server.oceankeeper.domain.message.dto.request.MessageDetailReqDto;
 import com.server.oceankeeper.domain.message.dto.request.MessageSendReqDto;
 import com.server.oceankeeper.domain.message.dto.request.PrivateMessageSendReqDto;
+import com.server.oceankeeper.domain.message.dto.response.MessageDetailResDto;
 import com.server.oceankeeper.domain.message.dto.response.MessageSendResDto;
 import com.server.oceankeeper.domain.message.dto.response.PostResDto;
 import com.server.oceankeeper.domain.message.dto.response.PrivateMessageSendResDto;
@@ -23,9 +25,9 @@ public class MessageController {
 
     @ApiOperation(value = "유저의 전체 쪽지 확인 [권한 필요]",
             notes = "특정 유저의 전체 쪽지(개인쪽지+활동공지+거절쪽지) 내역을 보여줍니다", response = PostResDto.class)
-    @GetMapping(value = "/inbox/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/inbox", produces = MediaType.APPLICATION_JSON_VALUE)
     public APIResponse<PostResDto> getAllMessage(
-            @PathVariable String userId,
+            @RequestParam("user") String userId,
             @RequestParam Integer size,
             @RequestParam Long id,
             @RequestParam("type") MessageType type, HttpServletRequest request) throws Exception {
@@ -46,6 +48,14 @@ public class MessageController {
     @PostMapping(value = "/message/private", produces = MediaType.APPLICATION_JSON_VALUE)
     public APIResponse<PrivateMessageSendResDto> sendPrivateMessage(@RequestBody PrivateMessageSendReqDto message) {
         PrivateMessageSendResDto response = messageService.sendPrivateMessage(message);
+        return APIResponse.createPostResponse(response);
+    }
+
+    @ApiOperation(value = "상세 쪽지 확인 [권한 필요]",
+            notes = "특정 쪽지의 정보를 확인합니다", response = PrivateMessageSendResDto.class)
+    @GetMapping(value = "/message", produces = MediaType.APPLICATION_JSON_VALUE)
+    public APIResponse<MessageDetailResDto> getMessage(@RequestParam(value = "message-id") Long messageId) {
+        MessageDetailResDto response = messageService.getMessage(messageId);
         return APIResponse.createPostResponse(response);
     }
 }
