@@ -181,6 +181,7 @@ public class ActivityService {
 
     @Transactional
     public ApplyActivityResDto applyActivity(ApplyApplicationReqDto request) {
+        log.debug("JBJB applyActivity request : {}",request);
 
         Activity activity = getActivity(request.getActivityId());
 
@@ -201,7 +202,7 @@ public class ActivityService {
                 , UUIDGenerator.changeUuidToString(crew.getUuid()));
     }
 
-    private Activity getActivity(String activityId) {
+    public Activity getActivity(String activityId) {
         return activityRepository.findByUuid(UUIDGenerator.changeUuidFromString(activityId))
                 .orElseThrow(() -> new IdNotFoundException("해당 활동이 존재하지 않습니다."));
     }
@@ -304,7 +305,8 @@ public class ActivityService {
     public ActivityDetailResDto getActivityDetail(String activityId) {
         Activity activity = getActivity(activityId);
         ActivityDetail activityDetail = getActivityDetail(activity);
-        return new ActivityDetailResDto(activity, activityDetail);
+        OUser host = crewService.findOwner(activity);
+        return new ActivityDetailResDto(activity, activityDetail, host);
     }
 
     @Transactional

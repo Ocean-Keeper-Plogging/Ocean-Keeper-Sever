@@ -49,7 +49,8 @@ public class OMessage extends BaseEntity {
     private boolean isRead;
 
     @Builder
-    public OMessage(MessageType type, String messageFrom, String to, Activity activity, OUser user, String title, String detail, boolean read) {
+    public OMessage(Long id, MessageType type, String messageFrom, String to, Activity activity, OUser user, String title, String detail, boolean read) {
+        this.id = id;
         this.messageType = type;
         this.messageFrom = messageFrom;
         this.messageTo = to;

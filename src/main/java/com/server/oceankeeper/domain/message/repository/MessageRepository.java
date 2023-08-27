@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MessageRepository extends JpaRepository<OMessage, Long> {
-    List<OMessage> findByUserAndMessageType(OUser user, MessageType type);
+public interface MessageRepository extends JpaRepository<OMessage, Long>, MessageQueryDslRepository {
+    List<OMessage> findByUserAndMessageTypeOrderByCreatedAt(OUser user, MessageType type);
 }

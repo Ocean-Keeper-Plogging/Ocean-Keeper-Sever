@@ -33,7 +33,7 @@ public class ImageService {
         if (file.isEmpty()) {
             throw new IllegalRequestException("profile 이미지가 정상적으로 전송되지 않았습니다.");
         }
-        OUser user = tokenUtil.getProviderInfoFromHeader(request);
+        OUser user = tokenUtil.getUserFromHeader(request);
 
         //기존 파일 s3에서 삭제
         removeProfile(user);

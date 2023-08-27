@@ -21,27 +21,23 @@ import javax.servlet.http.HttpServletRequest;
 public class MessageController {
     private final MessageService messageService;
 
-    @ApiOperation(value = "유저의 보낸 쪽지 확인 [권한 필요]",
-            notes = "특정 유저의 보낸 쪽지 내역을 보여줍니다", response = PostResDto.class)
-    @GetMapping(value = "/post/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public APIResponse<PostResDto> getMailing(@PathVariable String userId, HttpServletRequest request) throws Exception {
-        PostResDto response = messageService.getMailing(userId, MessageType.POST, request);
-        return APIResponse.createGetResponse(response);
-    }
-
     @ApiOperation(value = "유저의 전체 쪽지 확인 [권한 필요]",
-            notes = "특정 유저의 전체 쪽지(개인쪽지+활동공지쪽지) 내역을 보여줍니다", response = PostResDto.class)
+            notes = "특정 유저의 전체 쪽지(개인쪽지+활동공지+거절쪽지) 내역을 보여줍니다", response = PostResDto.class)
     @GetMapping(value = "/inbox/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public APIResponse<PostResDto> getAllMessage(@PathVariable String userId, @RequestParam("type") MessageType type, HttpServletRequest request) throws Exception {
-        PostResDto response = messageService.getMailing(userId, type, request);
+    public APIResponse<PostResDto> getAllMessage(
+            @PathVariable String userId,
+            @RequestParam Integer size,
+            @RequestParam Long id,
+            @RequestParam("type") MessageType type, HttpServletRequest request) throws Exception {
+        PostResDto response = messageService.getMailing(userId, id, type, size, request);
         return APIResponse.createGetResponse(response);
     }
 
     @ApiOperation(value = "쪽지 보내기 [권한 필요]",
             notes = "쪽지를 보냅니다", response = MessageSendResDto.class)
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public APIResponse<MessageSendResDto> sendMessage(@RequestBody MessageSendReqDto message) {
-        MessageSendResDto response = messageService.sendMessage(message);
+    public APIResponse<MessageSendResDto> sendMessage(@RequestBody MessageSendReqDto message, HttpServletRequest request) {
+        MessageSendResDto response = messageService.sendMessage(message, request);
         return APIResponse.createPostResponse(response);
     }
 

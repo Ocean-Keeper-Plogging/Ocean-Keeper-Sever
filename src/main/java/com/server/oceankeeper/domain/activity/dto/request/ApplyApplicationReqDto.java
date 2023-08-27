@@ -33,6 +33,7 @@ public class ApplyApplicationReqDto {
             value = "활동 신청할 유저 이름",
             example = "김둘리"
     )
+    @NotEmpty
     private final String name;
 
     @ApiModelProperty(
@@ -40,6 +41,7 @@ public class ApplyApplicationReqDto {
             example = "01012345678"
     )
     @Pattern(regexp = "^01([0|1|6|7|8|9])?(\\d{3,4})?(\\d{4})$")
+    @NotEmpty
     private final String phoneNumber;
 
     @ApiModelProperty(
@@ -60,6 +62,7 @@ public class ApplyApplicationReqDto {
             example = "kim@naver.com"
     )
     @Pattern(regexp = "^[a-zA-Z\\d+-\\_.]+@[a-zA-Z\\d-]+\\.[a-zA-Z\\d-.]+$")
+    @NotEmpty
     private final String email;
 
     @ApiModelProperty(
@@ -72,6 +75,7 @@ public class ApplyApplicationReqDto {
             value = "이동수단",
             example = "대중교통"
     )
+    @NotEmpty
     private final String transportation;
 
     @ApiModelProperty(
@@ -81,5 +85,9 @@ public class ApplyApplicationReqDto {
     private final String question;
 
     @AssertTrue
+    @ApiModelProperty(
+            value = "개인정보 동의(필수 true)",
+            example = "true"
+    )
     private final boolean privacyAgreement;
 }

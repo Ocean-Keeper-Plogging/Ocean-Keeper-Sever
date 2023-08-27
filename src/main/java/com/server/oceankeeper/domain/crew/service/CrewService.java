@@ -55,18 +55,18 @@ public class CrewService {
                 .uuid(UUIDGenerator.createUuid())
                 .user(applyUser)
                 .activity(activity)
-                .crewStatus(CrewStatus.IN_PROGRESS)
-                .applyAt(LocalDateTime.now())
-                .email(request.getEmail())
                 .activityRole(CrewRole.CREW)
+                .dayOfBirth(request.getDayOfBirth())
+                .crewStatus(CrewStatus.IN_PROGRESS)
+                .email(request.getEmail())
                 .name(request.getName())
                 .phoneNumber(request.getPhoneNumber())
                 .id1365(request.getId1365())
+                .applyAt(LocalDateTime.now())
                 .privacyAgreement(request.isPrivacyAgreement())
                 .transportation(request.getTransportation())
                 .question(request.getQuestion())
                 .startPoint(request.getStartPoint())
-                .dayOfBirth(request.getDayOfBirth())
                 .build();
         crewRepository.save(crew);
         return crew;
@@ -99,9 +99,10 @@ public class CrewService {
 
     @Transactional
     public ApplicationReqDto findApplication(OUser user) {
-        Crews applicationInfo = crewRepository.findTopByUserOrderByCreatedAtDesc(user)
+        Crews applicationInfo = crewRepository.findCrewsByUserOrderByCreatedAtDesc(user)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 지원서가 존재하지 않습니다."));
 
+        log.info("JBJB applicationInfo : {}",applicationInfo);
         return ApplicationReqDto.builder()
                 .dayOfBirth(applicationInfo.getDayOfBirth())
                 .email(applicationInfo.getEmail())

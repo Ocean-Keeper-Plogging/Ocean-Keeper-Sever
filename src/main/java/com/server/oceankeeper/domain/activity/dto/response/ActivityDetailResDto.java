@@ -3,6 +3,7 @@ package com.server.oceankeeper.domain.activity.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.server.oceankeeper.domain.activity.dto.request.LocationDto;
 import com.server.oceankeeper.domain.activity.entity.*;
+import com.server.oceankeeper.domain.user.entitiy.OUser;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
@@ -58,7 +59,7 @@ public class ActivityDetailResDto {
 
     @ApiModelProperty(
             value = "모집 기간 시작일",
-            example = "2023-07-11T00:00:00",
+            example = "2023-07-11",
             required = true
     )
     @NotNull
@@ -67,7 +68,7 @@ public class ActivityDetailResDto {
 
     @ApiModelProperty(
             value = "모집 기간 종료",
-            example = "2023-07-13T23:59:59",
+            example = "2023-07-13",
             required = true
     )
     @NotNull
@@ -167,6 +168,18 @@ public class ActivityDetailResDto {
     )
     private final ActivityStatus activityStatus;
 
+    @ApiModelProperty(
+            value = "호스트 닉네임",
+            example = "홍길동"
+    )
+    private final String hostNickName;
+
+    @ApiModelProperty(
+            value = "활동 진행 상황",
+            example = "https://"
+    )
+    private final String hostImageUrl;
+
 //    public Activity toActivityEntity() {
 //        return Activity.builder()
 //                .uuid(UUIDGenerator.createUuid())
@@ -199,7 +212,7 @@ public class ActivityDetailResDto {
 //                .build();
 //    }
 
-    public ActivityDetailResDto(Activity activity, ActivityDetail activityDetail) {
+    public ActivityDetailResDto(Activity activity, ActivityDetail activityDetail, OUser host) {
         this.location = new LocationDto(activity.getLocation());
         this.locationTag = activity.getLocationTag();
         this.title = activity.getTitle();
@@ -220,5 +233,7 @@ public class ActivityDetailResDto {
         this.preparation = activityDetail.getPreparation();
         this.rewards = activityDetail.getRewards();
         this.etc = activityDetail.getEtc();
+        this.hostNickName = host.getNickname();
+        this.hostImageUrl = host.getProfile();
     }
 }

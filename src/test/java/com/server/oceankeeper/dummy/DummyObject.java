@@ -57,6 +57,27 @@ public class DummyObject {
                 .build();
     }
 
+    protected OUser newMockUser(Long id, UUID uuid) {
+        String nickname ="nickname" +genRandomString();
+        return OUser.builder()
+                .id(id)
+                .nickname(nickname)
+                .provider("naver")
+                .providerId(genRandomString()+genRandomString()+genRandomString())
+                .email(nickname+ "@" + "naver.com")
+                .profile("none")
+                .status(UserStatus.ACTIVE)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .deviceToken(genRandomString())
+                .password("_")
+                .role(UserRole.USER)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .uuid(uuid)
+                .build();
+    }
+
     protected Activity newMockActivity(int quota, ActivityStatus activityStatus,
                                        LocationTag locationTag, GarbageCategory garbageCategory,UUID uuid) {
         return Activity.builder()
@@ -67,6 +88,24 @@ public class DummyObject {
                 .garbageCategory(garbageCategory)
                 .location(new Location(123.1, 123.2, "제주" + genRandomString()))
                 .locationTag(locationTag)
+                .recruitEndAt(LocalDate.now().plusDays(5))
+                .recruitStartAt(LocalDate.now())
+                .startAt(LocalDateTime.now().plusDays(10))
+                .title("activity " + genRandomString())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    protected Activity newMockActivity(UUID uuid) {
+        return Activity.builder()
+                .participants(1)
+                .quota(10)
+                .uuid(uuid)
+                .activityStatus(ActivityStatus.ALL)
+                .garbageCategory(GarbageCategory.COASTAL)
+                .location(new Location(123.1, 123.2, "제주" + genRandomString()))
+                .locationTag(LocationTag.EAST)
                 .recruitEndAt(LocalDate.now().plusDays(5))
                 .recruitStartAt(LocalDate.now())
                 .startAt(LocalDateTime.now().plusDays(10))

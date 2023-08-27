@@ -200,6 +200,10 @@ class ActivityControllerTest {
         ApplyApplicationReqDto request = ApplyApplicationReqDto.builder()
                 .activityId("activityId")
                 .userId("userId")
+                .name("kim")
+                .phoneNumber("01012341234")
+                .email("kim@naver.com")
+                .transportation("자차")
                 .privacyAgreement(true)
                 .build();
         String requestStr = om.writeValueAsString(request);
@@ -244,7 +248,7 @@ class ActivityControllerTest {
     @DisplayName("활동 수정")
     @WithMockUser
     void modifyActivity() throws Exception {
-        when(tokenUtil.getProviderInfoFromHeader(any())).thenReturn(OUser.builder().build());
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(OUser.builder().build());
         doNothing().when(activityService).modifyActivity(any(),any(),any());
 
         ModifyActivityReqDto request = ModifyActivityReqDto.builder()
@@ -284,7 +288,7 @@ class ActivityControllerTest {
     @DisplayName("활동 지원서 수정")
     @WithMockUser
     void modifyApplication() throws Exception {
-        when(tokenUtil.getProviderInfoFromHeader(any())).thenReturn(OUser.builder().build());
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(OUser.builder().build());
         doNothing().when(activityService).modifyApplication(any(),any(),any());
 
         ModifyApplicationReqDto request = ModifyApplicationReqDto.builder()
@@ -307,7 +311,7 @@ class ActivityControllerTest {
     @DisplayName("마지막 활동 지원서 불러오기")
     @WithMockUser
     void getLastApplication() throws Exception {
-        when(tokenUtil.getProviderInfoFromHeader(any())).thenReturn(OUser.builder().build());
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(OUser.builder().build());
         when(activityService.getLastApplication(any())).thenReturn(ApplicationReqDto.builder().build());
 
         //when

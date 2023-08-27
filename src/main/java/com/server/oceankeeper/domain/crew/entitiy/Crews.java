@@ -34,6 +34,7 @@ public class Crews extends BaseEntity {
     @Column(nullable = false)
     private CrewRole activityRole;
 
+    @Column(length = 8)
     private String dayOfBirth;
 
     @Column(nullable = false)
@@ -93,6 +94,7 @@ public class Crews extends BaseEntity {
         this.privacyAgreement = privacyAgreement;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.dayOfBirth = dayOfBirth;
     }
 
     @Override

@@ -45,6 +45,10 @@ class ActivityRepositoryTest extends DummyObject {
 
     @BeforeEach
     void setUp() {
+        setUpUserAndActivity();
+    }
+
+    protected void setUpUserAndActivity() {
         OUser kim = newUserWithR("kim", "naver", "kimproviderId", UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"));
         em.persist(kim);
 

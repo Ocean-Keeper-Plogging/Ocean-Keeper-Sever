@@ -206,10 +206,12 @@ class ActivityServiceTest extends DummyObject {
         Activity expectActivity = request.toActivityEntity();
         ActivityDetail expectActivityDetail = request.toActivityDetailEntity();
         expectActivity.addParticipant(); //fake 참여자 넣기
+        OUser expectUser = newMockUser(155L, "hostkim", "naver", "naver123", UUID.randomUUID());
 
         //when
         when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
         when(activityDetailRepository.findByActivity(any())).thenReturn(Optional.of(expectActivityDetail));
+        when(crewService.findOwner(any())).thenReturn(expectUser);
 
         //then
         var result = activityService.getActivityDetail(UUIDGenerator.changeUuidToString(expectActivity.getUuid()));
@@ -229,6 +231,8 @@ class ActivityServiceTest extends DummyObject {
         assertThat(result.getTitle()).isEqualTo(request.getTitle());
         assertThat(result.getLocation()).isEqualTo(request.getLocation());
         assertThat(result.getParticipants()).isEqualTo(1);
+        assertThat(result.getHostNickName()).isEqualTo(expectUser.getNickname());
+        assertThat(result.getHostImageUrl()).isEqualTo(expectUser.getProfile());
     }
 
     @Test
@@ -274,7 +278,7 @@ class ActivityServiceTest extends DummyObject {
         final OUser mockUser = newMockUser(123L, "kim", "naver", "providerid1", UUID.randomUUID());
         final String uuid1 = UUIDGenerator.changeUuidToString(UUIDGenerator.createUuid());
         final String uuid2 = UUIDGenerator.changeUuidToString(UUIDGenerator.createUuid());
-        final LocalDateTime currentTime=LocalDateTime.now();
+        final LocalDateTime currentTime = LocalDateTime.now();
         List<MyScheduledActivityDto> expectResult = Arrays.asList(
                 MyScheduledActivityDto.builder()
                         .id(uuid1)

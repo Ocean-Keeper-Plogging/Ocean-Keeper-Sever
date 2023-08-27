@@ -62,15 +62,15 @@ public class ActivityController {
     @ApiOperation(value = "활동 보기 [권한 필요]", notes = "활동을 간략하게 보여줍니다.", response = GetActivityResDto.class, responseContainer = "List")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<APIResponse<GetActivityResDto>> getActivity(
-            @ApiParam(name = "status", value = "open/closed/all 중 하나로 확인 대상 활동 상태")
+            @ApiParam(name = "status", value = "open/closed 중 하나로 확인 대상 활동 상태. 필터링 안하면 전체")
             @RequestParam(required = false) String status,
-            @ApiParam(name = "location-tag", value = "WEST/EAST/SOUTH/JEJU/ETC 중 하나로 활동 지역태그")
+            @ApiParam(name = "location-tag", value = "WEST/EAST/SOUTH/JEJU/ETC 중 하나로 활동 지역태그. 필터링 안하면 전체")
             @RequestParam(value = "location-tag", required = false)
             LocationTag locationTag,
-            @ApiParam(name = "garbage-category", value = "COASTAL/FLOATING/DEPOSITED/ETC 중 하나로 쓰레기 종류")
+            @ApiParam(name = "garbage-category", value = "COASTAL/FLOATING/DEPOSITED/ETC 중 하나로 쓰레기 종류. 필터링 안하면 전체")
             @RequestParam(value = "garbage-category", required = false)
             GarbageCategory garbageCategory,
-            @ApiParam(name = "size", value = "한번에 확인할 페이지 사이즈.", defaultValue = "1", example = "5")
+            @ApiParam(name = "size", value = "한번에 확인할 페이지 사이즈. 디폴트 1", defaultValue = "1", example = "5")
             @RequestParam(value = "size", required = false) Integer pageSize,
             @ApiParam(name = "activity-id", value = "activity 아이디")
             @RequestParam(value = "activity-id", required = false) String activityId) {
@@ -123,7 +123,7 @@ public class ActivityController {
             @PathVariable String activityId,
             @RequestBody @Valid ModifyActivityReqDto activity,
             HttpServletRequest request) {
-        OUser user = tokenUtil.getProviderInfoFromHeader(request);
+        OUser user = tokenUtil.getUserFromHeader(request);
         activityService.modifyActivity(activityId, activity, user);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPatchResponse("활동 수정 완료"));
     }
@@ -137,7 +137,7 @@ public class ActivityController {
             @PathVariable String applicationId,
             @RequestBody @Valid ModifyApplicationReqDto activity,
             HttpServletRequest request) {
-        OUser user = tokenUtil.getProviderInfoFromHeader(request);
+        OUser user = tokenUtil.getUserFromHeader(request);
         activityService.modifyApplication(applicationId, activity, user);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPatchResponse("활동 지원서 수정 완료"));
     }
@@ -147,7 +147,7 @@ public class ActivityController {
     @GetMapping(value = "/recruitment/application/last",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<APIResponse<ApplicationReqDto>> getLastApplication(HttpServletRequest request) {
-        OUser user = tokenUtil.getProviderInfoFromHeader(request);
+        OUser user = tokenUtil.getUserFromHeader(request);
         ApplicationReqDto response = activityService.getLastApplication(user);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createGetResponse(response));
     }
@@ -160,7 +160,7 @@ public class ActivityController {
             @ApiParam(name = "application-id", value = "지원 취소할 지원서 id", defaultValue = "11ee2968b912f9be9cf11179b5b80610", required = true)
             @RequestParam("application-id") String applicationId,
             HttpServletRequest request) {
-        OUser user = tokenUtil.getProviderInfoFromHeader(request);
+        OUser user = tokenUtil.getUserFromHeader(request);
         activityService.cancelApplication(applicationId, user);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createDeleteResponse("활동 지원서 삭제 완료"));
     }
@@ -173,7 +173,7 @@ public class ActivityController {
             @ApiParam(name = "activity-id", value = "취소할 활동 id", defaultValue = "11ee2964f8473afb9cf1650479121d20", required = true)
             @RequestParam("activity-id") String activityId,
             HttpServletRequest request) {
-        OUser user = tokenUtil.getProviderInfoFromHeader(request);
+        OUser user = tokenUtil.getUserFromHeader(request);
         activityService.cancelActivity(activityId, user);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createDeleteResponse("활동 모집 삭제 완료"));
     }

@@ -18,7 +18,7 @@ public class TokenUtil {
     private final UserRepository userRepository;
 
     @Transactional
-    public OUser getProviderInfoFromHeader(HttpServletRequest request) {
+    public OUser getUserFromHeader(HttpServletRequest request) {
         String jwt = tokenProvider.resolveToken(request);
         String[] providerInfo = tokenProvider.getProviderInfo(jwt);
 
