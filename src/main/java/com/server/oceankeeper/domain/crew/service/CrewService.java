@@ -8,8 +8,8 @@ import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.crew.repository.CrewRepository;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
-import com.server.oceankeeper.domain.statistics.entity.ActivityEventType;
-import com.server.oceankeeper.domain.statistics.entity.EventPublisher;
+import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
@@ -102,7 +102,6 @@ public class CrewService {
         Crews applicationInfo = crewRepository.findCrewsByUserOrderByCreatedAtDesc(user)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 지원서가 존재하지 않습니다."));
 
-        log.info("JBJB applicationInfo : {}",applicationInfo);
         return ApplicationReqDto.builder()
                 .dayOfBirth(applicationInfo.getDayOfBirth())
                 .email(applicationInfo.getEmail())
@@ -135,14 +134,14 @@ public class CrewService {
     @Transactional
     public void deleteCrew(OUser user, Crews crew) {
         crewRepository.delete(crew);
-        EventPublisher.raise(new ActivityEvent(this, user, ActivityEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT));
+        EventPublisher.raise(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT));
     }
 
     @Transactional
     public void deleteByHost(Crews crew) {
         crewRepository.delete(crew);
         //TODO: fetch join 필요성 고려
-        EventPublisher.raise(new ActivityEvent(this, crew.getUser(), ActivityEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+        EventPublisher.raise(new ActivityEvent(this, crew.getUser(), OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
     }
 
     public List<Crews> findCrews(Activity activity) {

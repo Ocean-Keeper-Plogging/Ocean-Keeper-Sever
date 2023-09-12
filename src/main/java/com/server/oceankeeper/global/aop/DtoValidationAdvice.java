@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 @Component
 @Aspect
-public class DtoValidataionAdvice {
+public class DtoValidationAdvice {
 
     @Pointcut("@annotation(org.springframework.web.bind.annotation.PostMapping)")
     public void postMapping(){}

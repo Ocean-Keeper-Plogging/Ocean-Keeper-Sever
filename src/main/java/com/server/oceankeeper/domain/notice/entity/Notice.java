@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -27,5 +28,13 @@ public class Notice extends BaseEntity {
         this.id = id;
         this.contents = contents;
         this.title = title;
+    }
+
+    public LocalDateTime getCreatedAt(){
+        return this.createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt(){
+        return this.updatedAt;
     }
 }

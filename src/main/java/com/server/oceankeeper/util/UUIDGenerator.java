@@ -22,7 +22,7 @@ public class UUIDGenerator {
     }
 
     public static UUID changeUuidFromString(String id) {
-        if (id.length() != 32) throw new UuidValidException("유효한 아이디가 아닙니다");
+        if (id.length() != 32) throw new UuidValidException("유효한 UUID 포맷이 아닙니다");
         StringBuilder sb = new StringBuilder(id);
         sb.insert(8, "-");
         sb.insert(13, "-");

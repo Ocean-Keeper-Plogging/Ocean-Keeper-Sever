@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.statistics.entity;
+package com.server.oceankeeper.global.eventfilter;
 
 import org.springframework.context.ApplicationEventPublisher;
 

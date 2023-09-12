@@ -13,6 +13,8 @@ import java.util.UUID;
 public interface CrewRepository extends CrudRepository<Crews, Long> {
     List<Crews> findByActivity(Activity activity);
 
+    List<Crews> findByUser(OUser user);
+
     Optional<Crews> findByUserAndUuid(OUser user, UUID uuid);
 
     Optional<Crews> findCrewsByUserOrderByCreatedAtDesc(OUser user);

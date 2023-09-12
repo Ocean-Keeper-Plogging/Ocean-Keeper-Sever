@@ -29,9 +29,9 @@ public class MessageQueryDslRepositoryImpl implements MessageQueryDslRepository 
     @Override
     public Slice<MessageDao> findByUserAndMessageType(Long lastId, OUser user, MessageType type, Pageable pageable) {
         List<MessageDao> result = queryFactory.select(
-                        Projections.fields(MessageDao.class,
-                                oMessage.id.as("messageId"),
-                                oMessage.messageType.as("messageType"),
+                        Projections.constructor(MessageDao.class,
+                                oMessage.id.as("id"),
+                                oMessage.messageType.as("type"),
                                 oMessage.messageFrom.as("from"),
                                 activity.uuid.as("activityId"),
                                 activity.title.as("title"),
@@ -42,11 +42,38 @@ public class MessageQueryDslRepositoryImpl implements MessageQueryDslRepository 
                 .from(oMessage)
                 .innerJoin(oMessage.activity, activity)
                 .innerJoin(oMessage.user, oUser)
-                .where(type != MessageType.ALL ? condition(type, oMessage.messageType::eq)
-                                : (oMessage.messageType.eq(MessageType.NOTICE))
-                                .or(oMessage.messageType.eq(MessageType.PRIVATE))
-                                .or(oMessage.messageType.eq(MessageType.REJECT)),
-                        condition(user, oMessage.user::eq),
+                .where(type == MessageType.ALL ?  (oMessage.messageType.eq(MessageType.NOTICE))
+                        .or(oMessage.messageType.eq(MessageType.PRIVATE)) : nullCondition(type, oMessage.messageType::eq),
+                        oMessage.messageTo.eq(user.getNickname()),
+                        //nullCondition(user, oMessage.user::eq),
+                        lessThanId(lastId)
+                ) //for no offset scrolling, use message sent time
+                .orderBy(oMessage.createdAt.desc())
+                .limit(pageable.getPageSize() + 1)
+                .fetch()
+                .stream().distinct().collect(Collectors.toList());
+        return checkLastPage(pageable, result);
+    }
+
+    @Override
+    public Slice<MessageDao> findBySentUserAndMessageType(Long lastId, OUser user, Pageable pageable) {
+        List<MessageDao> result = queryFactory.select(
+                        Projections.constructor(MessageDao.class,
+                                oMessage.id.as("id"),
+                                oMessage.messageType.as("type"),
+                                oMessage.messageFrom.as("from"),
+                                activity.uuid.as("activityId"),
+                                activity.title.as("title"),
+                                activity.garbageCategory.as("garbageCategory"),
+                                oMessage.createdAt.as("time"),
+                                oMessage.isRead.as("read")
+                        ))
+                .from(oMessage)
+                .innerJoin(oMessage.activity, activity)
+                .innerJoin(oMessage.user, oUser)
+                .where(nullCondition(user.getNickname(),oMessage.messageFrom::eq),
+                        oMessage.messageType.eq(MessageType.PRIVATE),
+                        nullCondition(user, oMessage.user::eq),
                         lessThanId(lastId)
                 ) //for no offset scrolling, use message sent time
                 .orderBy(oMessage.createdAt.desc())
@@ -67,11 +94,11 @@ public class MessageQueryDslRepositoryImpl implements MessageQueryDslRepository 
         return new SliceImpl<T>(result, pageable, hasNext);
     }
 
-    private <T> BooleanExpression condition(T value, Function<T, BooleanExpression> function) {
+    private <T> BooleanExpression nullCondition(T value, Function<T, BooleanExpression> function) {
         return Optional.ofNullable(value).map(function).orElse(null);
     }
 
     private BooleanExpression lessThanId(Long id) {
-        return id == null ? null : oMessage.id.lt(id);
+        return id == null ? null : oMessage.id.goe(id);
     }
 }

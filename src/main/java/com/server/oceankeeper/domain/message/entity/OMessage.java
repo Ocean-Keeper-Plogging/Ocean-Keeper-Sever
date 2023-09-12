@@ -35,21 +35,19 @@ public class OMessage extends BaseEntity {
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ACTIVITY_MESSAGE_ID")
+    @JoinColumn(name = "ACTIVITY_ID")
     private Activity activity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_MESSAGE_ID")
+    @JoinColumn(name = "USER_ID")
     private OUser user;
 
     private String title;
 
-    private String detail;
-
     private boolean isRead;
 
     @Builder
-    public OMessage(Long id, MessageType type, String messageFrom, String to, Activity activity, OUser user, String title, String detail, boolean read) {
+    public OMessage(Long id, MessageType type, String messageFrom, String to, Activity activity, OUser user, String title, boolean read) {
         this.id = id;
         this.messageType = type;
         this.messageFrom = messageFrom;
@@ -57,7 +55,6 @@ public class OMessage extends BaseEntity {
         this.activity = activity;
         this.user = user;
         this.title = title;
-        this.detail = detail;
         this.isRead = read;
     }
 }

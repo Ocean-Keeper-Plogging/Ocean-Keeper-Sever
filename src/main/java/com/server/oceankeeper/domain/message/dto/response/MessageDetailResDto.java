@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.message.dto.response;
 
+import com.server.oceankeeper.domain.message.entity.MessageDetail;
 import com.server.oceankeeper.domain.message.entity.MessageType;
 import com.server.oceankeeper.domain.message.entity.OMessage;
 import lombok.Data;
@@ -15,10 +16,10 @@ public class MessageDetailResDto {
     private final LocalDateTime createdAt;
     private final MessageType messageType;
 
-    public static MessageDetailResDto fromEntity(OMessage message) {
+    public static MessageDetailResDto fromEntity(OMessage message, MessageDetail messageDetail) {
         return new MessageDetailResDto(
                 message.getId(),
-                message.getDetail(),
+                messageDetail.getDetail(),
                 message.getMessageFrom(),
                 message.getMessageTo(),
                 message.getTime(),

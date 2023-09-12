@@ -26,7 +26,18 @@ import javax.validation.ValidationException;
 public class CustomExceptionHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @ExceptionHandler({MethodArgumentNotValidException.class,ValidationException.class})
+    @ExceptionHandler(DtoValidationException.class)
+    public ResponseEntity<APIResponse<ErrorResponse>> validationApiException(DtoValidationException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                e.getMessage() + ": " + e.getErrorMap().toString(),
+                                ErrorCode.INVALID_REQUEST)));
+    }
+
+    @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class})
     public ResponseEntity<APIResponse<ErrorResponse>> validationException(Exception e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -34,6 +45,17 @@ public class CustomExceptionHandler {
                         new ErrorResponse(
                                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                                 "필수 파라미터가 잘못되었습니다.",
+                                ErrorCode.INVALID_REQUEST)));
+    }
+
+    @ExceptionHandler(NotValidFormatException.class)
+    public ResponseEntity<APIResponse<ErrorResponse>> notValidFormatException(Exception e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                e.getMessage(),
                                 ErrorCode.INVALID_REQUEST)));
     }
 
@@ -189,17 +211,6 @@ public class CustomExceptionHandler {
                                 HttpStatus.NOT_FOUND.getReasonPhrase(),
                                 e.getMessage(),
                                 ErrorCode.NOT_FOUND_RESOURCE)));
-    }
-
-    @ExceptionHandler(DtoValidationException.class)
-    public ResponseEntity<APIResponse<ErrorResponse>> validationApiException(DtoValidationException e) {
-        log.error(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
-                        new ErrorResponse(
-                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                                e.getMessage() + ": " + e.getErrorMap().toString(),
-                                ErrorCode.INVALID_REQUEST)));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

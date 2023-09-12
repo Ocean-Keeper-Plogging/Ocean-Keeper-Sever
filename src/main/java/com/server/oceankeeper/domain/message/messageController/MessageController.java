@@ -1,16 +1,14 @@
 package com.server.oceankeeper.domain.message.messageController;
 
-import com.server.oceankeeper.domain.message.dto.request.MessageDetailReqDto;
 import com.server.oceankeeper.domain.message.dto.request.MessageSendReqDto;
-import com.server.oceankeeper.domain.message.dto.request.PrivateMessageSendReqDto;
 import com.server.oceankeeper.domain.message.dto.response.MessageDetailResDto;
 import com.server.oceankeeper.domain.message.dto.response.MessageSendResDto;
 import com.server.oceankeeper.domain.message.dto.response.PostResDto;
 import com.server.oceankeeper.domain.message.dto.response.PrivateMessageSendResDto;
-import com.server.oceankeeper.domain.message.entity.MessageType;
 import com.server.oceankeeper.domain.message.service.MessageService;
 import com.server.oceankeeper.global.response.APIResponse;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -23,15 +21,19 @@ import javax.servlet.http.HttpServletRequest;
 public class MessageController {
     private final MessageService messageService;
 
-    @ApiOperation(value = "유저의 전체 쪽지 확인 [권한 필요]",
-            notes = "특정 유저의 전체 쪽지(개인쪽지+활동공지+거절쪽지) 내역을 보여줍니다", response = PostResDto.class)
+    @ApiOperation(value = "유저의 쪽지함 확인 [권한 필요]",
+            notes = "특정 유저의 쪽지함 내역을 보여줍니다", response = PostResDto.class)
     @GetMapping(value = "/inbox", produces = MediaType.APPLICATION_JSON_VALUE)
     public APIResponse<PostResDto> getAllMessage(
+            @ApiParam(name = "user", value = "메세지 보내는 유저 아이디")
             @RequestParam("user") String userId,
-            @RequestParam Integer size,
-            @RequestParam Long id,
-            @RequestParam("type") MessageType type, HttpServletRequest request) throws Exception {
-        PostResDto response = messageService.getMailing(userId, id, type, size, request);
+            @ApiParam(name = "size", value = "메세지 개수", defaultValue = "5")
+            @RequestParam(required = false) Integer size,
+            @ApiParam(name = "message id", value = "메세지 아이디", defaultValue = "1")
+            @RequestParam(required = false) Long id,
+            @ApiParam(name = "type", value = "메세지 타입(REJECT,NOTICE,PRIVATE,SENT,ALL 중 하나), 지정안하면 ALL", defaultValue = "ALL")
+            @RequestParam(value = "type", required = false) String type, HttpServletRequest request) throws Exception {
+        PostResDto response = messageService.getInbox(userId, id, type, size, request);
         return APIResponse.createGetResponse(response);
     }
 
@@ -43,17 +45,9 @@ public class MessageController {
         return APIResponse.createPostResponse(response);
     }
 
-    @ApiOperation(value = "개인 쪽지 보내기 [권한 필요]",
-            notes = "개인쪽지를 보냅니다", response = PrivateMessageSendResDto.class)
-    @PostMapping(value = "/message/private", produces = MediaType.APPLICATION_JSON_VALUE)
-    public APIResponse<PrivateMessageSendResDto> sendPrivateMessage(@RequestBody PrivateMessageSendReqDto message) {
-        PrivateMessageSendResDto response = messageService.sendPrivateMessage(message);
-        return APIResponse.createPostResponse(response);
-    }
-
     @ApiOperation(value = "상세 쪽지 확인 [권한 필요]",
             notes = "특정 쪽지의 정보를 확인합니다", response = PrivateMessageSendResDto.class)
-    @GetMapping(value = "/message", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
     public APIResponse<MessageDetailResDto> getMessage(@RequestParam(value = "message-id") Long messageId) {
         MessageDetailResDto response = messageService.getMessage(messageId);
         return APIResponse.createPostResponse(response);

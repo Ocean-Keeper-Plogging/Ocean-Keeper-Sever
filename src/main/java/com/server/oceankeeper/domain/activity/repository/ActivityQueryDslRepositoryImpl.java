@@ -3,14 +3,14 @@ package com.server.oceankeeper.domain.activity.repository;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.server.oceankeeper.domain.activity.dto.ActivityDao;
-import com.server.oceankeeper.domain.activity.dto.MyActivityDao;
-import com.server.oceankeeper.domain.activity.dto.AllActivityDao;
+import com.server.oceankeeper.domain.activity.dto.*;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
+import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
+import com.server.oceankeeper.domain.user.entitiy.OUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -47,7 +47,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                                 activity.recruitEndAt,
                                 activity.startAt,
                                 activity.location.address.as("location")
-                                ))
+                        ))
                 .from(crews)
                 .innerJoin(crews.activity, activity)
                 .innerJoin(crews.user, oUser)
@@ -94,25 +94,6 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
         return checkLastPage(pageable, result);
     }
 
-    private <T> Slice<T> checkLastPage(Pageable pageable, List<T> result) {
-        boolean hasNext = false;
-
-        if (result.size() > pageable.getPageSize()) {
-            hasNext = true;
-            result.remove(pageable.getPageSize());
-        }
-
-        return new SliceImpl<T>(result, pageable, hasNext);
-    }
-
-    private BooleanExpression ltUuid(UUID uuid) {
-        return uuid == null ? null : activity.uuid.lt(uuid);
-    }
-
-    private <T> BooleanExpression condition(T value, Function<T, BooleanExpression> function) {
-        return Optional.ofNullable(value).map(function).orElse(null);
-    }
-
     @Override
     public List<MyActivityDao> getMyActivitiesLimit5(MyActivityParam myActivityParam) {
         return queryFactory
@@ -134,4 +115,58 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .fetch();
     }
 
+    @Override
+    public List<HostActivityDao> getHostActivityNameFromUser(OUser user) {
+        return queryFactory
+                .select(Projections.constructor(HostActivityDao.class,
+                        crews.activity.uuid.as("uuid"),
+                        crews.activity.title.as("title")))
+                .from(crews)
+                .join(crews.user, oUser)
+                .join(crews.activity, activity)
+                .where(
+                        oUser.uuid.eq(user.getUuid()),
+                        crews.activityRole.eq(CrewRole.HOST),
+                        crews.crewStatus.eq(CrewStatus.IN_PROGRESS))
+                .orderBy(crews.activity.title.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<CrewInfoDao> getCrewInfoFromHostUser(OUser user) {
+        return queryFactory
+                .select(Projections.constructor(CrewInfoDao.class,
+                        crews.activity.uuid.as("uuid"),
+                        crews.activity.title.as("title"),
+                        crews.user.nickname.as("nickname")
+                ))
+                .from(crews)
+                .join(crews.user, oUser)
+                .join(crews.activity, activity)
+                .where(
+                        oUser.uuid.eq(user.getUuid()),
+                        crews.activityRole.eq(CrewRole.HOST),
+                        crews.crewStatus.eq(CrewStatus.IN_PROGRESS))
+                .orderBy(crews.activity.title.asc())
+                .fetch();
+    }
+
+    private <T> Slice<T> checkLastPage(Pageable pageable, List<T> result) {
+        boolean hasNext = false;
+
+        if (result.size() > pageable.getPageSize()) {
+            hasNext = true;
+            result.remove(pageable.getPageSize());
+        }
+
+        return new SliceImpl<T>(result, pageable, hasNext);
+    }
+
+    private BooleanExpression ltUuid(UUID uuid) {
+        return uuid == null ? null : activity.uuid.lt(uuid);
+    }
+
+    private <T> BooleanExpression condition(T value, Function<T, BooleanExpression> function) {
+        return Optional.ofNullable(value).map(function).orElse(null);
+    }
 }

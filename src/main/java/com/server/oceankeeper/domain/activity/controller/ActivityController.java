@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.activity.controller;
 
+import com.server.oceankeeper.domain.activity.dto.HostActivityDto;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyActivityReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyApplicationReqDto;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -100,7 +102,7 @@ public class ActivityController {
     @PostMapping(value = "/recruitment",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<APIResponse<RegisterActivityResDto>> registerActivity(@RequestBody @Valid RegisterActivityReqDto activity) {
+    public ResponseEntity<APIResponse<RegisterActivityResDto>> registerActivity(@RequestBody @Valid RegisterActivityReqDto activity, BindingResult bindingResult) {
         RegisterActivityResDto response = activityService.registerActivity(activity);
         return ResponseEntity.status(HttpStatus.CREATED).body(APIResponse.createPostResponse(response));
     }
@@ -109,7 +111,7 @@ public class ActivityController {
     @PostMapping(value = "/recruitment/application",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<APIResponse<ApplyActivityResDto>> applyActivity(@RequestBody @Valid ApplyApplicationReqDto activity) {
+    public ResponseEntity<APIResponse<ApplyActivityResDto>> applyActivity(@RequestBody @Valid ApplyApplicationReqDto activity, BindingResult bindingResult) {
         ApplyActivityResDto response = activityService.applyActivity(activity);
         return ResponseEntity.status(HttpStatus.CREATED).body(APIResponse.createPostResponse(response));
     }
@@ -122,7 +124,7 @@ public class ActivityController {
             @ApiParam(name = "activityId", value = "지원서 id", defaultValue = "11ee2964f8473afb9cf1650479121d20", required = true)
             @PathVariable String activityId,
             @RequestBody @Valid ModifyActivityReqDto activity,
-            HttpServletRequest request) {
+            HttpServletRequest request, BindingResult bindingResult) {
         OUser user = tokenUtil.getUserFromHeader(request);
         activityService.modifyActivity(activityId, activity, user);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPatchResponse("활동 수정 완료"));
@@ -136,7 +138,7 @@ public class ActivityController {
             @ApiParam(name = "applicationId", value = "지원서 id", defaultValue = "11ee2968b912f9be9cf11179b5b80610", required = true)
             @PathVariable String applicationId,
             @RequestBody @Valid ModifyApplicationReqDto activity,
-            HttpServletRequest request) {
+            HttpServletRequest request, BindingResult bindingResult) {
         OUser user = tokenUtil.getUserFromHeader(request);
         activityService.modifyApplication(applicationId, activity, user);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPatchResponse("활동 지원서 수정 완료"));
@@ -176,5 +178,25 @@ public class ActivityController {
         OUser user = tokenUtil.getUserFromHeader(request);
         activityService.cancelActivity(activityId, user);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createDeleteResponse("활동 모집 삭제 완료"));
+    }
+
+    @ApiOperation(value = "요청자가 호스트인 활동의 활동명 불러오기 [권한 필요]", notes = "요청자가 호스트인 활동명을 불러옵니다",
+            response = ApplicationReqDto.class)
+    @GetMapping(value = "/recruitment/host/activity-name",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<APIResponse<HostActivityDto>> getHostActivity(HttpServletRequest request) {
+        OUser user = tokenUtil.getUserFromHeader(request);
+        HostActivityDto response = activityService.getHostActivityName(user);
+        return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createGetResponse(response));
+    }
+
+    @ApiOperation(value = "요청자가 호스트인 활동의 크루원 닉네임 불러오기 [권한 필요]", notes = "요청자가 호스트인 활동의 크루원 닉네임을 불러옵니다",
+            response = ApplicationReqDto.class)
+    @GetMapping(value = "/recruitment/host/crew-nickname",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<APIResponse<CrewActivityDto>> getCrewInfo(HttpServletRequest request) {
+        OUser user = tokenUtil.getUserFromHeader(request);
+        CrewActivityDto response = activityService.getCrewInfo(user);
+        return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createGetResponse(response));
     }
 }

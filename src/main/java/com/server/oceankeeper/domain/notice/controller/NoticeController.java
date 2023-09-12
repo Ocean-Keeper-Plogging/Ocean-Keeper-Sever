@@ -32,7 +32,7 @@ public class NoticeController {
     }
 
     @ApiOperation(value = "공지사항 수정[권한 필요]")
-    @PostMapping("/admin/notice")
+    @PutMapping("/admin/notice")
     public APIResponse<NoticeResDto> putNotice(@RequestBody NoticeModifyReqDto request) {
         NoticeResDto response = service.putNotice(request);
         return APIResponse.createPostResponse(response);

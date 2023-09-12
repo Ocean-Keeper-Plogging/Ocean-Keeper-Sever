@@ -40,7 +40,7 @@ public class ApplyApplicationReqDto {
             value = "신청자 휴대폰 번호",
             example = "01012345678"
     )
-    @Pattern(regexp = "^01([0|1|6|7|8|9])?(\\d{3,4})?(\\d{4})$")
+    @Pattern(regexp = "^01([0|1|6|7|8|9])?(\\d{3,4})?(\\d{4})$", message = "전화번호는 하이픈 없이 01XYYYYZZZZ 꼴이어야합니다")
     @NotEmpty
     private final String phoneNumber;
 
@@ -54,14 +54,14 @@ public class ApplyApplicationReqDto {
             value = "생년월일",
             example = "20010305"
     )
-    @Pattern(regexp = "^(19\\d\\d|20\\d{2})(0\\d|1[0-2])(0[1-9]|[1-2]\\d|3[0-1])$")
+    @Pattern(regexp = "^(19\\d\\d|20\\d{2})(0\\d|1[0-2])(0[1-9]|[1-2]\\d|3[0-1])$", message = "생년월일은 하이픈 없이 YYYYMMDD 꼴이어야 합니다")
     private final String dayOfBirth;
 
     @ApiModelProperty(
             value = "이메일",
             example = "kim@naver.com"
     )
-    @Pattern(regexp = "^[a-zA-Z\\d+-\\_.]+@[a-zA-Z\\d-]+\\.[a-zA-Z\\d-.]+$")
+    @Pattern(regexp = "^[a-zA-Z\\d+-\\_.]+@[a-zA-Z\\d-]+\\.[a-zA-Z\\d-.]+$",message = "이메일 형식에 맞아야합니다.")
     @NotEmpty
     private final String email;
 
@@ -75,7 +75,7 @@ public class ApplyApplicationReqDto {
             value = "이동수단",
             example = "대중교통"
     )
-    @NotEmpty
+    @NotEmpty(message = "")
     private final String transportation;
 
     @ApiModelProperty(
@@ -84,7 +84,7 @@ public class ApplyApplicationReqDto {
     )
     private final String question;
 
-    @AssertTrue
+    @AssertTrue(message = "개인정보 동의는 필수입니다.")
     @ApiModelProperty(
             value = "개인정보 동의(필수 true)",
             example = "true"

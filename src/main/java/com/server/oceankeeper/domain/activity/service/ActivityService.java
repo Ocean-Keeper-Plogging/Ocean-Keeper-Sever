@@ -1,8 +1,6 @@
 package com.server.oceankeeper.domain.activity.service;
 
-import com.server.oceankeeper.domain.activity.dto.ActivityDao;
-import com.server.oceankeeper.domain.activity.dto.AllActivityDao;
-import com.server.oceankeeper.domain.activity.dto.MyActivityDao;
+import com.server.oceankeeper.domain.activity.dto.*;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyActivityReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyApplicationReqDto;
@@ -17,10 +15,10 @@ import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
 import com.server.oceankeeper.domain.crew.service.CrewService;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
-import com.server.oceankeeper.domain.statistics.entity.ActivityEventType;
-import com.server.oceankeeper.domain.statistics.entity.EventPublisher;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
+import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
@@ -129,7 +127,6 @@ public class ActivityService {
 
     @Transactional
     public GetActivityResDto getActivities(String activityId, String status, LocationTag locationTag, GarbageCategory garbageCategory, Integer pageSize) {
-        log.info("JBJB getActivities param : activity id : {}, status : {}, pageSize : {}", activityId, status, pageSize);
         ActivityStatus activityStatus = ActivityStatus.getStatus(status);
         Slice<AllActivityDao> response = activityRepository.getAllActivities(activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
                 activityStatus, locationTag, garbageCategory, PageRequest.ofSize(pageSize != null ? pageSize : 1));
@@ -168,7 +165,7 @@ public class ActivityService {
 
         crewService.addHost(activity, user);
 
-        EventPublisher.raise(new ActivityEvent(this, user, ActivityEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+        EventPublisher.raise(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
 
         return new RegisterActivityResDto(UUIDGenerator.changeUuidToString(activity.getUuid()));
     }
@@ -181,8 +178,6 @@ public class ActivityService {
 
     @Transactional
     public ApplyActivityResDto applyActivity(ApplyApplicationReqDto request) {
-        log.debug("JBJB applyActivity request : {}",request);
-
         Activity activity = getActivity(request.getActivityId());
 
         OUser applyUser = getUser(request.getUserId());
@@ -195,7 +190,7 @@ public class ActivityService {
         activity.addParticipant();
         Crews crew = crewService.addCrew(request, activity, applyUser);
 
-        EventPublisher.raise(new ActivityEvent(this, applyUser, ActivityEventType.ACTIVITY_PARTICIPATION_EVENT));
+        EventPublisher.raise(new ActivityEvent(this, applyUser, OceanKeeperEventType.ACTIVITY_PARTICIPATION_EVENT));
 
         return new ApplyActivityResDto(
                 UUIDGenerator.changeUuidToString(activity.getUuid())
@@ -349,5 +344,32 @@ public class ActivityService {
         //해당 활동에 속한 모두에게 활동 취소됨을 알림
         crewService.findCrews(activity).forEach(crewService::deleteByHost);
         activityRepository.delete(activity);
+    }
+
+    @Transactional
+    public HostActivityDto getHostActivityName(OUser user) {
+        List<HostActivityDao> activities = activityRepository.getHostActivityNameFromUser(user);
+        return new HostActivityDto(activities.stream().map(
+                        d -> new HostActivityDto.HostActivityInnerDto(
+                                UUIDGenerator.changeUuidToString(d.getUuid()),
+                                d.getTitle()))
+                .collect(Collectors.toList()));
+    }
+
+    @Transactional
+    public CrewActivityDto getCrewInfo(OUser user) {
+        List<CrewInfoDao> activities = activityRepository.getCrewInfoFromHostUser(user);
+        List<CrewActivityDto.CrewActivityInnerClass> data = activities.stream().map(
+                d -> new CrewActivityDto.CrewActivityInnerClass(d.getNickname())).collect(Collectors.toList());
+        if (!activities.isEmpty()) {
+            return new CrewActivityDto(
+                    UUIDGenerator.changeUuidToString(activities.get(0).getUuid()),
+                    activities.get(0).getTitle(),
+                    data);
+        }
+        return new CrewActivityDto(
+                "",
+                "",
+                null);
     }
 }

@@ -2,7 +2,7 @@ package com.server.oceankeeper.domain.statistics.service;
 
 import com.server.oceankeeper.domain.statistics.dto.ActivityInfoResDto;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
-import com.server.oceankeeper.domain.statistics.entity.ActivityEventType;
+import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.domain.statistics.entity.ActivityInfo;
 import com.server.oceankeeper.domain.statistics.repository.ActivityInfoRepository;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
@@ -23,19 +23,19 @@ public class ActivityInfoService {
 
     @EventListener
     public void handle(ActivityEvent event) {
-        if (event.getEvent().equals(ActivityEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT)) {
+        if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT)) {
             registerActivity(event);
             log.debug("activity registered");
-        } else if (event.getEvent().equals(ActivityEventType.ACTIVITY_NO_SHOW_EVENT)) {
+        } else if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_NO_SHOW_EVENT)) {
             noShowActivity(event);
             log.debug("no show activity");
-        } else if (event.getEvent().equals(ActivityEventType.ACTIVITY_PARTICIPATION_EVENT)) {
+        } else if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_PARTICIPATION_EVENT)) {
             participateActivity(event);
             log.debug("participated");
-        } else if (event.getEvent().equals(ActivityEventType.USER_JOINED_EVENT)) {
+        } else if (event.getEvent().equals(OceanKeeperEventType.USER_JOINED_EVENT)) {
             userJoined(event);
             log.debug("user joined");
-        } else if (event.getEvent().equals(ActivityEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT)) {
+        } else if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT)) {
             cancelEvent(event);
             log.debug("activity canceled");
         }

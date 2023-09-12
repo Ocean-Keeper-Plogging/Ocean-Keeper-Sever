@@ -68,7 +68,6 @@ class MessageRepositoryTest extends DummyObject {
         OMessage message = OMessage.builder()
                 .id(99L)
                 .messageFrom(user.getNickname())
-                .detail("세부 내용")
                 .read(false)
                 .title("쪽지 1")
                 .user(user)
