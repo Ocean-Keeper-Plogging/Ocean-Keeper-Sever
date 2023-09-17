@@ -1,20 +1,20 @@
-package com.server.oceankeeper.domain.notice.dto.response;
+package com.server.oceankeeper.domain.guide.dto.response;
 
-import com.server.oceankeeper.domain.notice.entity.Notice;
+import com.server.oceankeeper.domain.guide.entity.Guide;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class NoticeDetailResDto {
+public class GuideDetailResDto {
     private final Long id;
     private final String title;
     private final String contents;
     private final LocalDate createdAt;
     private final LocalDate modifiedAt;
 
-    public static NoticeDetailResDto fromEntity(Notice notice){
-        return new NoticeDetailResDto(
+    public static GuideDetailResDto fromEntity(Guide notice){
+        return new GuideDetailResDto(
                 notice.getId(),
                 notice.getTitle(),
                 notice.getContents(),

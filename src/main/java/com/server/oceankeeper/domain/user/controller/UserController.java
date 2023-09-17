@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.user.controller;
+ package com.server.oceankeeper.domain.user.controller;
 
 import com.server.oceankeeper.domain.user.dto.TokenInfo;
 import com.server.oceankeeper.domain.user.service.UserService;

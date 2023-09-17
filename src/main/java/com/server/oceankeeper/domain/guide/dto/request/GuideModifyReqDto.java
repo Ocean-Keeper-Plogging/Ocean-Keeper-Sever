@@ -1,11 +1,11 @@
-package com.server.oceankeeper.domain.notice.dto.request;
+package com.server.oceankeeper.domain.guide.dto.request;
 
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 
 @Data
-public class NoticeModifyReqDto {
+public class GuideModifyReqDto {
     @NotEmpty
     private final Long id;
     private final String contents;

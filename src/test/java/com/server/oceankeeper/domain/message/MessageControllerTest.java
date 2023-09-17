@@ -1,9 +1,10 @@
-package com.server.oceankeeper.domain.message.messageController;
+package com.server.oceankeeper.domain.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.domain.message.dto.request.MessageSendReqDto;
 import com.server.oceankeeper.domain.message.dto.response.MessageSendResDto;
 import com.server.oceankeeper.domain.message.entity.MessageSentType;
+import com.server.oceankeeper.domain.message.messageController.MessageController;
 import com.server.oceankeeper.domain.message.service.MessageService;
 import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.config.SecurityConfig;

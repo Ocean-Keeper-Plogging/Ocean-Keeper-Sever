@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.notice.entity;
+package com.server.oceankeeper.domain.guide.entity;
 
 import com.server.oceankeeper.global.BaseEntity;
 import lombok.AccessLevel;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notice extends BaseEntity {
+public class Guide extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -24,7 +24,7 @@ public class Notice extends BaseEntity {
     private String title;
 
     @Builder
-    public Notice(Long id, String contents, String title, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public Guide(Long id, String contents, String title, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.id = id;
         this.contents = contents;
         this.title = title;

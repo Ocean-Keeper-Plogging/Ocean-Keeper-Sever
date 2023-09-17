@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.message.repository;
+package com.server.oceankeeper.domain.message;
 
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
@@ -8,6 +8,7 @@ import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
 import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.message.entity.OMessage;
+import com.server.oceankeeper.domain.message.repository.MessageRepository;
 import com.server.oceankeeper.domain.message.service.MessageService;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.dummy.DummyObject;

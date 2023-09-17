@@ -5,5 +5,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 public interface NoticeQueryDslRepository {
-    Slice<NoticeDao> getNotices(Long noticeId, Pageable pageable);
+    Slice<NoticeDao> getData(Long noticeId, Pageable pageable);
 }

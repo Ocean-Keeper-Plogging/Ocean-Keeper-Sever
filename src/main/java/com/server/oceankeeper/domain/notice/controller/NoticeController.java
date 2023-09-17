@@ -9,6 +9,7 @@ import com.server.oceankeeper.domain.notice.service.NoticeService;
 import com.server.oceankeeper.global.response.APIResponse;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,31 +18,38 @@ public class NoticeController {
     private final NoticeService service;
 
     @ApiOperation(value = "공지사항 리스트 조회[권한 필요]")
-    @GetMapping("/admin/notice")
-    public APIResponse<NoticeListResDto> getNotice(@RequestParam("notice-id") Long noticeId,
-                                                   @RequestParam("size") Integer size) {
-        NoticeListResDto response = service.getNotice(noticeId, size);
+    @GetMapping("/notice")
+    public APIResponse<NoticeListResDto> get(@RequestParam(value = "notice-id",required = false) Long noticeId,
+                                             @RequestParam(value = "size",required = false) Integer size) {
+        NoticeListResDto response = service.get(noticeId, size);
         return APIResponse.createGetResponse(response);
     }
 
     @ApiOperation(value = "공지사항 작성[권한 필요]")
     @PostMapping("/admin/notice")
-    public APIResponse<NoticeResDto> postNotice(@RequestBody NoticeReqDto request) {
-        NoticeResDto response = service.postNotice(request);
+    public APIResponse<NoticeResDto> post(@RequestBody NoticeReqDto request, BindingResult bindingResult) {
+        NoticeResDto response = service.post(request);
         return APIResponse.createPostResponse(response);
     }
 
     @ApiOperation(value = "공지사항 수정[권한 필요]")
     @PutMapping("/admin/notice")
-    public APIResponse<NoticeResDto> putNotice(@RequestBody NoticeModifyReqDto request) {
-        NoticeResDto response = service.putNotice(request);
+    public APIResponse<NoticeResDto> put(@RequestBody NoticeModifyReqDto request, BindingResult bindingResult) {
+        NoticeResDto response = service.put(request);
         return APIResponse.createPostResponse(response);
     }
 
     @ApiOperation(value = "공지사항 상세 조회[권한 필요]")
     @GetMapping("/notice/detail")
-    public APIResponse<NoticeDetailResDto> getNoticeDetail(@RequestParam("notice-id") Long noticeId) {
-        NoticeDetailResDto response = service.getNoticeDetail(noticeId);
+    public APIResponse<NoticeDetailResDto> getDetail(@RequestParam("notice-id") Long noticeId) {
+        NoticeDetailResDto response = service.getDetail(noticeId);
+        return APIResponse.createGetResponse(response);
+    }
+
+    @ApiOperation(value = "공지사항 삭제[권한 필요]")
+    @DeleteMapping("/admin/notice")
+    public APIResponse<Boolean> delete(@RequestParam("notice-id") Long noticeId) {
+        boolean response = service.delete(noticeId);
         return APIResponse.createGetResponse(response);
     }
 }
