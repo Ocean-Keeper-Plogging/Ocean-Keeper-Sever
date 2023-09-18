@@ -134,14 +134,14 @@ public class CrewService {
     @Transactional
     public void deleteCrew(OUser user, Crews crew) {
         crewRepository.delete(crew);
-        EventPublisher.raise(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT));
+        EventPublisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT));
     }
 
     @Transactional
     public void deleteByHost(Crews crew) {
         crewRepository.delete(crew);
         //TODO: fetch join 필요성 고려
-        EventPublisher.raise(new ActivityEvent(this, crew.getUser(), OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+        EventPublisher.emit(new ActivityEvent(this, crew.getUser(), OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
     }
 
     public List<Crews> findCrews(Activity activity) {

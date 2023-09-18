@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -23,7 +24,7 @@ public class MessageSendReqDto {
             notes = "REJECT(거절),NOTICE(공지),PRIVATE(개인) 중 하나",
             example = "NOTICE"
     )
-    @NotEmpty
+    @NotNull
     private final MessageSentType type;
 
     @ApiModelProperty(
@@ -35,7 +36,7 @@ public class MessageSendReqDto {
 
     @ApiModelProperty(
             value = "내용",
-            notes = "쪽지 내용을 입력합니다. 첫번째 \n를 기준으로 타이틀을 지정합니다.",
+            notes = "쪽지 내용을 입력합니다. 첫번째 \n 또는 쉼표(.)를 기준으로 타이틀을 지정합니다. 두 지정자가 없을경우 내용의 절반 + ...이 타이틀이 됩니다.",
             example = "안녕하세요. 어서오세요.\n 일경우, 안녕하세요. 어서오세요.가 타이틀이 됩니다"
     )
     @NotEmpty

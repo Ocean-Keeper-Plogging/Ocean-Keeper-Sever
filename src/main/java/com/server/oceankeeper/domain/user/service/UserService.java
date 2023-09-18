@@ -1,7 +1,6 @@
 package com.server.oceankeeper.domain.user.service;
 
 
-import com.server.oceankeeper.domain.message.entity.MessageEvent;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.user.dto.JoinReqDto;
 import com.server.oceankeeper.domain.user.dto.JoinResDto;
@@ -18,8 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +43,7 @@ public class UserService {
         user.initializePassword(passwordEncoder.encode(password)); //TODO: 더 나은 보안 방법이 없을까 고민
         OUser userSaved = userRepository.save(user);
 
-        EventPublisher.raise(new ActivityEvent(this, userSaved, OceanKeeperEventType.USER_JOINED_EVENT));
+        EventPublisher.emit(new ActivityEvent(this, userSaved, OceanKeeperEventType.USER_JOINED_EVENT));
         return new JoinResDto(userSaved);
     }
 
@@ -89,14 +86,8 @@ public class UserService {
         }
     }
 
-    @EventListener
-    @Async
-    public void handle(MessageEvent event) {
-        if (event.getEvent().equals(OceanKeeperEventType.MESSAGE_SENT_EVENT)) {
-            String nickname = event.getNickname();
-            OUser user = userRepository.findByNickname(nickname)
-                    .orElseThrow(() -> new ResourceNotFoundException("해당 닉네임을 가진 유저가 존재하지 않습니다."));
-            log.debug("message received");
-        }
+    public OUser findUserByNickname(String nickname) {
+        return userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 닉네임을 가진 유저가 존재하지 않습니다."));
     }
 }

@@ -31,13 +31,14 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = MessageController.class, includeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class),
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class)
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class),
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = AccessDeniedHandler.class),
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthenticationEntryPoint.class)
 })
 @ActiveProfiles("test")
 class MessageControllerTest {
@@ -52,10 +53,6 @@ class MessageControllerTest {
 
     @MockBean
     private TokenProvider tokenProvider;
-    @MockBean
-    private AccessDeniedHandler accessDeniedHandler;
-    @MockBean
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @MockBean
     private TokenUtil tokenUtil;
 
@@ -111,6 +108,24 @@ class MessageControllerTest {
         //when
         ResultActions resultActions = mvc.perform(post("/message")
                         .content(om.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("Response body : " + responseBody);
+
+        //then
+        resultActions.andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("쪽지 삭제")
+    public void deleteMessage() throws Exception {
+        //given
+        when(messageService.delete(any(), any())).thenReturn(true);
+
+        //when
+        ResultActions resultActions = mvc.perform(delete("/message")
+                        .param("message-id","1")
                 .contentType(MediaType.APPLICATION_JSON));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("Response body : " + responseBody);

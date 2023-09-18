@@ -8,5 +8,5 @@ import org.springframework.data.domain.Slice;
 
 public interface MessageQueryDslRepository {
     Slice<MessageDao> findByUserAndMessageType(Long lastId, OUser user, MessageType type, Pageable pageable);
-    Slice<MessageDao> findBySentUserAndMessageType(Long lastId, OUser user, Pageable pageable);
+    Slice<MessageDao> findBySenderAndMessageType(Long lastId, OUser user, Pageable pageable);
 }

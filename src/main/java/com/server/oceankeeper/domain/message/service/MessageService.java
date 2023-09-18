@@ -16,6 +16,7 @@ import com.server.oceankeeper.domain.message.repository.MessageRepository;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
+import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import com.server.oceankeeper.util.TokenUtil;
 import com.server.oceankeeper.util.UUIDGenerator;
@@ -77,7 +78,7 @@ public class MessageService {
 
         OUser user = activityService.getUser(userId);
 
-        Slice<MessageDao> result = messageRepository.findBySentUserAndMessageType(
+        Slice<MessageDao> result = messageRepository.findBySenderAndMessageType(
                 id,
                 user,
                 size != null ? PageRequest.ofSize(size) : PageRequest.ofSize(5));
@@ -114,9 +115,11 @@ public class MessageService {
                     .to(nickname)
                     .user(user)
                     .title(title)
+                    .isDeleteFromReceiver(false)
+                    .isDeleteFromSender(false)
                     .build();
             messageRepository.save(message);
-            EventPublisher.raise(new MessageEvent(this, nickname, OceanKeeperEventType.MESSAGE_SENT_EVENT));
+            EventPublisher.emit(new MessageEvent(this, nickname, OceanKeeperEventType.MESSAGE_SENT_EVENT));
 
             MessageDetail messageDetail = MessageDetail.builder()
                     .id(message.getId())
@@ -138,15 +141,69 @@ public class MessageService {
         }
 
         //fallback
-        return req.getContents().substring(0, req.getContents().length() / 2);
+        return req.getContents().substring(0, req.getContents().length() / 2) + "...";
     }
 
     @Transactional
-    public MessageDetailResDto getMessage(Long messageId) {
+    public MessageDetailResDto getMessage(Long messageId, HttpServletRequest request) {
         OMessage message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new ResourceNotFoundException("메세지 아이디에 해당하는 메세지가 없습니다"));
         MessageDetail messageDetail = messageDetailRepository.findById(messageId)
                 .orElseThrow(() -> new ResourceNotFoundException("메세지 아이디에 해당하는 상세 메세지가 없습니다"));
-        return MessageDetailResDto.fromEntity(message, messageDetail);
+
+        OUser user = tokenUtil.getUserFromHeader(request);
+
+        boolean bUserIsSender = userIsSender(user, message);
+        boolean bUserIsReceiver = userIsReceiver(user, message);
+        if (!bUserIsSender && !bUserIsReceiver) {
+            throw new IllegalRequestException("요청자가 받거나 보낸 메세지만 확인할 수 있습니다.");
+        }
+
+        MessageDetailResDto response = MessageDetailResDto.fromEntity(message, messageDetail);
+
+        message.messageRead(true);
+        messageRepository.save(message);
+        return response;
+    }
+
+    @Transactional
+    public boolean delete(Long messageId, HttpServletRequest request) {
+        OUser user = tokenUtil.getUserFromHeader(request);
+
+        OMessage message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new ResourceNotFoundException("메세지 아이디에 해당하는 메세지가 없습니다"));
+        MessageDetail messageDetail = messageDetailRepository.findById(messageId)
+                .orElseThrow(() -> new ResourceNotFoundException("메세지 아이디에 해당하는 상세 메세지가 없습니다"));
+
+        boolean bUserIsSender = userIsSender(user, message);
+        boolean bUserIsReceiver = userIsReceiver(user, message);
+
+        if (bUserIsSender) {
+            log.debug("SENDER{} delete message", user.getNickname());
+            message.checkDeletionFromSender(true);
+            messageRepository.save(message);
+        }
+
+        if (bUserIsReceiver) {
+            log.debug("RECEIVER{} delete message", user.getNickname());
+            message.checkDeletionFromReceiver(true);
+            messageRepository.save(message);
+        }
+
+        if (message.getIsDeleteFromReceiver() && message.getIsDeleteFromSender()) {
+            log.debug("message id({}) will be deleted", message.getId());
+            messageRepository.delete(message);
+            messageDetailRepository.delete(messageDetail);
+        }
+
+        return true;
+    }
+
+    private boolean userIsSender(OUser user, OMessage message) {
+        return message.getMessageFrom().equals(user.getNickname());
+    }
+
+    private boolean userIsReceiver(OUser user, OMessage message) {
+        return message.getMessageTo().equals(user.getNickname());
     }
 }

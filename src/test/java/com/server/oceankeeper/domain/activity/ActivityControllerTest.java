@@ -46,7 +46,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(value = ActivityController.class, includeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class),
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class)
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class),
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = AccessDeniedHandler.class),
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthenticationEntryPoint.class)
 })
 @Import({DtoValidationAdvice.class, AopAutoConfiguration.class})
 @ActiveProfiles("test")
@@ -59,10 +61,6 @@ class ActivityControllerTest {
     private ActivityService activityService;
     @MockBean
     private TokenProvider tokenProvider;
-    @MockBean
-    private AccessDeniedHandler accessDeniedHandler;
-    @MockBean
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @MockBean
     private TokenUtil tokenUtil;
 
@@ -96,6 +94,7 @@ class ActivityControllerTest {
 
     @Test
     @DisplayName("활동 수정하기")
+    @WithMockUser
     void edit() throws Exception {
         when(activityService.getMyScheduleActivity(any())).thenReturn(List.of(
                 new MyScheduledActivityDto("1", 11,
@@ -110,8 +109,10 @@ class ActivityControllerTest {
                 )
         ));
 
+        ModifyActivityReqDto request = ModifyActivityReqDto.builder().build();
         //when
-        ResultActions resultActions = mvc.perform(put("/activity/user/1")
+        ResultActions resultActions = mvc.perform(patch("/activity/recruitment/1")
+                        .content(om.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("Response body : " + responseBody);

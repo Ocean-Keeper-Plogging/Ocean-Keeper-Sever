@@ -165,7 +165,7 @@ public class ActivityService {
 
         crewService.addHost(activity, user);
 
-        EventPublisher.raise(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+        EventPublisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
 
         return new RegisterActivityResDto(UUIDGenerator.changeUuidToString(activity.getUuid()));
     }
@@ -190,7 +190,7 @@ public class ActivityService {
         activity.addParticipant();
         Crews crew = crewService.addCrew(request, activity, applyUser);
 
-        EventPublisher.raise(new ActivityEvent(this, applyUser, OceanKeeperEventType.ACTIVITY_PARTICIPATION_EVENT));
+        EventPublisher.emit(new ActivityEvent(this, applyUser, OceanKeeperEventType.ACTIVITY_PARTICIPATION_EVENT));
 
         return new ApplyActivityResDto(
                 UUIDGenerator.changeUuidToString(activity.getUuid())

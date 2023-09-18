@@ -11,9 +11,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/message")
@@ -40,7 +42,7 @@ public class MessageController {
     @ApiOperation(value = "쪽지 보내기 [권한 필요]",
             notes = "쪽지를 보냅니다", response = MessageSendResDto.class)
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public APIResponse<MessageSendResDto> sendMessage(@RequestBody MessageSendReqDto message, HttpServletRequest request) {
+    public APIResponse<MessageSendResDto> sendMessage(@Valid @RequestBody MessageSendReqDto message, BindingResult result, HttpServletRequest request) {
         MessageSendResDto response = messageService.sendMessage(message, request);
         return APIResponse.createPostResponse(response);
     }
@@ -48,8 +50,16 @@ public class MessageController {
     @ApiOperation(value = "상세 쪽지 확인 [권한 필요]",
             notes = "특정 쪽지의 정보를 확인합니다", response = PrivateMessageSendResDto.class)
     @GetMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
-    public APIResponse<MessageDetailResDto> getMessage(@RequestParam(value = "message-id") Long messageId) {
-        MessageDetailResDto response = messageService.getMessage(messageId);
-        return APIResponse.createPostResponse(response);
+    public APIResponse<MessageDetailResDto> getMessage(@RequestParam(value = "message-id") Long messageId, HttpServletRequest request) {
+        MessageDetailResDto response = messageService.getMessage(messageId, request);
+        return APIResponse.createGetResponse(response);
+    }
+
+    @ApiOperation(value = "쪽지 삭제 [권한 필요]",
+            notes = "쪽지를 삭제합니다", response = Boolean.class)
+    @DeleteMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public APIResponse<Boolean> deleteMessage(@RequestParam(value = "message-id") Long messageId, HttpServletRequest request) {
+        boolean response = messageService.delete(messageId, request);
+        return APIResponse.createDeleteResponse(response);
     }
 }

@@ -44,7 +44,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @ActiveProfiles("test")
 class NoticeControllerTest {
-    //@Autowired
     private MockMvc mvc;
     @Autowired
     private ObjectMapper om;

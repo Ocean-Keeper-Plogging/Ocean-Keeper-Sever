@@ -45,6 +45,7 @@ public class MessageQueryDslRepositoryImpl implements MessageQueryDslRepository 
                 .where(type == MessageType.ALL ?  (oMessage.messageType.eq(MessageType.NOTICE))
                         .or(oMessage.messageType.eq(MessageType.PRIVATE)) : nullCondition(type, oMessage.messageType::eq),
                         oMessage.messageTo.eq(user.getNickname()),
+                        oMessage.isDeleteFromReceiver.eq(false),
                         //nullCondition(user, oMessage.user::eq),
                         lessThanId(lastId)
                 ) //for no offset scrolling, use message sent time
@@ -56,7 +57,7 @@ public class MessageQueryDslRepositoryImpl implements MessageQueryDslRepository 
     }
 
     @Override
-    public Slice<MessageDao> findBySentUserAndMessageType(Long lastId, OUser user, Pageable pageable) {
+    public Slice<MessageDao> findBySenderAndMessageType(Long lastId, OUser user, Pageable pageable) {
         List<MessageDao> result = queryFactory.select(
                         Projections.constructor(MessageDao.class,
                                 oMessage.id.as("id"),
@@ -72,6 +73,7 @@ public class MessageQueryDslRepositoryImpl implements MessageQueryDslRepository 
                 .innerJoin(oMessage.activity, activity)
                 .innerJoin(oMessage.user, oUser)
                 .where(nullCondition(user.getNickname(),oMessage.messageFrom::eq),
+                        oMessage.isDeleteFromSender.eq(false),
                         oMessage.messageType.eq(MessageType.PRIVATE),
                         nullCondition(user, oMessage.user::eq),
                         lessThanId(lastId)
