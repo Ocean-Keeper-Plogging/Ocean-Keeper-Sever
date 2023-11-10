@@ -1,14 +1,13 @@
-package com.server.oceankeeper.notification.entity;
+package com.server.oceankeeper.domain.notification.entity;
 
+import com.server.oceankeeper.domain.notification.dto.MessagePreFormat;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.BaseEntity;
-import com.server.oceankeeper.notification.dto.MessagePreFormat;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table

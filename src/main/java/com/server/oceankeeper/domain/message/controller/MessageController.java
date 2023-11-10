@@ -1,8 +1,7 @@
-package com.server.oceankeeper.domain.message.messageController;
+package com.server.oceankeeper.domain.message.controller;
 
 import com.server.oceankeeper.domain.message.dto.request.MessageReadReqDto;
 import com.server.oceankeeper.domain.message.dto.request.MessageSendReqDto;
-import com.server.oceankeeper.domain.message.dto.response.MessageDetailResDto;
 import com.server.oceankeeper.domain.message.dto.response.MessageSendResDto;
 import com.server.oceankeeper.domain.message.dto.response.PostResDto;
 import com.server.oceankeeper.domain.message.dto.response.PrivateMessageSendResDto;

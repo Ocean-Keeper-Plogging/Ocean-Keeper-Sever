@@ -1,7 +1,7 @@
-package com.server.oceankeeper.notification.repository;
+package com.server.oceankeeper.domain.notification.repository;
 
 import com.server.oceankeeper.domain.user.entitiy.OUser;
-import com.server.oceankeeper.notification.entity.Notification;
+import com.server.oceankeeper.domain.notification.entity.Notification;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

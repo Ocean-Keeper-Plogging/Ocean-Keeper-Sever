@@ -1,4 +1,4 @@
-package com.server.oceankeeper.notification.config;
+package com.server.oceankeeper.domain.notification.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;

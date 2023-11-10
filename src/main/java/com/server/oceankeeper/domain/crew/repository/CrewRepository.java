@@ -17,7 +17,7 @@ public interface CrewRepository extends CrudRepository<Crews, Long> {
 
     Optional<Crews> findByUserAndUuid(OUser user, UUID uuid);
 
-    Optional<Crews> findCrewsByUserOrderByCreatedAtDesc(OUser user);
+    Optional<Crews> findByUserOrderByCreatedAtDesc(OUser user);
 
     Optional<Crews> findByActivityAndActivityRole(Activity activity, CrewRole activityRole);
 

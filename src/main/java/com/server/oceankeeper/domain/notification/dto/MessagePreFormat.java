@@ -1,4 +1,4 @@
-package com.server.oceankeeper.notification.dto;
+package com.server.oceankeeper.domain.notification.dto;
 
 public enum MessagePreFormat {
     NEW_MESSAGE("새로운 쪽지가 도착했습니다.")

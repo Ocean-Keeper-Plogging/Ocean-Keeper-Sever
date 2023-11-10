@@ -1,11 +1,11 @@
-package com.server.oceankeeper.notification.service;
+package com.server.oceankeeper.domain.notification.service;
 
+import com.server.oceankeeper.domain.notification.dto.FCMRequestDto;
+import com.server.oceankeeper.domain.notification.dto.MessagePreFormat;
+import com.server.oceankeeper.domain.notification.repository.NotificationRepository;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.service.UserService;
-import com.server.oceankeeper.notification.dto.FCMRequestDto;
-import com.server.oceankeeper.notification.dto.MessagePreFormat;
-import com.server.oceankeeper.notification.entity.Notification;
-import com.server.oceankeeper.notification.repository.NotificationRepository;
+import com.server.oceankeeper.domain.notification.entity.Notification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

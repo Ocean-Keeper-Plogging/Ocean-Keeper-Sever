@@ -2,16 +2,14 @@ package com.server.oceankeeper.domain.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.domain.message.dto.request.MessageSendReqDto;
-import com.server.oceankeeper.domain.message.dto.response.MessageSendResDto;
 import com.server.oceankeeper.domain.message.entity.MessageSentType;
-import com.server.oceankeeper.domain.message.messageController.MessageController;
+import com.server.oceankeeper.domain.message.controller.MessageController;
 import com.server.oceankeeper.domain.message.service.MessageService;
 import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.config.SecurityConfig;
 import com.server.oceankeeper.global.handler.CustomExceptionHandler;
 import com.server.oceankeeper.global.jwt.JwtAuthenticationEntryPoint;
 import com.server.oceankeeper.util.TokenUtil;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;

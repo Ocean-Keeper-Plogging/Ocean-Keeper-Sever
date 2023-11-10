@@ -319,6 +319,7 @@ public class ActivityService {
     @Transactional
     public ApplicationDto getLastApplication(HttpServletRequest servletRequest) {
         OUser user = tokenUtil.getUserFromHeader(servletRequest);
+        log.info("JBJB user:{},",user);
         return crewService.getApplicationDto(user);
     }
 

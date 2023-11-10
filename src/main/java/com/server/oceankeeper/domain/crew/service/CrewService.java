@@ -99,7 +99,7 @@ public class CrewService {
 
     @Transactional
     public ApplicationDto getApplicationDto(OUser user) {
-        Crews applicationInfo = crewRepository.findCrewsByUserOrderByCreatedAtDesc(user)
+        Crews applicationInfo = crewRepository.findByUserOrderByCreatedAtDesc(user)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 지원서가 존재하지 않습니다."));
 
         return ApplicationDto.builder()

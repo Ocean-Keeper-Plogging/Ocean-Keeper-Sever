@@ -1,15 +1,12 @@
-package com.server.oceankeeper.notification.service;
+package com.server.oceankeeper.domain.notification.service;
 
-import com.google.firebase.FirebaseException;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.server.oceankeeper.domain.message.entity.MessageEvent;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
-import com.server.oceankeeper.domain.user.service.UserService;
+import com.server.oceankeeper.domain.notification.dto.FCMRequestDto;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
-import com.server.oceankeeper.notification.dto.FCMRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -53,7 +50,7 @@ public class FCMService {
         try{
             firebaseMessaging.send(message);
         }catch (FirebaseMessagingException e){
-            throw new IOException(String.format("Firebase 메세지 전송 실패 :%s", e.getMessagingErrorCode().toString()));
+            //throw new IOException(String.format("Firebase 메세지 전송 실패 :%s", e.getMessagingErrorCode().toString()));
         }
     }
 }

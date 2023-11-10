@@ -1,4 +1,4 @@
-package com.server.oceankeeper.notification.dto;
+package com.server.oceankeeper.domain.notification.dto;
 
 import lombok.Data;
 
