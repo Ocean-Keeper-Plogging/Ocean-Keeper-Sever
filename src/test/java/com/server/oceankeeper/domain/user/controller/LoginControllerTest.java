@@ -74,7 +74,7 @@ class LoginControllerTest {
         String requestBody = om.writeValueAsString(loginReqDto);
         UUID uuid = UUID.randomUUID();
         when(loginService.login(any(), any())).thenReturn(
-                new LoginResDto(new JoinResDto(OUser.builder().uuid(uuid).nickname("asdf").build()),
+                new LoginResDto(new JoinResDto(OUser.builder().uuid(uuid).nickname("asdf").profile("profile").build()),
                         new TokenInfo("Bearer", "asdf", "asdf", 1234L)));
 
         LoginUser mockUser = new LoginUser(OUser.builder()
@@ -85,6 +85,7 @@ class LoginControllerTest {
                 .uuid(uuid)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .profile("profile")
                 .password(new BCryptPasswordEncoder().encode(password))
                 .deviceToken(UUID.randomUUID().toString())
                 .build());
@@ -112,7 +113,7 @@ class LoginControllerTest {
                 .build();
         String requestBody = om.writeValueAsString(loginReqDto);
         when(loginService.login(any(), any())).thenReturn(
-                new LoginResDto(new JoinResDto(OUser.builder().uuid(UUID.randomUUID()).nickname("asdf").build()),
+                new LoginResDto(new JoinResDto(OUser.builder().uuid(UUID.randomUUID()).nickname("asdf").profile("profile").build()),
                         new TokenInfo("Bearer", "asdf", "asdf", 1234L)));
 
         //when
@@ -137,7 +138,7 @@ class LoginControllerTest {
                 .build();
         String requestBody = om.writeValueAsString(loginReqDto);
         when(loginService.login(any(), any())).thenReturn(
-                new LoginResDto(new JoinResDto(OUser.builder().uuid(UUID.randomUUID()).nickname("asdf").build()),
+                new LoginResDto(new JoinResDto(OUser.builder().uuid(UUID.randomUUID()).nickname("asdf").profile("profile").build()),
                         new TokenInfo("Bearer", "asdf", "asdf", 1234L)));
 
         //when

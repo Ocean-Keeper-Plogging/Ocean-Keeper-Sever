@@ -8,6 +8,7 @@ import javax.validation.constraints.NotEmpty;
 public class GuideModifyReqDto {
     @NotEmpty
     private final Long id;
-    private final String contents;
+    private final String videoName;
+    private final String videoLink;
     private final String title;
 }

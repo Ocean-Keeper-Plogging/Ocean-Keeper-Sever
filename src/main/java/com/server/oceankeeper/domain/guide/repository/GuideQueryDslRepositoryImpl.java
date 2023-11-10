@@ -24,6 +24,8 @@ public class GuideQueryDslRepositoryImpl implements GuideQueryDslRepository {
                         Projections.constructor(GuideDao.class,
                                 guide.id,
                                 guide.title,
+                                guide.videoName,
+                                guide.videoLink,
                                 guide.createdAt,
                                 guide.updatedAt.as("modifiedAt")))
                 .from(guide).where(lessThan(id)) //for no offset scrolling, use notice id

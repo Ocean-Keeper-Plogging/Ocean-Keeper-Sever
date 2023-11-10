@@ -45,7 +45,8 @@ public class GuideService {
         Guide modifiedGuide = Guide.builder()
                 .id(notice.getId())
                 .title(request.getTitle() == null ? notice.getTitle() : request.getTitle())
-                .contents(request.getContents() == null ? notice.getContents() : request.getContents())
+                .videoName(request.getVideoName() == null ? notice.getVideoName() : request.getVideoName())
+                .videoLink(request.getVideoLink() == null ? notice.getVideoLink() : request.getVideoLink())
                 .createdAt(notice.getCreatedAt())
                 .build();
         modifiedGuide = repository.save(modifiedGuide);

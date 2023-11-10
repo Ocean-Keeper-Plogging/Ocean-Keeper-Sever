@@ -1,6 +1,10 @@
 package com.server.oceankeeper.domain.activity.service;
 
-import com.server.oceankeeper.domain.activity.dto.*;
+import com.server.oceankeeper.domain.activity.dao.*;
+import com.server.oceankeeper.domain.activity.dto.ApplicationSettingReqDto;
+import com.server.oceankeeper.domain.activity.dto.ApplicationSettingResDto;
+import com.server.oceankeeper.domain.activity.dto.CrewInfoDetailDto;
+import com.server.oceankeeper.domain.activity.dto.FullApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyActivityReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyApplicationReqDto;
@@ -14,6 +18,7 @@ import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
 import com.server.oceankeeper.domain.crew.service.CrewService;
+import com.server.oceankeeper.domain.statistics.dto.ActivityInfoResDto;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
@@ -23,6 +28,7 @@ import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
+import com.server.oceankeeper.util.TokenUtil;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,12 +37,14 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -46,10 +54,11 @@ public class ActivityService {
     private final ActivityDetailRepository activityDetailRepository;
     private final UserRepository userRepository;
     private final CrewService crewService;
+    private final TokenUtil tokenUtil;
 
     @Transactional
     public List<MyScheduledActivityDto> getMyScheduleActivity(String id) {
-        return getMyActivitiesLimit5(new MyActivityParam(LocalDate.now(), UUIDGenerator.changeUuidFromString(id), CrewStatus.IN_PROGRESS));
+        return getMyActivitiesLimit5(new MyActivityParam(LocalDateTime.now(), UUIDGenerator.changeUuidFromString(id)));
     }
 
     private List<MyScheduledActivityDto> getMyActivitiesLimit5(MyActivityParam param) {
@@ -87,7 +96,7 @@ public class ActivityService {
             result.append(minute).append("분");
         }
         result.append(" 시작");
-        log.info("date {} => get start day {}", date, result);
+        //log.info("date {} => get start day {}", date, result);
 
         return result.toString();
     }
@@ -128,8 +137,13 @@ public class ActivityService {
     @Transactional
     public GetActivityResDto getActivities(String activityId, String status, LocationTag locationTag, GarbageCategory garbageCategory, Integer pageSize) {
         ActivityStatus activityStatus = ActivityStatus.getStatus(status);
-        Slice<AllActivityDao> response = activityRepository.getAllActivities(activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
-                activityStatus, locationTag, garbageCategory, PageRequest.ofSize(pageSize != null ? pageSize : 1));
+        Slice<AllActivityDao> response = activityRepository.getAllActivities(
+                activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
+                activityStatus,
+                locationTag,
+                garbageCategory,
+                LocalDateTime.now(),
+                PageRequest.ofSize(pageSize != null ? pageSize : 1));
         log.debug("getActivities response :{}", response);
         List<AllActivityResDto> activities = response.stream().map(r -> new AllActivityResDto(
                 UUIDGenerator.changeUuidToString(r.getActivityId()),
@@ -147,12 +161,13 @@ public class ActivityService {
         log.debug("getActivities activities :{}", response);
         return new GetActivityResDto(activities,
                 new GetActivityResDto.Meta(activities.size(), !response.hasNext()));
-
     }
 
     @Transactional
     public RegisterActivityResDto registerActivity(RegisterActivityReqDto request) {
         log.info("registerActivity request :{}", request);
+
+        checkRecruitDay(request.getRecruitStartAt(), request.getRecruitEndAt(), request.getStartAt());
 
         OUser user = getUser(request.getUserId());
 
@@ -168,6 +183,12 @@ public class ActivityService {
         EventPublisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
 
         return new RegisterActivityResDto(UUIDGenerator.changeUuidToString(activity.getUuid()));
+    }
+
+    private void checkRecruitDay(LocalDate recruitStartAt, LocalDate recruitEndAt, LocalDateTime startAt) {
+        if (recruitStartAt.isAfter(recruitEndAt) || startAt.isBefore(recruitEndAt.atStartOfDay())) {
+            throw new IllegalRequestException("모집 기간과 활동 시작 시각을 확인해주세요");
+        }
     }
 
     @Transactional
@@ -199,12 +220,13 @@ public class ActivityService {
 
     public Activity getActivity(String activityId) {
         return activityRepository.findByUuid(UUIDGenerator.changeUuidFromString(activityId))
-                .orElseThrow(() -> new IdNotFoundException("해당 활동이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 활동이 존재하지 않습니다."));
     }
 
     @Transactional
-    public void modifyActivity(String activityId, ModifyActivityReqDto request, OUser user) {
-        log.info("modifyActivity activity id : {}, request :{}", activityId, request);
+    public void modifyActivity(String activityId, ModifyActivityReqDto request, HttpServletRequest servletRequest) {
+        log.debug("modifyActivity activity id : {}, request :{}", activityId, request);
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
 
         //요청한 사람이 만든 활동인지 확인
         //TODO: 인터셉터로 변환
@@ -212,6 +234,7 @@ public class ActivityService {
         ActivityDetail activityDetail = getActivityDetail(activity);
         OUser host = crewService.findOwner(activity);
         if (!user.equals(host)) {
+            log.error("current user :{}\n host :{}", user, host);
             throw new IllegalRequestException("요청한 유저에게 활동 수정 권한이 없습니다.");
         }
 
@@ -225,12 +248,27 @@ public class ActivityService {
             activity.setGarbageCategory(request.getGarbageCategory());
         if (request.getLocationTag() != null)
             activity.setLocationTag(request.getLocationTag());
-        if (request.getRecruitStartAt() != null)
+        if (request.getRecruitStartAt() != null) {
+            checkRecruitDay(
+                    request.getRecruitStartAt(),
+                    request.getRecruitEndAt() != null ? request.getRecruitEndAt() : activity.getRecruitEndAt(),
+                    request.getStartAt() != null ? request.getStartAt() : activity.getStartAt());
             activity.setRecruitStartAt(request.getRecruitStartAt());
-        if (request.getRecruitEndAt() != null)
+        }
+        if (request.getRecruitEndAt() != null) {
+            checkRecruitDay(
+                    request.getRecruitStartAt() != null ? request.getRecruitStartAt() : activity.getRecruitStartAt(),
+                    request.getRecruitEndAt(),
+                    request.getStartAt() != null ? request.getStartAt() : activity.getStartAt());
             activity.setRecruitEndAt(request.getRecruitEndAt());
-        if (request.getStartAt() != null)
+        }
+        if (request.getStartAt() != null) {
+            checkRecruitDay(
+                    request.getRecruitStartAt() != null ? request.getRecruitStartAt() : activity.getRecruitStartAt(),
+                    request.getRecruitEndAt() != null ? request.getRecruitEndAt() : activity.getRecruitEndAt(),
+                    request.getStartAt());
             activity.setStartAt(request.getStartAt());
+        }
         if (request.getThumbnailUrl() != null)
             activity.setThumbnail(request.getThumbnailUrl());
         if (request.getKeeperIntroduction() != null)
@@ -262,7 +300,8 @@ public class ActivityService {
     }
 
     @Transactional
-    public void modifyApplication(String applicationId, ModifyApplicationReqDto request, OUser user) {
+    public void modifyApplication(String applicationId, ModifyApplicationReqDto request, HttpServletRequest servletRequest) {
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
         Activity activity = getActivity(applicationId);
 
         Crews crew = crewService.findApplication(user, activity);
@@ -278,12 +317,14 @@ public class ActivityService {
     }
 
     @Transactional
-    public ApplicationReqDto getLastApplication(OUser user) {
-        return crewService.findApplication(user);
+    public ApplicationDto getLastApplication(HttpServletRequest servletRequest) {
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
+        return crewService.getApplicationDto(user);
     }
 
     @Transactional
-    public void cancelApplication(String applicationId, OUser user) {
+    public void cancelApplication(String applicationId, HttpServletRequest servletRequest) {
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
         Crews crew = crewService.findApplication(user, applicationId);
 
         Activity activity = crew.getActivity();
@@ -305,35 +346,43 @@ public class ActivityService {
     }
 
     @Transactional
-    public ApplicationReqDto getApplication(String applicationId) {
-        return crewService.findApplication(applicationId);
+    public ApplicationDto getApplication(String applicationId) {
+        return crewService.getApplicationDto(applicationId);
     }
 
     @Transactional
-    public MyActivityDto getMyActivities(String userId, String activityId, String status, Integer pageSize) {
-        CrewRole role = CrewRole.getRole(status);
-        Slice<ActivityDao> response = activityRepository.getMyActivities(UUIDGenerator.changeUuidFromString(userId),
+    public Slice<ActivityDao> getActivityDao(String userId, String activityId, String status, String roleStr, Integer pageSize) {
+        CrewRole role = CrewRole.getRole(roleStr);
+        ActivityStatus activityStatus = ActivityStatus.getStatus(status);
+        Slice<ActivityDao> response = activityRepository.getMyActivities(
+                UUIDGenerator.changeUuidFromString(userId),
                 activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
-                status == null ? null : status.equals("closed") ? ActivityStatus.CLOSE : ActivityStatus.OPEN,
-                role, PageRequest.ofSize(pageSize != null ? pageSize : 1));
-        log.debug("getMyActivities response :{}", response);
+                activityStatus,
+                role,
+                LocalDateTime.now(),
+                PageRequest.ofSize(pageSize != null ? pageSize : 5));
+        return response;
+    }
 
-        return new MyActivityDto(response.stream().map(r -> new MyActivityDto.MyActivityDetail(
-                UUIDGenerator.changeUuidToString(r.getActivityId()),
-                r.getTitle(),
-                r.getHostNickname(),
-                r.getQuota(),
-                r.getParticipants(),
-                r.getActivityImageUrl(),
-                r.getRecruitStartAt(),
-                r.getRecruitEndAt(),
-                r.getStartAt(),
-                r.getStatus(),
-                r.getAddress())).collect(Collectors.toList()));
+    public ActivityStatus getActivityStatus(ActivityDao r) {
+        if (LocalDateTime.now().isBefore(r.getRecruitEndAt().atStartOfDay())) {
+            if (LocalDateTime.now().isBefore(r.getStartAt()))
+                return ActivityStatus.OPEN;
+            else
+                return ActivityStatus.RECRUITMENT_CLOSE;
+        }
+        return ActivityStatus.CLOSED;
+    }
+
+    public CrewStatus getCrewStatusFromActivityDao(ActivityDao r) {
+        final CrewStatus status = r.getCrewStatus();
+        return (status == CrewStatus.REJECT || status == CrewStatus.NO_SHOW) ? status :
+                LocalDateTime.now().isBefore(r.getStartAt()) ? CrewStatus.IN_PROGRESS : CrewStatus.CLOSED;
     }
 
     @Transactional
-    public void cancelActivity(String activityId, OUser user) {
+    public void cancelActivity(String activityId, HttpServletRequest servletRequest) {
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
         Activity activity = getActivity(activityId);
         Crews host = crewService.findApplication(user, activity);
 
@@ -347,7 +396,8 @@ public class ActivityService {
     }
 
     @Transactional
-    public HostActivityDto getHostActivityName(OUser user) {
+    public HostActivityDto getHostActivityName(HttpServletRequest servletRequest) {
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
         List<HostActivityDao> activities = activityRepository.getHostActivityNameFromUser(user);
         return new HostActivityDto(activities.stream().map(
                         d -> new HostActivityDto.HostActivityInnerDto(
@@ -357,19 +407,60 @@ public class ActivityService {
     }
 
     @Transactional
-    public CrewActivityDto getCrewInfo(OUser user) {
-        List<CrewInfoDao> activities = activityRepository.getCrewInfoFromHostUser(user);
-        List<CrewActivityDto.CrewActivityInnerClass> data = activities.stream().map(
+    public CrewActivityDto getCrewInfo(String activityId, HttpServletRequest servletRequest) {
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
+
+        List<CrewInfoDao> crewInfo = activityRepository.getCrewInfoFromHostUser(user, UUIDGenerator.changeUuidFromString(activityId));
+        List<CrewActivityDto.CrewActivityInnerClass> data = crewInfo.stream().map(
                 d -> new CrewActivityDto.CrewActivityInnerClass(d.getNickname())).collect(Collectors.toList());
-        if (!activities.isEmpty()) {
+        if (!crewInfo.isEmpty()) {
             return new CrewActivityDto(
-                    UUIDGenerator.changeUuidToString(activities.get(0).getUuid()),
-                    activities.get(0).getTitle(),
+                    UUIDGenerator.changeUuidToString(crewInfo.get(0).getUuid()),
+                    crewInfo.get(0).getTitle(),
                     data);
         }
         return new CrewActivityDto(
                 "",
                 "",
                 null);
+    }
+
+    @Transactional
+    public CrewInfoDetailDto getCrewInfoDetail(String activityId, HttpServletRequest servletRequest) {
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
+        //validation
+        Activity activity = getActivity(activityId);
+        OUser host = crewService.findOwner(activity);
+        if (!user.equals(host)) {
+            log.error("current user :{} host :{}", user, host);
+            throw new IllegalRequestException("요청한 유저에게 활동 조회 권한이 없습니다.");
+        }
+
+        List<CrewInfoDetailDao> crewInfo = activityRepository.getCrewInfo(UUIDGenerator.changeUuidFromString(activityId));
+        List<CrewInfoDetailDto.CrewInfoDetailData> data = IntStream.range(0, crewInfo.size())
+                .mapToObj(i -> new CrewInfoDetailDto.CrewInfoDetailData(i + 1, crewInfo.get(i)))
+                .collect(Collectors.toList());
+        log.debug("crew detail info :{}", data);
+        return new CrewInfoDetailDto(activityId, data);
+    }
+
+    @Transactional
+    public ApplicationSettingResDto setApplicationStatus(ApplicationSettingReqDto status, HttpServletRequest servletRequest) {
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
+        CrewStatus newStatus = CrewStatus.getLimitedStatus(status.getStatus());
+        if (newStatus == null) {
+            throw new IllegalRequestException("요청한 크루원 상태가 올바르지 않습니다. NO_SHOW(노쇼), REJECT(거절) 중 하나여야합니다.");
+        }
+
+        boolean result = true;
+
+        for (String applicationId : status.getApplicationId()) {
+            Crews application = crewService.findCrews(applicationId);
+            application.changeCrewStatus(newStatus);
+            crewService.save(application);
+            result &= (application.getCrewStatus() == newStatus);
+        }
+
+        return new ApplicationSettingResDto(result, newStatus);
     }
 }

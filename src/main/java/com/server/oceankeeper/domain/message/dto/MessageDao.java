@@ -14,10 +14,12 @@ public class MessageDao {
 
     private final String from;
     private final UUID activityId;
-    private final String title;
+    private final String activityTitle;
+    private final String messageBody;
     private final GarbageCategory garbageCategory;
 
-    private final LocalDateTime time;
+    private final LocalDateTime messageSentAt;
+    private final LocalDateTime activityStartAt;
 
     private final boolean read;
 }

@@ -1,18 +1,14 @@
 package com.server.oceankeeper.domain.activity.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
-@ToString
-@Getter
-@Setter
-@RequiredArgsConstructor
+@Data
 @Builder
-public class ApplicationReqDto {
+public class ApplicationDto {
     @ApiModelProperty(
             value = "활동 신청할 유저 이름",
             example = "김둘리"

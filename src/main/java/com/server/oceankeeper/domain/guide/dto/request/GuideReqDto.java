@@ -7,12 +7,14 @@ import java.time.LocalDateTime;
 
 @Data
 public class GuideReqDto {
-    private final String contents;
+    private final String videoLink;
+    private final String videoName;
     private final String title;
 
     public Guide toEntity(){
         return Guide.builder()
-                .contents(contents)
+                .videoLink(videoLink)
+                .videoName(videoName)
                 .title(title)
                 .createdAt(LocalDateTime.now())
                 .build();

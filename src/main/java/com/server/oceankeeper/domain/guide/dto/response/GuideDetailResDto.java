@@ -17,7 +17,7 @@ public class GuideDetailResDto {
         return new GuideDetailResDto(
                 notice.getId(),
                 notice.getTitle(),
-                notice.getContents(),
+                notice.getVideoLink(),
                 notice.getCreatedAt().toLocalDate(),
                 notice.getUpdatedAt().toLocalDate());
     }

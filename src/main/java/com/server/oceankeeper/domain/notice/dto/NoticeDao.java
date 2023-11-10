@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public class NoticeDao {
     private final Long id;
     private final String title;
+    private final String contents;
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 }

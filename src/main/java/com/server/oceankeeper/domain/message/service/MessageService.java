@@ -3,8 +3,8 @@ package com.server.oceankeeper.domain.message.service;
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.activity.service.ActivityService;
 import com.server.oceankeeper.domain.message.dto.MessageDao;
+import com.server.oceankeeper.domain.message.dto.request.MessageReadReqDto;
 import com.server.oceankeeper.domain.message.dto.request.MessageSendReqDto;
-import com.server.oceankeeper.domain.message.dto.response.MessageDetailResDto;
 import com.server.oceankeeper.domain.message.dto.response.MessageSendResDto;
 import com.server.oceankeeper.domain.message.dto.response.PostResDto;
 import com.server.oceankeeper.domain.message.entity.MessageDetail;
@@ -13,6 +13,7 @@ import com.server.oceankeeper.domain.message.entity.MessageType;
 import com.server.oceankeeper.domain.message.entity.OMessage;
 import com.server.oceankeeper.domain.message.repository.MessageDetailRepository;
 import com.server.oceankeeper.domain.message.repository.MessageRepository;
+import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
@@ -23,14 +24,17 @@ import com.server.oceankeeper.util.UUIDGenerator;
 import com.server.oceankeeper.util.UserAccessValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -46,18 +50,13 @@ public class MessageService {
     @Transactional
     public PostResDto getInbox(String userId, Long id, String type, Integer size, HttpServletRequest request) {
         userAccessValidationUtil.validate(request);
-        OUser user = activityService.getUser(userId);
 
         if (type != null && type.equals("SENT")) {
             return getSentMessageInbox(userId, id, size, request);
         }
 
         MessageType messageType = MessageType.toClass(type);
-        Slice<MessageDao> result = messageRepository.findByUserAndMessageType(
-                id,
-                user,
-                messageType,
-                size != null ? PageRequest.ofSize(size) : PageRequest.ofSize(5));
+        Slice<MessageDao> result = getMessageDao(id, size, userId, null, messageType);
 
         return new PostResDto(result.stream()
                 .map(m -> new PostResDto.MessageDto(
@@ -65,12 +64,26 @@ public class MessageService {
                         m.getType(),
                         m.getFrom(),
                         UUIDGenerator.changeUuidToString(m.getActivityId()),
-                        m.getTitle(),
+                        m.getActivityTitle(),
+                        m.getMessageBody(),
                         m.getGarbageCategory(),
-                        m.getTime(),
+                        m.getMessageSentAt(),
+                        m.getActivityStartAt(),
                         m.isRead()))
                 .collect(Collectors.toList()),
                 new PostResDto.Meta(result.getSize(), result.isLast()));
+    }
+
+    @Transactional
+    public Slice<MessageDao> getMessageDao(Long id, Integer size, String userId, UUID activityId, MessageType messageType) {
+        OUser user = activityService.getUser(userId);
+        Slice<MessageDao> result = messageRepository.findByUserAndMessageType(
+                id,
+                user,
+                messageType,
+                activityId,
+                size != null ? PageRequest.ofSize(size) : PageRequest.ofSize(5));
+        return result;
     }
 
     private PostResDto getSentMessageInbox(String userId, Long id, Integer size, HttpServletRequest request) {
@@ -89,12 +102,20 @@ public class MessageService {
                         m.getType(),
                         m.getFrom(),
                         UUIDGenerator.changeUuidToString(m.getActivityId()),
-                        m.getTitle(),
+                        m.getActivityTitle(),
+                        m.getMessageBody(),
                         m.getGarbageCategory(),
-                        m.getTime(),
+                        m.getMessageSentAt(),
+                        m.getActivityStartAt(),
                         m.isRead()))
                 .collect(Collectors.toList()),
                 new PostResDto.Meta(result.getSize(), result.isLast()));
+    }
+
+    @Transactional
+    public OMessage findByActivityAndMessageType(Activity activity, MessageType messageType) {
+        return messageRepository.findByActivityAndMessageType(activity, messageType)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 메세지가 없습니다."));
     }
 
     @Transactional
@@ -102,7 +123,6 @@ public class MessageService {
         OUser user = tokenUtil.getUserFromHeader(request);
         Activity activity = null;
 
-        String title = parseTitle(req);
         activity = activityService.getActivity(req.getActivityId());
 
         List<Long> messageIdList = new ArrayList<>();
@@ -113,13 +133,12 @@ public class MessageService {
                     .activity(activity)
                     .messageFrom(user.getNickname())
                     .to(nickname)
-                    .user(user)
-                    .title(title)
+                    .sender(user)
+                    .contents(req.getContents())
                     .isDeleteFromReceiver(false)
                     .isDeleteFromSender(false)
                     .build();
             messageRepository.save(message);
-            EventPublisher.emit(new MessageEvent(this, nickname, OceanKeeperEventType.MESSAGE_SENT_EVENT));
 
             MessageDetail messageDetail = MessageDetail.builder()
                     .id(message.getId())
@@ -127,29 +146,17 @@ public class MessageService {
                     .build();
             messageDetailRepository.save(messageDetail);
             messageIdList.add(message.getId());
+
+            EventPublisher.emit(new MessageEvent(this, nickname, OceanKeeperEventType.MESSAGE_SENT_EVENT));
         }
 
         return new MessageSendResDto(messageIdList);
     }
 
-    private String parseTitle(MessageSendReqDto req) {
-        if (req.getContents().matches("\n")) {
-            return req.getContents().split("\n")[0];
-        }
-        if (req.getContents().contains(".")) {
-            return req.getContents().split("\\.")[0];
-        }
-
-        //fallback
-        return req.getContents().substring(0, req.getContents().length() / 2) + "...";
-    }
-
     @Transactional
-    public MessageDetailResDto getMessage(Long messageId, HttpServletRequest request) {
-        OMessage message = messageRepository.findById(messageId)
+    public boolean changeReadFlag(MessageReadReqDto data, HttpServletRequest request) {
+        OMessage message = messageRepository.findById(data.getMessageId())
                 .orElseThrow(() -> new ResourceNotFoundException("메세지 아이디에 해당하는 메세지가 없습니다"));
-        MessageDetail messageDetail = messageDetailRepository.findById(messageId)
-                .orElseThrow(() -> new ResourceNotFoundException("메세지 아이디에 해당하는 상세 메세지가 없습니다"));
 
         OUser user = tokenUtil.getUserFromHeader(request);
 
@@ -159,11 +166,9 @@ public class MessageService {
             throw new IllegalRequestException("요청자가 받거나 보낸 메세지만 확인할 수 있습니다.");
         }
 
-        MessageDetailResDto response = MessageDetailResDto.fromEntity(message, messageDetail);
-
-        message.messageRead(true);
+        message.messageRead(data.isRead());
         messageRepository.save(message);
-        return response;
+        return true;
     }
 
     @Transactional
@@ -172,8 +177,6 @@ public class MessageService {
 
         OMessage message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new ResourceNotFoundException("메세지 아이디에 해당하는 메세지가 없습니다"));
-        MessageDetail messageDetail = messageDetailRepository.findById(messageId)
-                .orElseThrow(() -> new ResourceNotFoundException("메세지 아이디에 해당하는 상세 메세지가 없습니다"));
 
         boolean bUserIsSender = userIsSender(user, message);
         boolean bUserIsReceiver = userIsReceiver(user, message);
@@ -193,7 +196,6 @@ public class MessageService {
         if (message.getIsDeleteFromReceiver() && message.getIsDeleteFromSender()) {
             log.debug("message id({}) will be deleted", message.getId());
             messageRepository.delete(message);
-            messageDetailRepository.delete(messageDetail);
         }
 
         return true;
@@ -205,5 +207,23 @@ public class MessageService {
 
     private boolean userIsReceiver(OUser user, OMessage message) {
         return message.getMessageTo().equals(user.getNickname());
+    }
+
+    //(HACK) Message entity doesn't control the user entity, so force change the sender and recipient of the message
+    @EventListener
+    public void handleEvent(ActivityEvent event) {
+        if (event.getEvent().equals(OceanKeeperEventType.NICKNAME_CHANGE_EVENT)) {
+            log.debug("닉네임 변경 이벤트 처리");
+            String newNickname = event.getUser().getNickname();
+            List<OMessage> messages = messageRepository.findByMessageFrom(newNickname);
+            for (OMessage message : messages) {
+                message.changeMessageFrom(newNickname);
+            }
+
+            messages = messageRepository.findByMessageTo(newNickname);
+            for (OMessage message : messages) {
+                message.changeMessageTo(newNickname);
+            }
+        }
     }
 }

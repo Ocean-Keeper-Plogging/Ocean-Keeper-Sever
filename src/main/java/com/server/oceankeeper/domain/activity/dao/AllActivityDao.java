@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.activity.dto;
+package com.server.oceankeeper.domain.activity.dao;
 
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;

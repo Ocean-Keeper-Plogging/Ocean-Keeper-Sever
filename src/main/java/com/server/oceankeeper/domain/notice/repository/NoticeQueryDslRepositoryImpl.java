@@ -24,6 +24,7 @@ public class NoticeQueryDslRepositoryImpl implements NoticeQueryDslRepository {
                         Projections.constructor(NoticeDao.class,
                                 notice.id.as("noticeId"),
                                 notice.title,
+                                notice.contents,
                                 notice.createdAt,
                                 notice.updatedAt.as("modifiedAt")))
                 .from(notice).where(lessThan(noticeId)) //for no offset scrolling, use notice id

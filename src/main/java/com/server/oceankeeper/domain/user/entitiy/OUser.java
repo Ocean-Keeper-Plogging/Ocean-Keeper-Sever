@@ -11,11 +11,11 @@ import java.util.UUID;
 @Getter
 @Entity
 @NoArgsConstructor
-//@ToString(callSuper = true)
+@ToString(callSuper = true)
 @Table(name = "users", indexes = {
         @Index(name = "i_uuid", columnList = "uuid", unique = true),
         @Index(name = "i_provider_providerid", columnList = "provider, providerId", unique = true)})
-public class OUser extends BaseEntity {
+public class  OUser extends BaseEntity {
     @Id // primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

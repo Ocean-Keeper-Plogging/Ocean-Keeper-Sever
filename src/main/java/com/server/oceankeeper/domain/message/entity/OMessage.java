@@ -45,10 +45,10 @@ public class OMessage extends BaseEntity {
     private Activity activity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID")
-    private OUser user;
+    @JoinColumn(name = "SENDER_ID")
+    private OUser sender;
 
-    private String title;
+    private String contents;
 
     private boolean isRead;
 
@@ -72,17 +72,25 @@ public class OMessage extends BaseEntity {
 
     @Builder
     public OMessage(Long id, MessageType type, String messageFrom, String to,
-                    Activity activity, OUser user, String title, boolean read,
+                    Activity activity, OUser sender, String contents, boolean read,
                     Boolean isDeleteFromSender, Boolean isDeleteFromReceiver) {
         this.id = id;
         this.messageType = type;
         this.messageFrom = messageFrom;
         this.messageTo = to;
         this.activity = activity;
-        this.user = user;
-        this.title = title;
+        this.sender = sender;
+        this.contents = contents;
         this.isRead = read;
         this.isDeleteFromSender = isDeleteFromSender;
         this.isDeleteFromReceiver = isDeleteFromReceiver;
+    }
+
+    public void changeMessageFrom(String newNickname) {
+        this.messageTo = newNickname;
+    }
+
+    public void changeMessageTo(String newNickname) {
+        this.messageTo = newNickname;
     }
 }

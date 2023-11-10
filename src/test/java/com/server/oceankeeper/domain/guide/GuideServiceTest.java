@@ -39,8 +39,8 @@ class GuideServiceTest {
     @Test
     void getGuide() {
         Slice<GuideDao> expected = new SliceImpl<>(
-                List.of(new GuideDao(2L, "공지사항2", LocalDateTime.now(), LocalDateTime.now()),
-                        new GuideDao(1L, "공지사항", LocalDateTime.now(), LocalDateTime.now())),
+                List.of(new GuideDao(2L, "가이드1", "가이드1", "youtube.com/1", LocalDateTime.now(), LocalDateTime.now()),
+                        new GuideDao(1L, "공지사항2", "가이드2", "youtube.com/2", LocalDateTime.now(), LocalDateTime.now())),
                 Pageable.ofSize(2),
                 false);
         when(repository.getData(any(), any())).thenReturn(expected);
@@ -56,14 +56,15 @@ class GuideServiceTest {
                 .id(1L)
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
-                .contents("공지사항입니다.")
-                .title("공지사항")
+                .videoLink("youtube.com")
+                .videoName("비디오 이름1")
+                .title("이용가이드임")
                 .build();
     }
 
     @Test
     void postGuide() {
-        GuideReqDto request = new GuideReqDto("공지사항입니다.", "공지사항");
+        GuideReqDto request = new GuideReqDto("video link1", "비디오 이름1", "title");
         Guide expected = request.toEntity();
         when(repository.save(any())).thenReturn(expected);
         GuideResDto result = service.post(request);
@@ -74,10 +75,11 @@ class GuideServiceTest {
 
     @Test
     void putGuide() {
-        Guide notice = makeData();
-        GuideModifyReqDto request = new GuideModifyReqDto(1L, "공지사항", "공지사항 타이틀");
-        when(repository.findById(any())).thenReturn(Optional.ofNullable(notice));
-        when(repository.save(any())).thenReturn(new Guide(1L, "공지사항", "공지사항 타이틀", notice.getCreatedAt(), notice.getUpdatedAt()));
+        Guide guide = makeData();
+        GuideModifyReqDto request = new GuideModifyReqDto(1L, "new 비디오 이름", "https://youtube.com", "이용가이드임");
+        when(repository.findById(any())).thenReturn(Optional.ofNullable(guide));
+        when(repository.save(any())).thenReturn(new Guide(1L, "https://youtube.com", "new 비디오 이름",
+                "이용가이드임", guide.getCreatedAt(), guide.getUpdatedAt()));
 
         GuideResDto result = service.put(request);
         assertThat(result.getId()).isEqualTo(request.getId());
@@ -87,24 +89,24 @@ class GuideServiceTest {
 
     @Test
     void getGuideDetail() {
-        Guide notice = makeData();
-        when(repository.findById(any())).thenReturn(Optional.ofNullable(notice));
+        Guide guide = makeData();
+        when(repository.findById(any())).thenReturn(Optional.ofNullable(guide));
 
-        GuideDetailResDto result = service.getDetail(notice.getId());
-        assertThat(result.getId()).isEqualTo(notice.getId());
-        assertThat(result.getTitle()).isEqualTo(notice.getTitle());
-        assertThat(result.getContents()).isEqualTo(notice.getContents());
-        assertThat(result.getCreatedAt()).isEqualTo(notice.getCreatedAt().toLocalDate());
+        GuideDetailResDto result = service.getDetail(guide.getId());
+        assertThat(result.getId()).isEqualTo(guide.getId());
+        assertThat(result.getTitle()).isEqualTo(guide.getTitle());
+        assertThat(result.getContents()).isEqualTo(guide.getVideoLink());
+        assertThat(result.getCreatedAt()).isEqualTo(guide.getCreatedAt().toLocalDate());
     }
 
     @Test
     void deleteGuide() {
         //given
-        Guide notice = makeData();
-        when(repository.findById(any())).thenReturn(Optional.ofNullable(notice));
+        Guide guide = makeData();
+        when(repository.findById(any())).thenReturn(Optional.ofNullable(guide));
         doNothing().when(repository).delete(any());
 
-        boolean result = service.delete(notice.getId());
+        boolean result = service.delete(guide.getId());
         assertThat(result).isTrue();
     }
 }

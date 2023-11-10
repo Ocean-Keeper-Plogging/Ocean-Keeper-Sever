@@ -7,9 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ActivityStatus {
     OPEN("모집중"),
-    CLOSE("활동종료"),
-    CANCEL("활동취소"),
-    ALL("전체");
+    CLOSED("활동종료"),
+    RECRUITMENT_CLOSE("모집종료");
 
     private final String value;
 
@@ -19,11 +18,9 @@ public enum ActivityStatus {
             case "open":
                 return OPEN;
             case "closed":
-                return CLOSE;
-            case "cancel":
-                return CANCEL;
-            case "all":
-                return ALL;
+                return CLOSED;
+            case "recruitment-closed":
+                return RECRUITMENT_CLOSE;
             default:
                 return null;
         }

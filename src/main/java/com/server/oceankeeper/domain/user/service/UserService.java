@@ -67,6 +67,8 @@ public class UserService {
         inspectDuplicatedNickname(nickname);
 
         user.changeNickname(nickname);
+
+        EventPublisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.NICKNAME_CHANGE_EVENT));
     }
 
     @Transactional
@@ -86,8 +88,15 @@ public class UserService {
         }
     }
 
-    public OUser findUserByNickname(String nickname) {
+    @Transactional
+    public OUser findByNickname(String nickname) {
         return userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 닉네임을 가진 유저가 존재하지 않습니다."));
+    }
+
+    @Transactional
+    public OUser findByUUID(String userId) {
+        return userRepository.findByUuid(UUIDGenerator.changeUuidFromString(userId))
+                .orElseThrow(() -> new IdNotFoundException("해당 아이디가 존재하지 않습니다."));
     }
 }

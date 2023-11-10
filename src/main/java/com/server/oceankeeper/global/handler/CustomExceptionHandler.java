@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -188,7 +189,7 @@ public class CustomExceptionHandler {
                         new ErrorResponse(
                                 HttpStatus.FORBIDDEN.getReasonPhrase(),
                                 e.getMessage(),
-                                ErrorCode.NOT_FOUND_USER)));
+                                ErrorCode.FORBIDDEN_ERROR)));
     }
 
     @ExceptionHandler(DuplicatedResourceException.class)
@@ -226,6 +227,17 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(ExpiredTokenException.class)
     public ResponseEntity<APIResponse<ErrorResponse>> expiredTokenException(ExpiredTokenException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(APIResponse.createErrResponse(HttpStatus.UNAUTHORIZED,
+                        new ErrorResponse(
+                                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                                e.getMessage(),
+                                ErrorCode.UNAUTHORIZED_ERROR)));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<APIResponse<ErrorResponse>> mismatchException(BadCredentialsException e) {
         log.error(e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(APIResponse.createErrResponse(HttpStatus.UNAUTHORIZED,

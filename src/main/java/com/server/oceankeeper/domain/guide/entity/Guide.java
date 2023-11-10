@@ -18,15 +18,19 @@ public class Guide extends BaseEntity {
     private Long id;
 
     @Column
-    private String contents;
+    private String videoLink;
+
+    @Column
+    private String videoName;
 
     @Column
     private String title;
 
     @Builder
-    public Guide(Long id, String contents, String title, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public Guide(Long id, String videoLink, String videoName, String title, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.id = id;
-        this.contents = contents;
+        this.videoLink = videoLink;
+        this.videoName = videoName;
         this.title = title;
         this.createdAt = createdAt;
         this.updatedAt = modifiedAt;

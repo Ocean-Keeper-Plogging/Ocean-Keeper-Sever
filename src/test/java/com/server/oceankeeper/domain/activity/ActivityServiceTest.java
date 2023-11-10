@@ -1,6 +1,6 @@
 package com.server.oceankeeper.domain.activity;
 
-import com.server.oceankeeper.domain.activity.dto.MyActivityDao;
+import com.server.oceankeeper.domain.activity.dao.MyActivityDao;
 import com.server.oceankeeper.domain.activity.dto.request.*;
 import com.server.oceankeeper.domain.activity.dto.response.ApplyActivityResDto;
 import com.server.oceankeeper.domain.activity.dto.response.MyScheduledActivityDto;
@@ -23,6 +23,8 @@ import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
+import com.server.oceankeeper.global.exception.IllegalRequestException;
+import com.server.oceankeeper.util.TokenUtil;
 import com.server.oceankeeper.util.UUIDGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -59,6 +62,8 @@ class ActivityServiceTest extends DummyObject {
     private CrewService crewService;
     @Mock
     private CrewRepository crewRepository;
+    @Mock
+    private TokenUtil tokenUtil;
 
     private OUser createUser() {
         return OUser.builder()
@@ -143,6 +148,62 @@ class ActivityServiceTest extends DummyObject {
     }
 
     @Test
+    @DisplayName("활동 등록 시작시각이 모집시각보다 늦음")
+    void registerActivity_startTime_error() {
+        //given
+        RegisterActivityReqDto request = RegisterActivityReqDto.builder()
+                .userId("831ea182ffcd11edbe560242ac120002")
+                .title("title")
+                .location(new LocationDto("제주시", 123.1, 123.1))
+                .transportation("카셰어링 연결 예정")
+                .garbageCategory(GarbageCategory.COASTAL)
+                .locationTag(LocationTag.EAST)
+                .recruitStartAt(LocalDate.now())
+                .recruitEndAt(LocalDate.now().plusDays(10))
+                .startAt(LocalDateTime.now())
+                .keeperIntroduction("hi")
+                .activityStory("story")
+                .quota(5)
+                .programDetails("12시 집결")
+                .preparation("긴 상하의")
+                .rewards("점심제공")
+                .etc("오세요")
+                .build();;
+
+        //when
+        //then
+        assertThrows(IllegalRequestException.class, () -> activityService.registerActivity(request));
+    }
+
+    @Test
+    @DisplayName("활동 등록, 모집시작보다 모집끝이 더 빠름")
+    void registerActivity_recruitTime_error() {
+        //given
+        RegisterActivityReqDto request = RegisterActivityReqDto.builder()
+                .userId("831ea182ffcd11edbe560242ac120002")
+                .title("title")
+                .location(new LocationDto("제주시", 123.1, 123.1))
+                .transportation("카셰어링 연결 예정")
+                .garbageCategory(GarbageCategory.COASTAL)
+                .locationTag(LocationTag.EAST)
+                .recruitStartAt(LocalDate.now().plusDays(10))
+                .recruitEndAt(LocalDate.now())
+                .startAt(LocalDateTime.now().plusDays(10))
+                .keeperIntroduction("hi")
+                .activityStory("story")
+                .quota(5)
+                .programDetails("12시 집결")
+                .preparation("긴 상하의")
+                .rewards("점심제공")
+                .etc("오세요")
+                .build();;
+
+        //when
+        //then
+        assertThrows(IllegalRequestException.class, () -> activityService.registerActivity(request));
+    }
+
+    @Test
     @DisplayName("활동 모집 취소")
     void cancelActivity() {
         //given
@@ -156,12 +217,13 @@ class ActivityServiceTest extends DummyObject {
                 getCrew(expectActivity, createRandomUser()));
         when(activityRepository.findByUuid(any())).thenReturn(Optional.ofNullable(expectActivity));
         when(crewService.findApplication(any(), (Activity) any())).thenReturn(host);
-        when(crewService.findCrews(any())).thenReturn(crews);
+        when(crewService.findCrews(any(Activity.class))).thenReturn(crews);
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(expectUser);
         doNothing().when(crewService).deleteByHost(any());
 
         //when
         //then
-        activityService.cancelActivity(UUIDGenerator.changeUuidToString(expectActivity.getUuid()), expectUser);
+        activityService.cancelActivity(UUIDGenerator.changeUuidToString(expectActivity.getUuid()), new MockHttpServletRequest());
     }
 
     @Test
@@ -246,11 +308,12 @@ class ActivityServiceTest extends DummyObject {
         when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
         when(activityDetailRepository.findByActivity(any())).thenReturn(Optional.of(expectActivityDetail));
         when(crewService.findOwner(any())).thenReturn(expectUser);
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(expectUser);
         String activityId = UUIDGenerator.changeUuidToString(expectActivity.getUuid());
 
         //when
         //then
-        activityService.modifyActivity(activityId, request, expectUser);
+        activityService.modifyActivity(activityId, request, new MockHttpServletRequest());
     }
 
     private Crews createCrew(Activity expectActivity, OUser expectUser) {
@@ -363,11 +426,12 @@ class ActivityServiceTest extends DummyObject {
 
         when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
         when(crewService.findApplication(any(), (Activity) any())).thenReturn(expectedCrew);
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(expectUser);
         String activityId = UUIDGenerator.changeUuidToString(expectActivity.getUuid());
 
         //when
         //then
-        activityService.modifyApplication(activityId, request, expectUser);
+        activityService.modifyApplication(activityId, request, new MockHttpServletRequest());
     }
 
     private ApplyApplicationReqDto getApplicationRequest() {
@@ -442,9 +506,10 @@ class ActivityServiceTest extends DummyObject {
         when(crewService.addCrew(any(), any(), any())).thenReturn(newCrew);
         ApplyActivityResDto result = activityService.applyActivity(request);
         when(crewService.findApplication(any(), anyString())).thenReturn(newCrew);
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(mockUser);
 
         //when
-        activityService.cancelApplication(result.getApplicationId(), mockUser);
+        activityService.cancelApplication(result.getApplicationId(), new MockHttpServletRequest());
 
         //then
         assertThat(mockActivity.getParticipants()).isEqualTo(3); //하나 줄어듦
@@ -459,11 +524,12 @@ class ActivityServiceTest extends DummyObject {
                 .id(125L)
                 .uuid(UUIDGenerator.changeUuidFromString("831ea182ffcd11edbe560242ac121112"))
                 .build();
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(fakeUser);
 
         //when
         //then
         assertThrows(IdNotFoundException.class,
-                () -> activityService.cancelApplication(UUIDGenerator.changeUuidToString(UUID.randomUUID()), fakeUser));
+                () -> activityService.cancelApplication(UUIDGenerator.changeUuidToString(UUID.randomUUID()), new MockHttpServletRequest()));
     }
 
     private RegisterActivityReqDto getRegisterActivityRequest() {
@@ -476,7 +542,7 @@ class ActivityServiceTest extends DummyObject {
                 .locationTag(LocationTag.EAST)
                 .recruitStartAt(LocalDate.now())
                 .recruitEndAt(LocalDate.now().plusDays(5))
-                .startAt(LocalDateTime.now().plusHours(10))
+                .startAt(LocalDateTime.now().plusDays(15))
                 //.thumbnailUrl("")
                 .keeperIntroduction("hi")
                 //.keeperImageUrl("")
@@ -499,7 +565,7 @@ class ActivityServiceTest extends DummyObject {
                 .locationTag(LocationTag.EAST)
                 .recruitStartAt(LocalDate.now())
                 .recruitEndAt(LocalDate.now().plusDays(5))
-                .startAt(LocalDateTime.now().plusHours(10))
+                .startAt(LocalDateTime.now().plusDays(15))
                 //.thumbnailUrl("")
                 .keeperIntroduction("hi")
                 //.keeperImageUrl("")

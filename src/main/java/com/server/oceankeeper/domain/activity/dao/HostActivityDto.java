@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.activity.dto;
+package com.server.oceankeeper.domain.activity.dao;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

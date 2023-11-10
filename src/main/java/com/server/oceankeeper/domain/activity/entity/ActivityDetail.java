@@ -15,7 +15,7 @@ public class ActivityDetail {
     private Long id;
 
     @MapsId
-    @OneToOne(fetch=FetchType.LAZY)
+    @OneToOne(fetch=FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name="ACTIVITY_ID")
     @Setter
     private Activity activity;

@@ -11,7 +11,13 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter //TODO : 개선
-@Table(indexes = @Index(name = "i_uuid", columnList = "uuid", unique = true))
+@Table(indexes = {
+        @Index(name = "i_uuid", columnList = "uuid", unique = true),
+        @Index(name = "i_recruitEndAt", columnList = "recruitEndAt"),
+        @Index(name = "i_startAt", columnList = "startAt"),
+        @Index(name = "i_garbage", columnList = "garbageCategory"),
+        @Index(name = "i_location", columnList = "locationTag"),
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Activity extends BaseEntity {
     @Id
@@ -31,7 +37,6 @@ public class Activity extends BaseEntity {
     @Column(length = 30, nullable = false)
     private String title;
 
-    //@Column(columnDefinition = "default ''")
     private String thumbnail;
 
     @Enumerated(EnumType.STRING)
@@ -100,5 +105,9 @@ public class Activity extends BaseEntity {
     public void removeParticipant() {
         if (participants >= 1)
             participants--;
+    }
+
+    public void closeActivity() {
+        activityStatus = ActivityStatus.CLOSED;
     }
 }

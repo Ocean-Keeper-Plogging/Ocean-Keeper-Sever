@@ -70,8 +70,8 @@ class MessageRepositoryTest extends DummyObject {
                 .id(99L)
                 .messageFrom(user.getNickname())
                 .read(false)
-                .title("쪽지 1")
-                .user(user)
+                .contents("asdfasdf")
+                .sender(user)
                 .activity(activity)
                 .build();
         em.persist(message);

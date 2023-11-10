@@ -31,12 +31,14 @@ public class Crews extends BaseEntity {
     @JoinColumn(name = "USER_ID")
     private OUser user;
 
+    @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private CrewRole activityRole;
 
     @Column(length = 8)
     private String dayOfBirth;
 
+    @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private CrewStatus crewStatus;
 
@@ -115,5 +117,13 @@ public class Crews extends BaseEntity {
         result = 31 * result + user.hashCode();
         result = 31 * result + crewStatus.hashCode();
         return result;
+    }
+
+    public void closeApplication() {
+        crewStatus = CrewStatus.CLOSED;
+    }
+
+    public void changeCrewStatus(CrewStatus status) {
+        this.crewStatus = status;
     }
 }

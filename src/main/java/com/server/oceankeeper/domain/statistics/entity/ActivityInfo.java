@@ -21,7 +21,7 @@ public class ActivityInfo extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "user_id")
     private OUser user;
 

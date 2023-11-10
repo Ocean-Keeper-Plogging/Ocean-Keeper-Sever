@@ -42,7 +42,8 @@ class GuideRepositoryTest {
     private void makeNewGuide(Long id) {
         Guide notice = Guide.builder()
                 .id(id)
-                .contents(String.format("Guide %d 입니다.", id))
+                .videoName(String.format("Guide %d 입니다.", id))
+                .videoLink(String.format("youtube.com/%d", id))
                 .title(String.format("Guide %d", id))
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())

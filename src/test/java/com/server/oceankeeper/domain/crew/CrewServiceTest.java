@@ -40,7 +40,12 @@ class CrewServiceTest extends DummyObject {
 
     @Test
     void addCrew() {
-        Activity mockActivity = newMockActivity(5, ActivityStatus.OPEN,LocationTag.JEJU, GarbageCategory.COASTAL,UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120013"));
+        Activity mockActivity = newMockActivity(5,
+                ActivityStatus.OPEN,
+                LocationTag.JEJU,
+                GarbageCategory.COASTAL,
+                10,
+                UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120013"));
         OUser mockUser = newMockUser(1L, "kim", "naver", "providerId", UUID.randomUUID());
         Crews mockCrew = Crews.builder()
                 .activity(mockActivity)
@@ -72,7 +77,12 @@ class CrewServiceTest extends DummyObject {
 
     @Test
     void addHost() {
-        Activity mockActivity = newMockActivity(5, ActivityStatus.OPEN, LocationTag.EAST,GarbageCategory.COASTAL,UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120012"));
+        Activity mockActivity = newMockActivity(5,
+                ActivityStatus.OPEN,
+                LocationTag.EAST,
+                GarbageCategory.COASTAL,
+                10,
+                UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120012"));
         OUser mockUser = newMockUser(1L, "kim", "naver", "providerId", UUID.randomUUID());
         Crews mockCrew = Crews.builder()
                 .activity(Activity.builder().build())

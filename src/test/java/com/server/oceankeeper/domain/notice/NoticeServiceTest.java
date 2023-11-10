@@ -39,8 +39,8 @@ class NoticeServiceTest {
     @Test
     void getNotice() {
         Slice<NoticeDao> expected = new SliceImpl<>(
-                List.of(new NoticeDao(2L, "공지사항2", LocalDateTime.now(), LocalDateTime.now()),
-                        new NoticeDao(1L, "공지사항", LocalDateTime.now(), LocalDateTime.now())),
+                List.of(new NoticeDao(2L, "공지사항2", "contents2",LocalDateTime.now(), LocalDateTime.now()),
+                        new NoticeDao(1L, "공지사항", "contents",LocalDateTime.now(), LocalDateTime.now())),
                 Pageable.ofSize(2),
                 false);
         when(repository.getData(any(), any())).thenReturn(expected);

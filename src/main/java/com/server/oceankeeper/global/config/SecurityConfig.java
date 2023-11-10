@@ -70,6 +70,7 @@ public class SecurityConfig {
                 //auth
                 .antMatchers(HttpMethod.POST,"/auth/signup").permitAll()
                 .antMatchers(HttpMethod.POST,"/auth/login").permitAll()
+                .antMatchers(HttpMethod.POST,"/admin/login").permitAll() //TODO: 다른유저는 이방식으로 로그인못하도록 수정필요
                 .antMatchers(HttpMethod.POST,"/auth/reissue").permitAll()
                 .antMatchers(HttpMethod.GET,"/auth**").permitAll()
                 .antMatchers("/admin/**").hasRole("" + UserRole.ADMIN)

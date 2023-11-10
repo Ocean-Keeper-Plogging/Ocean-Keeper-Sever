@@ -27,6 +27,6 @@ public class LoginReqDto {
     }
 
     public UsernamePasswordAuthenticationToken toAuthentication(String password) {
-        return new UsernamePasswordAuthenticationToken(provider + "_" + providerId, password);
+        return new UsernamePasswordAuthenticationToken(provider + "-9___1-" + providerId, password);
     }
 }

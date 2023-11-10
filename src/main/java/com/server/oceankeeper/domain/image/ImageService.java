@@ -41,9 +41,7 @@ public class ImageService {
         String url = uploadNewProfile(file, dirName);
 
         updateProfile(user, url);
-
-        ProfileResDto profileResDto = ProfileResDto.builder().url(url).build();
-        return profileResDto;
+        return ProfileResDto.builder().url(url).build();
     }
 
     @Transactional

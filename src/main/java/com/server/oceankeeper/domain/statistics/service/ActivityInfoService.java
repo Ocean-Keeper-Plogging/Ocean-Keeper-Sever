@@ -9,17 +9,22 @@ import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
+import com.server.oceankeeper.util.TokenUtil;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ActivityInfoService {
     private final ActivityInfoRepository activityInfoRepository;
+    private final TokenUtil tokenUtil;
 
     @EventListener
     public void handle(ActivityEvent event) {
@@ -80,14 +85,22 @@ public class ActivityInfoService {
     private void registerActivity(ActivityEvent event) {
         OUser user = event.getUser();
         ActivityInfo info = getActivityInfo(user);
-        info.addHostingCount();
         activityInfoRepository.save(info);
     }
 
-    public ActivityInfoResDto getActivityInfo(String userId, OUser user) {
+    @Transactional
+    public ActivityInfoResDto getUserActivityInfo(String userId, HttpServletRequest servletRequest) {
+        OUser user = tokenUtil.getUserFromHeader(servletRequest);
         if (!userId.equals(UUIDGenerator.changeUuidToString(user.getUuid()))) {
             throw new IllegalRequestException("현재 유저는 해당 유저의 활동 정보를 조회할 수 없습니다.");
         }
+        ActivityInfo activityInfo = activityInfoRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 참여 정보가 없습니다."));
+        return new ActivityInfoResDto(activityInfo);
+    }
+
+    @Transactional
+    public ActivityInfoResDto getUserActivityInfo(OUser user) {
         ActivityInfo activityInfo = activityInfoRepository.findByUser(user)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 참여 정보가 없습니다."));
         return new ActivityInfoResDto(activityInfo);

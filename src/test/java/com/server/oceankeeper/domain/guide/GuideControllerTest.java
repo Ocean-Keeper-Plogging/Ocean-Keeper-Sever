@@ -94,7 +94,7 @@ class GuideControllerTest {
         when(service.put(any())).thenReturn(expectResponse);
 
         //when
-        GuideModifyReqDto request = new GuideModifyReqDto(1L, "new contents", "title");
+        GuideModifyReqDto request = new GuideModifyReqDto(1L, "new 비디오 이름", "new video link","title");
         ResultActions resultActions = mvc.perform(put("/admin/guide")
                 .content(om.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON));
@@ -114,7 +114,7 @@ class GuideControllerTest {
         when(service.put(any())).thenReturn(expectResponse);
 
         //when
-        GuideModifyReqDto request = new GuideModifyReqDto(1L, "new contents", "title");
+        GuideModifyReqDto request = new GuideModifyReqDto(1L, "new 비디오 이름", "new video link", "title");
         ResultActions resultActions = mvc.perform(put("/admin/guide")
                 .content(om.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON));
@@ -133,7 +133,7 @@ class GuideControllerTest {
         when(service.put(any())).thenThrow(new ResourceNotFoundException("공지사항 아이디에 해당하는 공지사항이 없습니다."));
 
         //when
-        GuideModifyReqDto request = new GuideModifyReqDto(null, "new contents", "title");
+        GuideModifyReqDto request = new GuideModifyReqDto(null, "new 비디오 이름", "new video link","title");
         ResultActions resultActions = mvc.perform(put("/admin/guide")
                 .content(om.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON));

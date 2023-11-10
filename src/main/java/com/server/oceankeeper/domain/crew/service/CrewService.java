@@ -1,7 +1,7 @@
 package com.server.oceankeeper.domain.crew.service;
 
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
-import com.server.oceankeeper.domain.activity.dto.response.ApplicationReqDto;
+import com.server.oceankeeper.domain.activity.dto.response.ApplicationDto;
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
 import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
@@ -98,11 +98,11 @@ public class CrewService {
     }
 
     @Transactional
-    public ApplicationReqDto findApplication(OUser user) {
+    public ApplicationDto getApplicationDto(OUser user) {
         Crews applicationInfo = crewRepository.findCrewsByUserOrderByCreatedAtDesc(user)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 지원서가 존재하지 않습니다."));
 
-        return ApplicationReqDto.builder()
+        return ApplicationDto.builder()
                 .dayOfBirth(applicationInfo.getDayOfBirth())
                 .email(applicationInfo.getEmail())
                 .id1365(applicationInfo.getId1365())
@@ -115,11 +115,10 @@ public class CrewService {
     }
 
     @Transactional
-    public ApplicationReqDto findApplication(String applicationId) {
-        Crews applicationInfo = crewRepository.findByUuid(UUIDGenerator.changeUuidFromString(applicationId))
-                .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 지원서가 존재하지 않습니다."));
+    public ApplicationDto getApplicationDto(String applicationId) {
+        Crews applicationInfo = getApplication(applicationId);
 
-        return ApplicationReqDto.builder()
+        return ApplicationDto.builder()
                 .dayOfBirth(applicationInfo.getDayOfBirth())
                 .email(applicationInfo.getEmail())
                 .id1365(applicationInfo.getId1365())
@@ -129,6 +128,23 @@ public class CrewService {
                 .transportation(applicationInfo.getTransportation())
                 .startPoint(applicationInfo.getStartPoint())
                 .build();
+    }
+
+    @Transactional
+    public Crews getApplication(String applicationId) {
+        return crewRepository.findByUuid(UUIDGenerator.changeUuidFromString(applicationId))
+                .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 지원서가 존재하지 않습니다."));
+    }
+
+    @Transactional
+    public Crews findCrews(String applicationId) {
+        return crewRepository.findByUuid(UUIDGenerator.changeUuidFromString(applicationId))
+                .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 지원서가 존재하지 않습니다."));
+    }
+
+    @Transactional
+    public List<Crews> findCrews(Activity activity) {
+        return crewRepository.findByActivity(activity);
     }
 
     @Transactional
@@ -142,9 +158,5 @@ public class CrewService {
         crewRepository.delete(crew);
         //TODO: fetch join 필요성 고려
         EventPublisher.emit(new ActivityEvent(this, crew.getUser(), OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
-    }
-
-    public List<Crews> findCrews(Activity activity) {
-        return crewRepository.findByActivity(activity);
     }
 }

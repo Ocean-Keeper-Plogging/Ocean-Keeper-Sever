@@ -20,8 +20,15 @@ public class JoinResDto{
     )
     private final String nickname;
 
+    @ApiModelProperty(
+            value = "유저 프로필 경로",
+            example = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
+    )
+    private final String profile;
+
     public JoinResDto(OUser user) {
         this.id = UUIDGenerator.changeUuidToString(user.getUuid());
         this.nickname = user.getNickname();
+        this.profile = user.getProfile();
     }
 }

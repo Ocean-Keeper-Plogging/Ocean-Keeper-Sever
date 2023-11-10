@@ -71,9 +71,10 @@ public class UserControllerTest extends DummyObject {
                 .nickname("test")
                 .email("kim@naver.com")
                 .deviceToken("1")
+                .profile("profile")
                 .build();
         String requestBody = om.writeValueAsString(joinReqDto);
-        when(userService.join(any())).thenReturn(new JoinResDto("123", "test"));
+        when(userService.join(any())).thenReturn(new JoinResDto("123", "test","profile"));
 
         System.out.println("request : " + joinReqDto.toEntity());
 

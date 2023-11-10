@@ -1,9 +1,10 @@
 package com.server.oceankeeper.domain.activity.repository;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.server.oceankeeper.domain.activity.dto.*;
+import com.server.oceankeeper.domain.activity.dao.*;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.server.oceankeeper.domain.activity.entity.QActivity.activity;
 import static com.server.oceankeeper.domain.crew.entitiy.QCrews.crews;
+import static com.server.oceankeeper.domain.statistics.entity.QActivityInfo.activityInfo;
 import static com.server.oceankeeper.domain.user.entitiy.QOUser.oUser;
 
 @RequiredArgsConstructor
@@ -32,7 +35,7 @@ import static com.server.oceankeeper.domain.user.entitiy.QOUser.oUser;
 public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepository {
     private final JPAQueryFactory queryFactory;
 
-    public Slice<AllActivityDao> getAllActivities(UUID activityId, ActivityStatus status, LocationTag tag, GarbageCategory category, Pageable pageable) {
+    public Slice<AllActivityDao> getAllActivities(UUID activityId, ActivityStatus activityStatus, LocationTag tag, GarbageCategory category, LocalDateTime startAt, Pageable pageable) {
         List<AllActivityDao> result = queryFactory.select(
                         Projections.fields(AllActivityDao.class,
                                 activity.uuid.as("activityId"),
@@ -51,7 +54,8 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .from(crews)
                 .innerJoin(crews.activity, activity)
                 .innerJoin(crews.user, oUser)
-                .where(condition(status, activity.activityStatus::eq),
+                .where(
+                        checkActivityStatus(activityStatus, startAt),
                         condition(tag, activity.locationTag::eq),
                         condition(category, activity.garbageCategory::eq),
                         condition(CrewRole.HOST, crews.activityRole::eq),
@@ -65,7 +69,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
     }
 
     @Override
-    public Slice<ActivityDao> getMyActivities(UUID userId, UUID activityId, ActivityStatus activityStatus, CrewRole crewRole, Pageable pageable) {
+    public Slice<ActivityDao> getMyActivities(UUID userId, UUID activityId, ActivityStatus activityStatus, CrewRole crewRole, LocalDateTime startAt, Pageable pageable) {
         List<ActivityDao> result = queryFactory.select(
                         Projections.constructor(ActivityDao.class,
                                 activity.uuid.as("activityId"),
@@ -78,20 +82,28 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                                 activity.recruitEndAt.as("recruitEndAt"),
                                 activity.startAt.as("startAt"),
                                 activity.activityStatus.as("status"),
-                                activity.location.address.as("address")
+                                activity.location.address.as("address"),
+                                crews.uuid.as("applicationId"),
+                                crews.activityRole.as("role"),
+                                crews.crewStatus.as("crewStatus")
                         ))
                 .from(crews)
                 .innerJoin(crews.activity, activity)
                 .innerJoin(crews.user, oUser)
-                .where(condition(userId, oUser.uuid::eq)
-                        , condition(activityStatus, activity.activityStatus::eq)
-                        , condition(crewRole, crews.activityRole::eq)
-                        , ltUuid(activityId) //for no offset scrolling, use activity id
+                .where(condition(userId, oUser.uuid::eq),
+                        checkActivityStatus(activityStatus, startAt),
+                        condition(crewRole, crews.activityRole::eq),
+                        ltUuid(activityId) //for no offset scrolling, use activity id
                 )
                 .orderBy(activity.uuid.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
         return checkLastPage(pageable, result);
+    }
+
+    private Predicate checkActivityStatus(ActivityStatus activityStatus, LocalDateTime startAt) {
+        return activityStatus == null ? null : activityStatus == ActivityStatus.CLOSED ?
+                condition(startAt, activity.startAt::lt) : condition(startAt, activity.startAt::goe);
     }
 
     @Override
@@ -106,10 +118,8 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .join(crews.user, oUser)
                 .join(crews.activity, activity)
                 .where(
-                        oUser.uuid.eq(myActivityParam.getUserUuid()),
-                        crews.activity.recruitStartAt.loe(myActivityParam.getTime()),
-                        crews.activity.recruitEndAt.goe(myActivityParam.getTime()),
-                        condition(myActivityParam.getCrewStatus(), crews.crewStatus::eq))
+                        condition(myActivityParam.getTime(), activity.startAt::goe),
+                        oUser.uuid.eq(myActivityParam.getUserUuid()))
                 .orderBy(crews.activity.startAt.asc())
                 .limit(5)
                 .fetch();
@@ -133,7 +143,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
     }
 
     @Override
-    public List<CrewInfoDao> getCrewInfoFromHostUser(OUser user) {
+    public List<CrewInfoDao> getCrewInfoFromHostUser(OUser user, UUID activityId) {
         return queryFactory
                 .select(Projections.constructor(CrewInfoDao.class,
                         crews.activity.uuid.as("uuid"),
@@ -144,11 +154,56 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .join(crews.user, oUser)
                 .join(crews.activity, activity)
                 .where(
-                        oUser.uuid.eq(user.getUuid()),
+                        crews.user.eq(user),
                         crews.activityRole.eq(CrewRole.HOST),
+                        crews.activity.uuid.eq(activityId),
                         crews.crewStatus.eq(CrewStatus.IN_PROGRESS))
                 .orderBy(crews.activity.title.asc())
                 .fetch();
+    }
+
+    @Override
+    public List<CrewInfoDetailDao> getCrewInfo(UUID activityId) {
+        List<CrewInfoDetailDao> result = queryFactory.select(
+                        Projections.constructor(CrewInfoDetailDao.class,
+                                crews.name.as("username"),
+                                crews.user.nickname,
+                                crews.crewStatus,
+                                crews.uuid.as("applicationId"))
+                )
+                .from(crews)
+                .leftJoin(crews.activity, activity)
+                .leftJoin(crews.user, oUser)
+                .where(
+                        crews.activity.uuid.eq(activityId),
+                        crews.activityRole.ne(CrewRole.HOST)
+                )
+                .orderBy(crews.id.asc())
+                .fetch();
+        return result;
+    }
+
+    @Override
+    public FullApplicationDao getApplicationAndUserInfo(UUID applicationId) {
+        FullApplicationDao result = queryFactory.select(Projections.constructor(FullApplicationDao.class,
+                        oUser.as("host"),
+                        crews.user.profile.as("profileUrl"),
+                        crews.user.nickname,
+                        activityInfo.countHosting,
+                        activityInfo.countActivity,
+                        activityInfo.countNoShow,
+                        crews.name.as("username"),
+                        crews.phoneNumber,
+                        crews.id1365,
+                        crews.startPoint,
+                        crews.transportation,
+                        crews.question))
+                .from(crews)
+                .innerJoin(crews.user, oUser)
+                .innerJoin(activityInfo.user, oUser)
+                .where(crews.uuid.eq(applicationId))
+                .fetchFirst();
+        return result;
     }
 
     private <T> Slice<T> checkLastPage(Pageable pageable, List<T> result) {

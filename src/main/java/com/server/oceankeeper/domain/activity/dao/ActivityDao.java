@@ -1,8 +1,11 @@
-package com.server.oceankeeper.domain.activity.dto;
+package com.server.oceankeeper.domain.activity.dao;
 
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
+import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
+import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,4 +31,8 @@ public class ActivityDao {
     private final ActivityStatus status;
 
     private String address;
+
+    private final UUID applicationId;
+    private final CrewRole role;
+    private final CrewStatus crewStatus;
 }

@@ -164,7 +164,7 @@ public class ActivityDetailResDto {
 
     @ApiModelProperty(
             value = "활동 진행 상황",
-            example = "OPEN,CLOSE,CANCEL"
+            example = "OPEN(오픈),CLOSED(활동종료),RECRUITMENT_CLOSE(모집종료)"
     )
     private final ActivityStatus activityStatus;
 

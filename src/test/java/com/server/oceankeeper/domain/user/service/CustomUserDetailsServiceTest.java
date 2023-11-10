@@ -29,7 +29,7 @@ class CustomUserDetailsServiceTest {
     @Test
     void loadUserByUsername() {
         //given
-        String oauthId = "naver_providerid";
+        String oauthId = "naver-9___1-providerid";
         OUser user = OUser.builder()
                 .id(1L)
                 .provider("naver")
@@ -44,7 +44,7 @@ class CustomUserDetailsServiceTest {
     @Test
     void loadUserByUsername_fail_noUser() {
         //given
-        String oauthId = "naver_providerid";
+        String oauthId = "naver-9___1-providerid";
         OUser user = OUser.builder()
                 .id(1L)
                 .provider("naver")

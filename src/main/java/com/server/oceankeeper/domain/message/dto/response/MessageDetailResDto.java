@@ -16,10 +16,10 @@ public class MessageDetailResDto {
     private final LocalDateTime createdAt;
     private final MessageType messageType;
 
-    public static MessageDetailResDto fromEntity(OMessage message, MessageDetail messageDetail) {
+    public static MessageDetailResDto fromEntity(OMessage message) {
         return new MessageDetailResDto(
                 message.getId(),
-                messageDetail.getDetail(),
+                message.getContents(),
                 message.getMessageFrom(),
                 message.getMessageTo(),
                 message.getTime(),

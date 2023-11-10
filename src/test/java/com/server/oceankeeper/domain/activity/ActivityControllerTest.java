@@ -3,12 +3,14 @@ package com.server.oceankeeper.domain.activity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.domain.activity.controller.ActivityController;
 import com.server.oceankeeper.domain.activity.dto.request.*;
-import com.server.oceankeeper.domain.activity.dto.response.ApplicationReqDto;
+import com.server.oceankeeper.domain.activity.dto.response.ApplicationDto;
 import com.server.oceankeeper.domain.activity.dto.response.ApplyActivityResDto;
 import com.server.oceankeeper.domain.activity.dto.response.MyScheduledActivityDto;
 import com.server.oceankeeper.domain.activity.dto.response.RegisterActivityResDto;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
+import com.server.oceankeeper.domain.activity.service.ActivityInfoCrewFacadeService;
+import com.server.oceankeeper.domain.activity.service.ActivityMessageFacadeService;
 import com.server.oceankeeper.domain.activity.service.ActivityService;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.service.TokenProvider;
@@ -24,7 +26,6 @@ import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -59,6 +60,10 @@ class ActivityControllerTest {
     private ObjectMapper om;
     @MockBean
     private ActivityService activityService;
+    @MockBean
+    private ActivityMessageFacadeService activityMessageService;
+    @MockBean
+    private ActivityInfoCrewFacadeService activityInfoCrewFacadeService;
     @MockBean
     private TokenProvider tokenProvider;
     @MockBean
@@ -318,7 +323,7 @@ class ActivityControllerTest {
     @WithMockUser
     void getLastApplication() throws Exception {
         when(tokenUtil.getUserFromHeader(any())).thenReturn(OUser.builder().build());
-        when(activityService.getLastApplication(any())).thenReturn(ApplicationReqDto.builder().build());
+        when(activityService.getLastApplication(any())).thenReturn(ApplicationDto.builder().build());
 
         //when
         ResultActions resultActions = mvc.perform(get("/activity/recruitment/application/last")
