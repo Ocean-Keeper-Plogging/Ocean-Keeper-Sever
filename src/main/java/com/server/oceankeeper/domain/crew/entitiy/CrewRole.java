@@ -6,7 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum CrewRole {
-    HOST("호스트"), CREW("크루");
+    HOST("호스트"),
+    CREW("크루"),
+    EMPTY("제거됨");
     private final String value;
 
     public static CrewRole getRole(String role) {

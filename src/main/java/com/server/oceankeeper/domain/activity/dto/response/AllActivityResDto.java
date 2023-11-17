@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.activity.dto.response;
 
+import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import io.swagger.annotations.ApiModelProperty;
@@ -85,6 +86,12 @@ public class AllActivityResDto {
             required = true
     )
     private final String startAt;
+
+    @ApiModelProperty(
+            value = "활동 상태",
+            required = true
+    )
+    private final ActivityStatus activityStatus;
 
     @ApiModelProperty(
             value = "활동 위치",

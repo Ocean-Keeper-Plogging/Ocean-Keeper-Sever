@@ -6,6 +6,7 @@ import com.server.oceankeeper.global.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -97,6 +98,21 @@ public class Crews extends BaseEntity {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.dayOfBirth = dayOfBirth;
+    }
+
+    public void reset() {
+        this.crewStatus = CrewStatus.CANCEL;
+        this.name = null;
+        this.phoneNumber = null;
+        this.id1365 = null;
+        this.email = null;
+        this.startPoint = null;
+        this.transportation = null;
+        this.question = null;
+        this.cancelAt = LocalDateTime.now();
+        this.dayOfBirth = null;
+        this.expiredAt = null;
+        this.finishAt = null;
     }
 
     @Override

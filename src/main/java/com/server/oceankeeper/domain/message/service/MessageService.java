@@ -51,7 +51,7 @@ public class MessageService {
     public PostResDto getInbox(String userId, Long id, String type, Integer size, HttpServletRequest request) {
         userAccessValidationUtil.validate(request);
 
-        if (type != null && type.equals("SENT")) {
+        if (type != null && type.equalsIgnoreCase("SENT")) {
             return getSentMessageInbox(userId, id, size, request);
         }
 

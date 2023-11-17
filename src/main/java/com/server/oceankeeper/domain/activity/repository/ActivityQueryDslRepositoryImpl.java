@@ -56,12 +56,13 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .innerJoin(crews.user, oUser)
                 .where(
                         checkActivityStatus(activityStatus, startAt),
+                        activity.activityStatus.ne(ActivityStatus.CANCEL),
                         condition(tag, activity.locationTag::eq),
                         condition(category, activity.garbageCategory::eq),
                         condition(CrewRole.HOST, crews.activityRole::eq),
                         ltUuid(activityId)
                 ) //for no offset scrolling, use activity id
-                .orderBy(activity.uuid.desc())
+                .orderBy(activity.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch()
                 .stream().distinct().collect(Collectors.toList());
@@ -92,6 +93,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .innerJoin(crews.user, oUser)
                 .where(condition(userId, oUser.uuid::eq),
                         checkActivityStatus(activityStatus, startAt),
+                        crews.activity.activityStatus.ne(ActivityStatus.CANCEL),
                         condition(crewRole, crews.activityRole::eq),
                         ltUuid(activityId) //for no offset scrolling, use activity id
                 )
@@ -119,6 +121,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .join(crews.activity, activity)
                 .where(
                         condition(myActivityParam.getTime(), activity.startAt::goe),
+                        crews.activity.activityStatus.ne(ActivityStatus.CANCEL),
                         oUser.uuid.eq(myActivityParam.getUserUuid()))
                 .orderBy(crews.activity.startAt.asc())
                 .limit(5)
@@ -137,6 +140,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .where(
                         oUser.uuid.eq(user.getUuid()),
                         crews.activityRole.eq(CrewRole.HOST),
+                        crews.activity.activityStatus.ne(ActivityStatus.CANCEL),
                         crews.crewStatus.eq(CrewStatus.IN_PROGRESS))
                 .orderBy(crews.activity.title.asc())
                 .fetch();
@@ -157,6 +161,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                         crews.user.eq(user),
                         crews.activityRole.eq(CrewRole.HOST),
                         crews.activity.uuid.eq(activityId),
+                        crews.activity.activityStatus.ne(ActivityStatus.CANCEL),
                         crews.crewStatus.eq(CrewStatus.IN_PROGRESS))
                 .orderBy(crews.activity.title.asc())
                 .fetch();
@@ -175,34 +180,12 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .leftJoin(crews.activity, activity)
                 .leftJoin(crews.user, oUser)
                 .where(
+                        crews.activity.activityStatus.ne(ActivityStatus.CANCEL),
                         crews.activity.uuid.eq(activityId),
-                        crews.activityRole.ne(CrewRole.HOST)
+                        crews.activityRole.eq(CrewRole.CREW)
                 )
                 .orderBy(crews.id.asc())
                 .fetch();
-        return result;
-    }
-
-    @Override
-    public FullApplicationDao getApplicationAndUserInfo(UUID applicationId) {
-        FullApplicationDao result = queryFactory.select(Projections.constructor(FullApplicationDao.class,
-                        oUser.as("host"),
-                        crews.user.profile.as("profileUrl"),
-                        crews.user.nickname,
-                        activityInfo.countHosting,
-                        activityInfo.countActivity,
-                        activityInfo.countNoShow,
-                        crews.name.as("username"),
-                        crews.phoneNumber,
-                        crews.id1365,
-                        crews.startPoint,
-                        crews.transportation,
-                        crews.question))
-                .from(crews)
-                .innerJoin(crews.user, oUser)
-                .innerJoin(activityInfo.user, oUser)
-                .where(crews.uuid.eq(applicationId))
-                .fetchFirst();
         return result;
     }
 

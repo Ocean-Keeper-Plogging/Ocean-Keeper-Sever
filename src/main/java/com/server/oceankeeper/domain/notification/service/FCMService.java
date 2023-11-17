@@ -50,6 +50,7 @@ public class FCMService {
         try{
             firebaseMessaging.send(message);
         }catch (FirebaseMessagingException e){
+            log.info("JBJB Firebase 메세지 전송 실패 : {}",e.getMessagingErrorCode().toString());
             //throw new IOException(String.format("Firebase 메세지 전송 실패 :%s", e.getMessagingErrorCode().toString()));
         }
     }

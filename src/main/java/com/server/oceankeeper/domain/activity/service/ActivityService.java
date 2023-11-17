@@ -1,10 +1,8 @@
 package com.server.oceankeeper.domain.activity.service;
 
 import com.server.oceankeeper.domain.activity.dao.*;
-import com.server.oceankeeper.domain.activity.dto.ApplicationSettingReqDto;
-import com.server.oceankeeper.domain.activity.dto.ApplicationSettingResDto;
 import com.server.oceankeeper.domain.activity.dto.CrewInfoDetailDto;
-import com.server.oceankeeper.domain.activity.dto.FullApplicationReqDto;
+import com.server.oceankeeper.domain.activity.dto.CrewInfoFileDto;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyActivityReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyApplicationReqDto;
@@ -18,7 +16,6 @@ import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
 import com.server.oceankeeper.domain.crew.service.CrewService;
-import com.server.oceankeeper.domain.statistics.dto.ActivityInfoResDto;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
@@ -32,19 +29,29 @@ import com.server.oceankeeper.util.TokenUtil;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.server.oceankeeper.domain.activity.entity.ActivityStatus.getActivityStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -144,7 +151,7 @@ public class ActivityService {
                 garbageCategory,
                 LocalDateTime.now(),
                 PageRequest.ofSize(pageSize != null ? pageSize : 1));
-        log.debug("getActivities response :{}", response);
+
         List<AllActivityResDto> activities = response.stream().map(r -> new AllActivityResDto(
                 UUIDGenerator.changeUuidToString(r.getActivityId()),
                 r.getTitle(),
@@ -157,8 +164,9 @@ public class ActivityService {
                 r.getRecruitStartAt().toString(),
                 r.getRecruitEndAt().toString(),
                 getStartDay(r.getStartAt()),
+                getActivityStatus(r.getRecruitEndAt(), r.getStartAt()),
                 r.getLocation())).collect(Collectors.toList());
-        log.debug("getActivities activities :{}", response);
+
         return new GetActivityResDto(activities,
                 new GetActivityResDto.Meta(activities.size(), !response.hasNext()));
     }
@@ -180,7 +188,8 @@ public class ActivityService {
 
         crewService.addHost(activity, user);
 
-        EventPublisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+        //TODO:활동 등록 기록은 활동이 끝난 다음에 처리
+        //EventPublisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_EVENT));
 
         return new RegisterActivityResDto(UUIDGenerator.changeUuidToString(activity.getUuid()));
     }
@@ -232,7 +241,7 @@ public class ActivityService {
         //TODO: 인터셉터로 변환
         Activity activity = getActivity(activityId);
         ActivityDetail activityDetail = getActivityDetail(activity);
-        OUser host = crewService.findOwner(activity);
+        OUser host = findOwner(activity);
         if (!user.equals(host)) {
             log.error("current user :{}\n host :{}", user, host);
             throw new IllegalRequestException("요청한 유저에게 활동 수정 권한이 없습니다.");
@@ -319,7 +328,7 @@ public class ActivityService {
     @Transactional
     public ApplicationDto getLastApplication(HttpServletRequest servletRequest) {
         OUser user = tokenUtil.getUserFromHeader(servletRequest);
-        log.info("JBJB user:{},",user);
+        log.info("JBJB user:{},", user);
         return crewService.getApplicationDto(user);
     }
 
@@ -342,7 +351,7 @@ public class ActivityService {
     public ActivityDetailResDto getActivityDetail(String activityId) {
         Activity activity = getActivity(activityId);
         ActivityDetail activityDetail = getActivityDetail(activity);
-        OUser host = crewService.findOwner(activity);
+        OUser host = findOwner(activity);
         return new ActivityDetailResDto(activity, activityDetail, host);
     }
 
@@ -365,19 +374,9 @@ public class ActivityService {
         return response;
     }
 
-    public ActivityStatus getActivityStatus(ActivityDao r) {
-        if (LocalDateTime.now().isBefore(r.getRecruitEndAt().atStartOfDay())) {
-            if (LocalDateTime.now().isBefore(r.getStartAt()))
-                return ActivityStatus.OPEN;
-            else
-                return ActivityStatus.RECRUITMENT_CLOSE;
-        }
-        return ActivityStatus.CLOSED;
-    }
-
     public CrewStatus getCrewStatusFromActivityDao(ActivityDao r) {
         final CrewStatus status = r.getCrewStatus();
-        return (status == CrewStatus.REJECT || status == CrewStatus.NO_SHOW) ? status :
+        return (status == CrewStatus.REJECT || status == CrewStatus.NO_SHOW || status == CrewStatus.CANCEL) ? status :
                 LocalDateTime.now().isBefore(r.getStartAt()) ? CrewStatus.IN_PROGRESS : CrewStatus.CLOSED;
     }
 
@@ -391,9 +390,20 @@ public class ActivityService {
         if (!host.getActivityRole().equals(CrewRole.HOST))
             throw new IllegalRequestException("해당 요청은 호스트만 가능합니다.");
 
+        if (activity.getActivityStatus().equals(ActivityStatus.CANCEL))
+            throw new DuplicatedResourceException("이미 취소된 활동입니다.");
+
         //해당 활동에 속한 모두에게 활동 취소됨을 알림
-        crewService.findCrews(activity).forEach(crewService::deleteByHost);
-        activityRepository.delete(activity);
+        crewService.findCrews(activity).forEach(crewService::resetCrewInfo);
+        ActivityDetail activityDetail = getActivityDetail(activity);
+
+        activityDetail.reset();
+        activity.reset();
+    }
+
+    @Transactional
+    public Crews findCrews(String applicationId) {
+        return crewService.findCrews(applicationId);
     }
 
     @Transactional
@@ -428,14 +438,7 @@ public class ActivityService {
 
     @Transactional
     public CrewInfoDetailDto getCrewInfoDetail(String activityId, HttpServletRequest servletRequest) {
-        OUser user = tokenUtil.getUserFromHeader(servletRequest);
-        //validation
-        Activity activity = getActivity(activityId);
-        OUser host = crewService.findOwner(activity);
-        if (!user.equals(host)) {
-            log.error("current user :{} host :{}", user, host);
-            throw new IllegalRequestException("요청한 유저에게 활동 조회 권한이 없습니다.");
-        }
+        validateHost(activityId, servletRequest);
 
         List<CrewInfoDetailDao> crewInfo = activityRepository.getCrewInfo(UUIDGenerator.changeUuidFromString(activityId));
         List<CrewInfoDetailDto.CrewInfoDetailData> data = IntStream.range(0, crewInfo.size())
@@ -446,22 +449,104 @@ public class ActivityService {
     }
 
     @Transactional
-    public ApplicationSettingResDto setApplicationStatus(ApplicationSettingReqDto status, HttpServletRequest servletRequest) {
-        OUser user = tokenUtil.getUserFromHeader(servletRequest);
-        CrewStatus newStatus = CrewStatus.getLimitedStatus(status.getStatus());
-        if (newStatus == null) {
-            throw new IllegalRequestException("요청한 크루원 상태가 올바르지 않습니다. NO_SHOW(노쇼), REJECT(거절) 중 하나여야합니다.");
+    public OUser findOwner(Activity activity) {
+        return crewService.findOwner(activity);
+    }
+
+    @Transactional
+    public CrewInfoFileDto getCrewInfoFile(String activityId, HttpServletRequest request) {
+        synchronized (this) {
+            Activity activity = validateHost(activityId, request);
+
+            try {
+                return makeExcelFile(activity);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private Activity validateHost(String activityId, HttpServletRequest request) {
+        OUser user = tokenUtil.getUserFromHeader(request);
+        //validation
+        Activity activity = getActivity(activityId);
+        OUser host = findOwner(activity);
+        if (!user.equals(host)) {
+            log.error("current user :{}\n host :{}", user, host);
+            throw new IllegalRequestException("요청한 유저에게 활동 조회 권한이 없습니다.");
+        }
+        return activity;
+    }
+
+    private CrewInfoFileDto makeExcelFile(Activity activity) throws IOException {
+        Workbook xWorkbook = new XSSFWorkbook(); //엑셀파일 생성
+        Sheet xSheet = xWorkbook.createSheet("sheet1"); //시트 생성
+        Row xRow = null; //행 객체 생성
+        Cell xCell = null; //열 객체 생성
+
+        initializeExcelFormat(xSheet);
+
+        int count = 1;
+        int row = 1;
+
+        for (Crews application : crewService.findCrews(activity)) {
+            if(application.getActivityRole().equals(CrewRole.HOST))
+                continue;
+            xRow = xSheet.createRow(row);
+            xCell = xRow.createCell(0);
+            xCell.setCellValue(count);
+            xCell = xRow.createCell(1);
+            xCell.setCellValue(getValue(application.getName()));
+            xCell = xRow.createCell(2);
+            xCell.setCellValue(getValue(application.getPhoneNumber()));
+            xCell = xRow.createCell(3);
+            xCell.setCellValue(getValue(application.getId1365()));
+            xCell = xRow.createCell(4);
+            xCell.setCellValue(getValue(application.getEmail()));
+            xCell = xRow.createCell(5);
+            xCell.setCellValue(getValue(application.getDayOfBirth()));
+
+            row++;
+            count++;
         }
 
-        boolean result = true;
-
-        for (String applicationId : status.getApplicationId()) {
-            Crews application = crewService.findCrews(applicationId);
-            application.changeCrewStatus(newStatus);
-            crewService.save(application);
-            result &= (application.getCrewStatus() == newStatus);
+        xRow = xSheet.getRow(xSheet.getFirstRowNum());
+        Iterator<Cell> cellIterator = xRow.cellIterator();
+        while (cellIterator.hasNext()) {
+            Cell cell = cellIterator.next();
+            int columnIndex = cell.getColumnIndex();
+            xSheet.autoSizeColumn(columnIndex);
         }
 
-        return new ApplicationSettingResDto(result, newStatus);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        xWorkbook.write(outputStream);
+
+
+        ByteArrayResource resource = new ByteArrayResource(outputStream.toByteArray());
+        outputStream.close();
+        return new CrewInfoFileDto(resource);
+    }
+
+    private void initializeExcelFormat(Sheet xSheet) {
+        Row xRow;
+        Cell xCell;
+        xRow = xSheet.createRow(0);
+
+        xCell = xRow.createCell(0);
+        xCell.setCellValue("No.");
+        xCell = xRow.createCell(1);
+        xCell.setCellValue("이름");
+        xCell = xRow.createCell(2);
+        xCell.setCellValue("연락처");
+        xCell = xRow.createCell(3);
+        xCell.setCellValue("1365 아이디");
+        xCell = xRow.createCell(4);
+        xCell.setCellValue("이메일");
+        xCell = xRow.createCell(5);
+        xCell.setCellValue("생년월일");
+    }
+
+    private String getValue(String data) {
+        return data == null ? "" : data;
     }
 }

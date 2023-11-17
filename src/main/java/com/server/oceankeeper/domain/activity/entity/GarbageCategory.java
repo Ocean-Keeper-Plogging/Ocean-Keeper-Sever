@@ -9,7 +9,8 @@ public enum GarbageCategory {
     COASTAL("연안쓰레기"),
     FLOATING("부유쓰레기"),
     DEPOSITED("침적쓰레기"),
-    ETC("기타");
+    ETC("기타"),
+    EMPTY("제거됨");
 
     private final String value;
 }

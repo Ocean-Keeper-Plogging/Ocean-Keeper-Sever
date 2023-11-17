@@ -33,4 +33,8 @@ public class Notification extends BaseEntity {
         this.user = user;
         this.type = type;
     }
+
+    public void read() {
+        isRead = true;
+    }
 }

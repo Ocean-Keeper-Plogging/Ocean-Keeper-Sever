@@ -70,4 +70,16 @@ public class ActivityDetail {
         this.rewards = rewards;
         this.etc = etc;
     }
+
+    public void reset() {
+        this.activityStory = null;
+        this.storyImage = null;
+        this.keeperIntroduction = null;
+        this.keeperImage = null;
+        this.transportation = null;
+        this.programDetails = null;
+        this.preparation = null;
+        this.rewards = null;
+        this.etc = null;
+    }
 }

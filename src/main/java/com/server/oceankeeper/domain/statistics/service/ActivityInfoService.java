@@ -28,7 +28,7 @@ public class ActivityInfoService {
 
     @EventListener
     public void handle(ActivityEvent event) {
-        if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT)) {
+        if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_REGISTRATION_EVENT)) {
             registerActivity(event);
             log.debug("activity registered");
         } else if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_NO_SHOW_EVENT)) {

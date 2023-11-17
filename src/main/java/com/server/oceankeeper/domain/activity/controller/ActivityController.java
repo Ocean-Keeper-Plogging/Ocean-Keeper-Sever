@@ -1,10 +1,7 @@
 package com.server.oceankeeper.domain.activity.controller;
 
 import com.server.oceankeeper.domain.activity.dao.HostActivityDto;
-import com.server.oceankeeper.domain.activity.dto.ApplicationSettingReqDto;
-import com.server.oceankeeper.domain.activity.dto.ApplicationSettingResDto;
-import com.server.oceankeeper.domain.activity.dto.CrewInfoDetailDto;
-import com.server.oceankeeper.domain.activity.dto.FullApplicationReqDto;
+import com.server.oceankeeper.domain.activity.dto.*;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyActivityReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyApplicationReqDto;
@@ -20,6 +17,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +27,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -233,13 +236,37 @@ public class ActivityController {
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createGetResponse(response));
     }
 
+    @ApiOperation(value = "크루원 정보 엑셀 저장하기 [권한 필요]", notes = "요청자가 특정 활동의 크루원 정보가 저장된 파일을 다운받습니다.",
+            response = CrewInfoFileDto.class)
+    @GetMapping(value = "/recruitment/host/crew-info-file",
+            produces = "application/vnd.ms-excel")
+    //public ResponseEntity<APIResponse<CrewInfoFileDto>> getCrewInfoFile(
+    public ResponseEntity<ByteArrayResource> getCrewInfoFile(
+            @ApiParam(value = "특정 활동 id", required = true, defaultValue = "11ee2962ed293b2a869b0f30e7d4f7c1")
+            @RequestParam(value = "activity-id") String activityId, HttpServletRequest request) {
+        CrewInfoFileDto response = activityService.getCrewInfoFile(activityId, request);
+        HttpHeaders headers= new HttpHeaders();
+        String filename = null;
+        try {
+            filename = URLEncoder.encode("example.xlsx", StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .headers(headers)
+                .contentLength(response.getCrewInfo().contentLength())
+                .body(response.getCrewInfo());
+    }
+
     @ApiOperation(value = "크루원 승인 설정[권한 필요]", notes = "요청자가 특정 활동의 크루원을 변경합니다.",
             response = ApplicationSettingResDto.class)
     @PostMapping(value = "/recruitment/host/crew-status",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<APIResponse<ApplicationSettingResDto>> setCrewAcceptance(
             @RequestBody ApplicationSettingReqDto request, HttpServletRequest servletRequest) {
-        ApplicationSettingResDto response = activityService.setApplicationStatus(request, servletRequest);
+        ApplicationSettingResDto response = activityMessageService.setApplicationStatus(request, servletRequest);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPostResponse(response));
     }
 }

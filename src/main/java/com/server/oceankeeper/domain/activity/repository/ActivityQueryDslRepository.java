@@ -27,6 +27,4 @@ public interface ActivityQueryDslRepository {
     List<CrewInfoDao> getCrewInfoFromHostUser(OUser user,UUID activityId); //Get only in-progress activity
 
     List<CrewInfoDetailDao> getCrewInfo(UUID activityId);
-
-    FullApplicationDao getApplicationAndUserInfo(UUID applicationId);
 }

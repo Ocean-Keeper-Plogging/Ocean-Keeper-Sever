@@ -26,6 +26,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'com.google.firebase:firebase-admin:9.2.0'
+    implementation 'org.apache.poi:poi-ooxml:3.9'
+    implementation 'commons-fileupload:commons-fileupload:1.5'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

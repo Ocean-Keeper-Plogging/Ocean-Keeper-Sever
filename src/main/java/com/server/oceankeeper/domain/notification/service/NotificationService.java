@@ -2,6 +2,7 @@ package com.server.oceankeeper.domain.notification.service;
 
 import com.server.oceankeeper.domain.notification.dto.FCMRequestDto;
 import com.server.oceankeeper.domain.notification.dto.MessagePreFormat;
+import com.server.oceankeeper.domain.notification.dto.NotificationResDto;
 import com.server.oceankeeper.domain.notification.repository.NotificationRepository;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.service.UserService;
@@ -37,8 +38,12 @@ public class NotificationService {
     }
 
     @Transactional
-    public void getNotificationList(String userId) {
+    public NotificationResDto getNotificationList(String userId) {
         OUser user = userService.findByUUID(userId);
         List<Notification> response = notificationRepository.findByUser(user);
+        for (Notification notification : response) {
+            notification.read();
+        }
+        return null;
     }
 }

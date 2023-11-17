@@ -65,7 +65,7 @@ class ActivityRepositoryTest extends DummyObject {
         Activity activityFromKim2 = newMockActivity(6, ActivityStatus.CLOSED, LocationTag.EAST, GarbageCategory.ETC, 5,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120002"));
         em.persist(activityFromKim2);
-        Activity activityFromKim3 = newMockActivity(15, ActivityStatus.OPEN, LocationTag.JEJU, GarbageCategory.DEPOSITED, 10,
+        Activity activityFromKim3 = newMockActivity(15, ActivityStatus.CANCEL, LocationTag.JEJU, GarbageCategory.DEPOSITED, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120003"));
         em.persist(activityFromKim3);
         Activity activityFromKim4 = newMockActivity(25, ActivityStatus.OPEN, LocationTag.SOUTH, GarbageCategory.FLOATING, 10,
@@ -80,17 +80,22 @@ class ActivityRepositoryTest extends DummyObject {
         Activity activityFromPark = newMockActivity(11, ActivityStatus.OPEN, LocationTag.WEST, GarbageCategory.ETC, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
         em.persist(activityFromPark);
+        Activity activityFromPark2 = newMockActivity(10, ActivityStatus.CANCEL, LocationTag.ETC, GarbageCategory.FLOATING, 5,
+                UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120022"));
+        em.persist(activityFromPark2);
 
         Crews crews = newCrew(activityFromKim, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
         Crews crews1 = newCrew(activityFromKim2, kim, CrewStatus.CLOSED, CrewRole.HOST);
-        Crews crews12 = newCrew(activityFromKim3, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
+        Crews crews12 = newCrew(activityFromKim3, kim, CrewStatus.CANCEL, CrewRole.HOST);
         Crews crews13 = newCrew(activityFromKim4, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
         Crews crews14 = newCrew(activityFromKim5, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
         Crews crews2 = newCrew(activityFromLee, lee, CrewStatus.IN_PROGRESS, CrewRole.HOST);
         Crews crews3 = newCrew(activityFromPark, park, CrewStatus.IN_PROGRESS, CrewRole.HOST);
+        Crews crews6 = newCrew(activityFromPark2, park, CrewStatus.CANCEL, CrewRole.HOST);
 
         Crews crews4 = newCrew(activityFromLee, kim, CrewStatus.REJECT, CrewRole.CREW);
         Crews crews5 = newCrew(activityFromPark, kim, CrewStatus.NO_SHOW, CrewRole.CREW);
+        Crews crews62 = newCrew(activityFromPark2, kim, CrewStatus.CANCEL, CrewRole.CREW);
 
         em.persist(crews);
         em.persist(crews1);
@@ -101,6 +106,8 @@ class ActivityRepositoryTest extends DummyObject {
         em.persist(crews3);
         em.persist(crews4);
         em.persist(crews5);
+        em.persist(crews6);
+        em.persist(crews62);
     }
 
     @Test
@@ -201,7 +208,7 @@ class ActivityRepositoryTest extends DummyObject {
                         null, ActivityStatus.OPEN, null, LocalDateTime.now().plusDays(9), Pageable.ofSize(15));
 
         //Then
-        assertThat(result.getContent().size()).isEqualTo(6);
+        assertThat(result.getContent().size()).isEqualTo(5);
         assertThat(result.getContent().get(0).getActivityId())
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
         assertThat(result.getContent().get(1).getActivityId())
@@ -219,7 +226,7 @@ class ActivityRepositoryTest extends DummyObject {
                         null, null, null, null, Pageable.ofSize(15));
 
         //Then
-        assertThat(result.getContent().size()).isEqualTo(7);
+        assertThat(result.getContent().size()).isEqualTo(6);
         assertThat(result.getContent().get(0).getActivityId())
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
         assertThat(result.getContent().get(1).getActivityId())
@@ -237,7 +244,7 @@ class ActivityRepositoryTest extends DummyObject {
 
         //Then
         System.out.println("result = " + result.getContent());
-        assertThat(result.getContent().size()).isEqualTo(6);
+        assertThat(result.getContent().size()).isEqualTo(5);
         assertThat(result.getContent().get(0).getActivityId())
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
         assertThat(result.getContent().get(1).getActivityId())

@@ -98,6 +98,18 @@ public class Activity extends BaseEntity {
         this.updatedAt = updatedAt;
     }
 
+    public void reset() {
+        this.title = "";
+        this.thumbnail = null;
+        this.quota = -1;
+        this.participants = -1;
+        this.recruitStartAt = LocalDate.now().plusYears(999);
+        this.recruitEndAt = LocalDate.now().plusYears(999);
+        this.startAt = LocalDateTime.now().plusYears(999);
+        this.activityStatus = ActivityStatus.CANCEL;
+        this.location = null;
+    }
+
     public void addParticipant() {
         participants++;
     }

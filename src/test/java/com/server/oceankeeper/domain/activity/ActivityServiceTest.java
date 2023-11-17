@@ -218,12 +218,37 @@ class ActivityServiceTest extends DummyObject {
         when(activityRepository.findByUuid(any())).thenReturn(Optional.ofNullable(expectActivity));
         when(crewService.findApplication(any(), (Activity) any())).thenReturn(host);
         when(crewService.findCrews(any(Activity.class))).thenReturn(crews);
+        when(activityDetailRepository.findByActivity(any())).thenReturn(Optional.ofNullable(expectActivityDetail));
         when(tokenUtil.getUserFromHeader(any())).thenReturn(expectUser);
-        doNothing().when(crewService).deleteByHost(any());
+        doNothing().when(crewService).resetCrewInfo(any());
 
         //when
         //then
         activityService.cancelActivity(UUIDGenerator.changeUuidToString(expectActivity.getUuid()), new MockHttpServletRequest());
+        assertThat(expectActivityDetail.getActivityStory()).isNull();
+        assertThat(expectActivityDetail.getStoryImage()).isNull();
+        assertThat(expectActivityDetail.getKeeperImage()).isNull();
+        assertThat(expectActivityDetail.getKeeperIntroduction()).isNull();
+        assertThat(expectActivityDetail.getProgramDetails()).isNull();
+        assertThat(expectActivityDetail.getPreparation()).isNull();
+        assertThat(expectActivityDetail.getTransportation()).isNull();
+        assertThat(expectActivityDetail.getRewards()).isNull();
+        assertThat(expectActivityDetail.getEtc()).isNull();
+    }
+
+    private ActivityDetail emptyActivityDetail(Activity activity) {
+        return new ActivityDetail(
+                null,
+                activity,UUID.randomUUID(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     @Test

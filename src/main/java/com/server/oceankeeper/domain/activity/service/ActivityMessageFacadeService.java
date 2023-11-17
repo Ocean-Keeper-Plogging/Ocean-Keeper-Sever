@@ -1,12 +1,23 @@
 package com.server.oceankeeper.domain.activity.service;
 
 import com.server.oceankeeper.domain.activity.dao.ActivityDao;
+import com.server.oceankeeper.domain.activity.dto.ApplicationSettingReqDto;
+import com.server.oceankeeper.domain.activity.dto.ApplicationSettingResDto;
 import com.server.oceankeeper.domain.activity.dto.response.MyActivityDto;
+import com.server.oceankeeper.domain.activity.entity.Activity;
+import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
 import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
+import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.message.dto.MessageDao;
+import com.server.oceankeeper.domain.message.dto.request.MessageSendReqDto;
+import com.server.oceankeeper.domain.message.dto.response.MessageSendResDto;
+import com.server.oceankeeper.domain.message.entity.MessageSentType;
 import com.server.oceankeeper.domain.message.entity.MessageType;
 import com.server.oceankeeper.domain.message.service.MessageService;
+import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.global.exception.IllegalRequestException;
+import com.server.oceankeeper.util.TokenUtil;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +25,15 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static com.server.oceankeeper.domain.activity.entity.ActivityStatus.getActivityStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +41,7 @@ import java.util.stream.Collectors;
 public class ActivityMessageFacadeService {
     private final ActivityService activityService;
     private final MessageService messageService;
+    private final TokenUtil tokenUtil;
 
     @Transactional
     public MyActivityDto getMyActivities(String userId, String activityId, String status, String roleStr, Integer pageSize) {
@@ -37,8 +55,11 @@ public class ActivityMessageFacadeService {
             List<MessageDao> messageDao = messageService.getMessageDao(null, null, userId, activity.getActivityId(), MessageType.REJECT).getContent();
             if (messageDao.size() == 1)
                 messageDaoList.add(messageDao.get(0));
-            else {
-                log.error("messageDao size :{}", messageDao.size());
+            else if (messageDao.size() >= 2) {
+                log.error("messageDao size :{}. only include first message\n result :{}", messageDao.size(), messageDao);
+                messageDaoList.add(messageDao.get(0));
+            } else {
+                log.error("messageDao empty");
             }
         }
 
@@ -54,7 +75,7 @@ public class ActivityMessageFacadeService {
                     r.getRecruitStartAt(),
                     r.getRecruitEndAt(),
                     r.getStartAt(),
-                    activityService.getActivityStatus(r),
+                    getActivityStatus(r.getRecruitEndAt(), r.getStartAt()),
                     r.getAddress(),
                     r.getRole() == CrewRole.HOST ? "" : UUIDGenerator.changeUuidToString(r.getApplicationId()),
                     r.getRole().toString(),
@@ -66,5 +87,69 @@ public class ActivityMessageFacadeService {
             response.add(myActivityDetail);
         }
         return new MyActivityDto(response, new MyActivityDto.Meta(activityDaoList.getContent().size(), !activityDaoList.hasNext()));
+    }
+
+    @Transactional
+    public ApplicationSettingResDto setApplicationStatus(ApplicationSettingReqDto request, HttpServletRequest servletRequest) {
+        OUser host = tokenUtil.getUserFromHeader(servletRequest);
+        CrewStatus newStatus = CrewStatus.getLimitedStatus(request.getStatus());
+        if (newStatus == null) {
+            throw new IllegalRequestException("요청한 크루원 상태가 올바르지 않습니다. NO_SHOW(노쇼), REJECT(거절) 중 하나여야합니다.");
+        }
+
+        boolean result = true;
+        boolean checkIsHost = false;
+        boolean checkActivityAlive = false;
+        List<String> rejectTargetNicknames = new ArrayList<>();
+        UUID activityId = null;
+        MessageSendResDto messageId = null;
+
+        for (String applicationId : request.getApplicationId()) {
+            Crews application = activityService.findCrews(applicationId);
+
+            if (application.getCrewStatus().equals(CrewStatus.REJECT))
+                throw new IllegalRequestException("이미 거절된 지원서입니다. 더이상 수정할 수 없습니다.");
+
+            application.changeCrewStatus(newStatus);
+
+            if (!checkIsHost) {
+                OUser user = activityService.findOwner(application.getActivity());
+                if (!host.equals(user))
+                    throw new IllegalRequestException("해당 요청에 대한 권한이 없습니다. 호스트만 신청자 관리를 할 수 있습니다.");
+                checkIsHost = true;
+            }
+
+            if (!checkActivityAlive) {
+                Activity activity = application.getActivity();
+                LocalDate recruitEndAt = activity.getRecruitEndAt();
+                LocalDateTime startAt = activity.getStartAt();
+                if (getActivityStatus(recruitEndAt, startAt).equals(ActivityStatus.RECRUITMENT_CLOSE))
+                    throw new IllegalRequestException("해당 프로젝트가 모집종료 상태가 아닙니다");
+                checkActivityAlive = true;
+            }
+
+            if (newStatus.equals(CrewStatus.REJECT)) {
+                rejectTargetNicknames.add(application.getUser().getNickname());
+                if (activityId == null)
+                    activityId = application.getActivity().getUuid();
+            }
+            result &= (application.getCrewStatus() == newStatus);
+        }
+
+        if (newStatus.equals(CrewStatus.REJECT)) {
+            assert activityId != null;
+            messageId = messageService.sendMessage(
+                    new MessageSendReqDto(
+                            rejectTargetNicknames,
+                            MessageSentType.REJECT,
+                            UUIDGenerator.changeUuidToString(activityId),
+                            request.getRejectReason()),
+                    servletRequest);
+        }
+
+        if (newStatus.equals(CrewStatus.REJECT))
+            return new ApplicationSettingResDto(result, newStatus, messageId.getMessageId());
+        else
+            return new ApplicationSettingResDto(result, newStatus);
     }
 }

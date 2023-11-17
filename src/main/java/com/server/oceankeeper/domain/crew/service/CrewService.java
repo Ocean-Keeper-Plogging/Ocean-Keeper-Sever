@@ -154,8 +154,8 @@ public class CrewService {
     }
 
     @Transactional
-    public void deleteByHost(Crews crew) {
-        crewRepository.delete(crew);
+    public void resetCrewInfo(Crews crew) {
+        crew.reset();
         //TODO: fetch join 필요성 고려
         EventPublisher.emit(new ActivityEvent(this, crew.getUser(), OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
     }

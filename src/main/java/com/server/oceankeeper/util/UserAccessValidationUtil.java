@@ -21,7 +21,7 @@ public class UserAccessValidationUtil {
     @Transactional
     public void validate(HttpServletRequest request) throws UuidValidException {
         OUser user = tokenUtil.getUserFromHeader(request);
-        String userIdFromPath = request.getParameter("user");
+        String userIdFromPath = request.getParameter(USERID_PREFIX);
         if (userIdFromPath == null) {
             throw new ResourceNotFoundException("해당 URI는 \"user\"를 포함하지 않습니다.");
         }

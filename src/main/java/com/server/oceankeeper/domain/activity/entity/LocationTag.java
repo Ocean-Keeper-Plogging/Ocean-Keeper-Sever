@@ -10,7 +10,8 @@ public enum LocationTag {
     EAST("동해번쩍"),
     SOUTH("남해번쩍"),
     JEJU("제주번쩍"),
-    ETC("기타");
+    ETC("기타"),
+    EMPTY("제거됨");
 
     private final String value;
 }

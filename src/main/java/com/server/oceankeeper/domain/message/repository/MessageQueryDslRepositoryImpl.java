@@ -45,11 +45,11 @@ public class MessageQueryDslRepositoryImpl implements MessageQueryDslRepository 
                 .from(oMessage)
                 .innerJoin(oMessage.activity, activity)
                 .innerJoin(oMessage.sender, oUser)
-                .where(type == MessageType.ALL ?  (oMessage.messageType.eq(MessageType.NOTICE))
-                        .or(oMessage.messageType.eq(MessageType.PRIVATE)) : nullCondition(type, oMessage.messageType::eq),
+                .where(type == MessageType.ALL ? (oMessage.messageType.eq(MessageType.NOTICE))
+                                .or(oMessage.messageType.eq(MessageType.PRIVATE)) : nullCondition(type, oMessage.messageType::eq),
                         oMessage.messageTo.eq(user.getNickname()),
                         oMessage.isDeleteFromReceiver.eq(false),
-                        nullCondition(activityId,activity.uuid::eq),
+                        nullCondition(activityId, activity.uuid::eq),
                         lessThanId(lastId)
                 ) //for no offset scrolling, use message sent time
                 .orderBy(oMessage.createdAt.desc())
@@ -77,7 +77,7 @@ public class MessageQueryDslRepositoryImpl implements MessageQueryDslRepository 
                 .from(oMessage)
                 .innerJoin(oMessage.activity, activity)
                 .innerJoin(oMessage.sender, oUser)
-                .where(nullCondition(user.getNickname(),oMessage.messageFrom::eq),
+                .where(nullCondition(user.getNickname(), oMessage.messageFrom::eq),
                         oMessage.isDeleteFromSender.eq(false),
                         oMessage.messageType.eq(MessageType.PRIVATE),
                         nullCondition(user, oMessage.sender::eq),
