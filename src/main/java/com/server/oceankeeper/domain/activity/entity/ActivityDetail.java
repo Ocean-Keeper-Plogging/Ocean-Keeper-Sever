@@ -47,16 +47,13 @@ public class ActivityDetail {
     private String preparation;
 
     @Column(length = 1000)
-    private String rewards;
-
-    @Column(length = 1000)
     @Lob
     private String etc;
 
     @Builder
     public ActivityDetail(Long id, Activity activity, UUID uuid, String activityStory,
                           String storyImage, String keeperIntroduction, String keeperImage,
-                          String transportation, String programDetails, String preparation, String rewards, String etc) {
+                          String transportation, String programDetails, String preparation, String etc) {
         this.id = id;
         this.activity = activity;
         this.uuid = uuid;
@@ -67,7 +64,6 @@ public class ActivityDetail {
         this.transportation = transportation;
         this.programDetails = programDetails;
         this.preparation = preparation;
-        this.rewards = rewards;
         this.etc = etc;
     }
 
@@ -79,7 +75,6 @@ public class ActivityDetail {
         this.transportation = null;
         this.programDetails = null;
         this.preparation = null;
-        this.rewards = null;
         this.etc = null;
     }
 }

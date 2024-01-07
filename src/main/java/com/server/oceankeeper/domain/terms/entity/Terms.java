@@ -17,7 +17,7 @@ public class Terms extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(length = 10000, nullable = false)
+    @Lob
     private String contents;
 
     @Builder

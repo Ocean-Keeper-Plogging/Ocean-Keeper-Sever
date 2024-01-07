@@ -5,13 +5,16 @@ import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Notification extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,5 +39,9 @@ public class Notification extends BaseEntity {
 
     public void read() {
         isRead = true;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

@@ -3,11 +3,13 @@ package com.server.oceankeeper.domain.user.repository;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<OUser, Long> {
     Optional<OUser> findByNicknameAndPassword(String nickname, String password);
+    List<OUser> findAllByAlarm(boolean alarm);
     Optional<OUser> findByUuid(UUID uuid);
 
     Optional<OUser> findByNickname(String nickname);

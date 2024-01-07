@@ -9,7 +9,6 @@ import com.server.oceankeeper.domain.activity.dto.response.MyScheduledActivityDt
 import com.server.oceankeeper.domain.activity.dto.response.RegisterActivityResDto;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
-import com.server.oceankeeper.domain.activity.service.ActivityInfoCrewFacadeService;
 import com.server.oceankeeper.domain.activity.service.ActivityMessageFacadeService;
 import com.server.oceankeeper.domain.activity.service.ActivityService;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
@@ -62,8 +61,6 @@ class ActivityControllerTest {
     private ActivityService activityService;
     @MockBean
     private ActivityMessageFacadeService activityMessageService;
-    @MockBean
-    private ActivityInfoCrewFacadeService activityInfoCrewFacadeService;
     @MockBean
     private TokenProvider tokenProvider;
     @MockBean
@@ -303,7 +300,7 @@ class ActivityControllerTest {
         doNothing().when(activityService).modifyApplication(any(),any(),any());
 
         ModifyApplicationReqDto request = ModifyApplicationReqDto.builder()
-                .privacyAgreement(true)
+                .email("kim@naver.com")
                 .build();
         String requestStr = om.writeValueAsString(request);
 

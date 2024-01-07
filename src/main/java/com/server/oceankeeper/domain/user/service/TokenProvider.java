@@ -140,7 +140,7 @@ public class TokenProvider {
         Claims claims = parseClaims(token);
         String subject = claims.getSubject();
 
-        return subject.split("_");
+        return subject.split("-9___1-");
     }
 
     public boolean validateToken(String jwt) throws ExpiredTokenException{

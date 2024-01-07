@@ -77,11 +77,11 @@ public class ActivityDetailResDto {
 
     @ApiModelProperty(
             value = "활동 시작일",
-            example = "2023-07-20T13:00:00",
+            example = "2023-07-20 13:00",
             required = true
     )
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm", timezone = "Asia/Seoul")
     private final LocalDateTime startAt;
 
     @ApiModelProperty(
@@ -180,38 +180,6 @@ public class ActivityDetailResDto {
     )
     private final String hostImageUrl;
 
-//    public Activity toActivityEntity() {
-//        return Activity.builder()
-//                .uuid(UUIDGenerator.createUuid())
-//                .location(location.toEntity())
-//                .locationTag(locationTag)
-//                .title(title)
-//                .thumbnail(thumbnailUrl)
-//                .garbageCategory(garbageCategory)
-//                .quota(quota)
-//                .participants(0)
-//                .recruitStartAt(recruitStartAt)
-//                .recruitEndAt(recruitEndAt)
-//                .startAt(startAt)
-//                .activityStatus(ActivityStatus.OPEN)
-//                .build();
-//    }
-//
-//    public ActivityDetail toActivityDetailEntity() {
-//        return ActivityDetail.builder()
-//                .uuid(UUIDGenerator.createUuid())
-//                .activityStory(activityStory)
-//                .storyImage(storyImageUrl)
-//                .keeperIntroduction(keeperIntroduction)
-//                .keeperImage(keeperImageUrl)
-//                .transportation(transportation)
-//                .programDetails(programDetails)
-//                .preparation(preparation)
-//                .rewards(rewards)
-//                .etc(etc)
-//                .build();
-//    }
-
     public ActivityDetailResDto(Activity activity, ActivityDetail activityDetail, OUser host) {
         this.location = new LocationDto(activity.getLocation());
         this.locationTag = activity.getLocationTag();
@@ -231,7 +199,7 @@ public class ActivityDetailResDto {
         this.transportation = activityDetail.getTransportation();
         this.programDetails = activityDetail.getProgramDetails();
         this.preparation = activityDetail.getPreparation();
-        this.rewards = activityDetail.getRewards();
+        this.rewards = activity.getRewards();
         this.etc = activityDetail.getEtc();
         this.hostNickName = host.getNickname();
         this.hostImageUrl = host.getProfile();

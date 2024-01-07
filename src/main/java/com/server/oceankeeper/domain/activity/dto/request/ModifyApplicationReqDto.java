@@ -63,7 +63,4 @@ public class ModifyApplicationReqDto {
             example = "안녕하세요"
     )
     private final String question;
-
-    @AssertTrue
-    private final boolean privacyAgreement;
 }

@@ -54,7 +54,7 @@ public class ApplyApplicationReqDto {
             value = "생년월일",
             example = "20010305"
     )
-    @Pattern(regexp = "^(19\\d\\d|20\\d{2})(0\\d|1[0-2])(0[1-9]|[1-2]\\d|3[0-1])$", message = "생년월일은 하이픈 없이 YYYYMMDD 꼴이어야 합니다")
+    @Pattern(regexp = "^$|^(19\\d\\d|20\\d{2})(0\\d|1[0-2])(0[1-9]|[1-2]\\d|3[0-1])$", message = "생년월일은 하이픈 없이 YYYYMMDD 꼴이어야 합니다")
     private final String dayOfBirth;
 
     @ApiModelProperty(

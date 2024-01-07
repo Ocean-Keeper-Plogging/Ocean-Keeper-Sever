@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.crew.service;
 
+import com.server.oceankeeper.domain.activity.dao.FullApplicationDao;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.response.ApplicationDto;
 import com.server.oceankeeper.domain.activity.entity.Activity;
@@ -8,9 +9,9 @@ import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.crew.repository.CrewRepository;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
-import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
-import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
+import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import com.server.oceankeeper.util.UUIDGenerator;
@@ -27,12 +28,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CrewService {
     private final CrewRepository crewRepository;
+    private final EventPublisher publisher;
 
     @Transactional
     public Crews addHost(Activity activity, OUser user) {
         Crews crew = Crews.builder()
                 .activity(activity)
                 .user(user)
+                .host(user)
                 .applyAt(LocalDateTime.now())
                 .uuid(UUIDGenerator.createUuid())
                 .activityRole(CrewRole.HOST)
@@ -50,11 +53,12 @@ public class CrewService {
     }
 
     @Transactional
-    public Crews addCrew(ApplyApplicationReqDto request, Activity activity, OUser applyUser) {
+    public Crews addCrew(ApplyApplicationReqDto request, Activity activity, OUser applyUser, OUser host) {
         Crews crew = Crews.builder()
                 .uuid(UUIDGenerator.createUuid())
                 .user(applyUser)
                 .activity(activity)
+                .host(host)
                 .activityRole(CrewRole.CREW)
                 .dayOfBirth(request.getDayOfBirth())
                 .crewStatus(CrewStatus.IN_PROGRESS)
@@ -91,7 +95,6 @@ public class CrewService {
                 .orElseThrow(() -> new IdNotFoundException("해당 활동에 유저가 존재하지 않습니다."));
     }
 
-
     @Transactional
     public boolean existCrew(OUser user, Activity activity) {
         return crewRepository.findByUserAndActivity(user, activity).isPresent();
@@ -99,7 +102,7 @@ public class CrewService {
 
     @Transactional
     public ApplicationDto getApplicationDto(OUser user) {
-        Crews applicationInfo = crewRepository.findByUserOrderByCreatedAtDesc(user)
+        Crews applicationInfo = crewRepository.findFirstByUserOrderByCreatedAtDesc(user)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 지원서가 존재하지 않습니다."));
 
         return ApplicationDto.builder()
@@ -149,14 +152,18 @@ public class CrewService {
 
     @Transactional
     public void deleteCrew(OUser user, Crews crew) {
+        log.info("JBJB [deleteCrew] crew:{}", crew);
         crewRepository.delete(crew);
-        EventPublisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT));
+        publisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT));
     }
 
     @Transactional
-    public void resetCrewInfo(Crews crew) {
-        crew.reset();
-        //TODO: fetch join 필요성 고려
-        EventPublisher.emit(new ActivityEvent(this, crew.getUser(), OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+    public FullApplicationDao getFullApplication(String applicationId) {
+        List<FullApplicationDao> result = crewRepository.getApplicationAndActivityInfoAndCrewInfo(UUIDGenerator.changeUuidFromString(applicationId));
+        log.info("JBJB result:{}", result);
+        if (result.size() != 1) {
+            throw new ResourceNotFoundException("신청서에 해당하는 정보가 없습니다.");
+        }
+        return result.get(0);
     }
 }

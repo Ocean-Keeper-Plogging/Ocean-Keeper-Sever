@@ -1,8 +1,8 @@
 package com.server.oceankeeper.domain.activity.service;
 
 import com.server.oceankeeper.domain.activity.dao.ActivityDao;
-import com.server.oceankeeper.domain.activity.dto.ApplicationSettingReqDto;
-import com.server.oceankeeper.domain.activity.dto.ApplicationSettingResDto;
+import com.server.oceankeeper.domain.activity.dto.request.ApplicationSettingReqDto;
+import com.server.oceankeeper.domain.activity.dto.response.ApplicationSettingResDto;
 import com.server.oceankeeper.domain.activity.dto.response.MyActivityDto;
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
@@ -15,7 +15,10 @@ import com.server.oceankeeper.domain.message.dto.response.MessageSendResDto;
 import com.server.oceankeeper.domain.message.entity.MessageSentType;
 import com.server.oceankeeper.domain.message.entity.MessageType;
 import com.server.oceankeeper.domain.message.service.MessageService;
+import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
+import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.util.TokenUtil;
 import com.server.oceankeeper.util.UUIDGenerator;
@@ -42,6 +45,7 @@ public class ActivityMessageFacadeService {
     private final ActivityService activityService;
     private final MessageService messageService;
     private final TokenUtil tokenUtil;
+    private final EventPublisher publisher;
 
     @Transactional
     public MyActivityDto getMyActivities(String userId, String activityId, String status, String roleStr, Integer pageSize) {
@@ -105,12 +109,10 @@ public class ActivityMessageFacadeService {
         MessageSendResDto messageId = null;
 
         for (String applicationId : request.getApplicationId()) {
-            Crews application = activityService.findCrews(applicationId);
+            Crews application = activityService.findCrew(applicationId);
 
             if (application.getCrewStatus().equals(CrewStatus.REJECT))
                 throw new IllegalRequestException("이미 거절된 지원서입니다. 더이상 수정할 수 없습니다.");
-
-            application.changeCrewStatus(newStatus);
 
             if (!checkIsHost) {
                 OUser user = activityService.findOwner(application.getActivity());
@@ -123,16 +125,21 @@ public class ActivityMessageFacadeService {
                 Activity activity = application.getActivity();
                 LocalDate recruitEndAt = activity.getRecruitEndAt();
                 LocalDateTime startAt = activity.getStartAt();
-                if (getActivityStatus(recruitEndAt, startAt).equals(ActivityStatus.RECRUITMENT_CLOSE))
+                if (!getActivityStatus(recruitEndAt, startAt).equals(ActivityStatus.RECRUITMENT_CLOSE))
                     throw new IllegalRequestException("해당 프로젝트가 모집종료 상태가 아닙니다");
                 checkActivityAlive = true;
             }
+
+            application.changeCrewStatus(newStatus);
 
             if (newStatus.equals(CrewStatus.REJECT)) {
                 rejectTargetNicknames.add(application.getUser().getNickname());
                 if (activityId == null)
                     activityId = application.getActivity().getUuid();
+            } else if (newStatus.equals(CrewStatus.NO_SHOW)) {
+                publisher.emit(new ActivityEvent(this, application.getUser(), OceanKeeperEventType.ACTIVITY_NO_SHOW_EVENT));
             }
+
             result &= (application.getCrewStatus() == newStatus);
         }
 

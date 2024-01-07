@@ -1,10 +1,7 @@
  package com.server.oceankeeper.domain.user.controller;
 
-import com.server.oceankeeper.domain.user.dto.TokenInfo;
+import com.server.oceankeeper.domain.user.dto.*;
 import com.server.oceankeeper.domain.user.service.UserService;
-import com.server.oceankeeper.domain.user.dto.JoinReqDto;
-import com.server.oceankeeper.domain.user.dto.JoinResDto;
-import com.server.oceankeeper.domain.user.dto.UserIdAndNicknameReqDto;
 import com.server.oceankeeper.global.response.APIResponse;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -54,8 +51,8 @@ public class UserController {
     //TODO: Implement user withdrawal
     @ApiOperation(value = "회원 탈퇴 [미구현][권한 필요]", notes = "회원을 탈퇴합니다.")
     @DeleteMapping(value = "/auth/withdrawal", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> withdrawal(@RequestBody @Valid JoinReqDto joinReqDto, BindingResult bindingResult) {
-        userService.withdrawal();
+    public ResponseEntity<?> withdrawal(@RequestBody @Valid WithdrawalReqDto withdrawalReqDto, BindingResult bindingResult) {
+        userService.withdrawal(withdrawalReqDto);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,"미구현"));
     }
 }

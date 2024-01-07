@@ -24,6 +24,7 @@ public enum ActivityStatus {
             case "closed":
                 return CLOSED;
             case "recruitment-closed":
+            case "recruitment-close":
                 return RECRUITMENT_CLOSE;
             case "cancel":
                 return CANCEL;
@@ -33,12 +34,10 @@ public enum ActivityStatus {
     }
 
     public static ActivityStatus getActivityStatus(LocalDate recruitEndAt, LocalDateTime startAt) {
-        if (LocalDateTime.now().isBefore(recruitEndAt.atStartOfDay())) {
-            if (LocalDateTime.now().isBefore(startAt))
-                return ActivityStatus.OPEN;
-            else
-                return ActivityStatus.RECRUITMENT_CLOSE;
-        }
+        if (LocalDateTime.now().isBefore(recruitEndAt.plusDays(1).atStartOfDay()))
+            return ActivityStatus.OPEN;
+        if (LocalDateTime.now().isBefore(startAt))
+            return ActivityStatus.RECRUITMENT_CLOSE;
         return ActivityStatus.CLOSED;
     }
 }

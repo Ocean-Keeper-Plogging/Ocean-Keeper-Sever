@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.activity.dto;
+package com.server.oceankeeper.domain.activity.dto.request;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

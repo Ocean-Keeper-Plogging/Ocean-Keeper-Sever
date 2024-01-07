@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.activity.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import io.swagger.annotations.ApiModelProperty;
@@ -69,6 +70,7 @@ public class MyActivityDto {
                 value = "활동 시작 시각",
                 required = true
         )
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm", timezone = "Asia/Seoul")
         private final LocalDateTime startAt;
 
         @ApiModelProperty(

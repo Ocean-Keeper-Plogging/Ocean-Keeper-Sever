@@ -154,7 +154,6 @@ public class ModifyActivityReqDto {
                 .transportation(transportation)
                 .programDetails(programDetails)
                 .preparation(preparation)
-                .rewards(rewards)
                 .etc(etc)
                 .build();
     }

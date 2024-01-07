@@ -17,6 +17,7 @@ import java.util.UUID;
         @Index(name = "i_startAt", columnList = "startAt"),
         @Index(name = "i_garbage", columnList = "garbageCategory"),
         @Index(name = "i_location", columnList = "locationTag"),
+        @Index(name = "i_reward", columnList = "rewards"),
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Activity extends BaseEntity {
@@ -61,6 +62,9 @@ public class Activity extends BaseEntity {
     @Column(nullable = false)
     private ActivityStatus activityStatus;
 
+    @Column(length = 1000)
+    private String rewards;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -81,7 +85,7 @@ public class Activity extends BaseEntity {
                     String thumbnail, GarbageCategory garbageCategory, Integer quota,
                     Integer participants, LocalDate recruitStartAt, LocalDate recruitEndAt,
                     LocalDateTime startAt, ActivityStatus activityStatus, Location location,
-                    LocalDateTime createdAt, LocalDateTime updatedAt) {
+                    LocalDateTime createdAt, LocalDateTime updatedAt, String rewards) {
         this.uuid = uuid;
         this.locationTag = locationTag;
         this.title = title;
@@ -96,6 +100,7 @@ public class Activity extends BaseEntity {
         this.location = location;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.rewards = rewards;
     }
 
     public void reset() {
@@ -108,6 +113,7 @@ public class Activity extends BaseEntity {
         this.startAt = LocalDateTime.now().plusYears(999);
         this.activityStatus = ActivityStatus.CANCEL;
         this.location = null;
+        this.rewards = null;
     }
 
     public void addParticipant() {
@@ -117,6 +123,10 @@ public class Activity extends BaseEntity {
     public void removeParticipant() {
         if (participants >= 1)
             participants--;
+    }
+
+    public void closeRecruitment() {
+        activityStatus = ActivityStatus.RECRUITMENT_CLOSE;
     }
 
     public void closeActivity() {

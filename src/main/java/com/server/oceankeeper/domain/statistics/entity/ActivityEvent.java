@@ -9,13 +9,13 @@ import org.springframework.context.ApplicationEvent;
 @ToString
 public class ActivityEvent extends ApplicationEvent {
     @Getter
-    private final OUser user;
+    private final Object object;
     @Getter
     private final OceanKeeperEventType event;
 
-    public ActivityEvent(Object source, OUser user, OceanKeeperEventType event) {
+    public ActivityEvent(Object source, Object obj, OceanKeeperEventType event) {
         super(source);
-        this.user = user;
+        this.object = obj;
         this.event = event;
     }
 }

@@ -1,15 +1,9 @@
 package com.server.oceankeeper.domain.activity.dto.response;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
-@ToString
-@Getter
-@Setter
-@RequiredArgsConstructor
+@Data
 public class ApplyActivityResDto {
     @ApiModelProperty(
             value = "등록한 activity id",

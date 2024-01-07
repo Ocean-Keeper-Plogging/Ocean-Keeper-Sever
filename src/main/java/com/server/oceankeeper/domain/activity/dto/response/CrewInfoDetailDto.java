@@ -1,6 +1,7 @@
-package com.server.oceankeeper.domain.activity.dto;
+package com.server.oceankeeper.domain.activity.dto.response;
 
 import com.server.oceankeeper.domain.activity.dao.CrewInfoDetailDao;
+import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.util.UUIDGenerator;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,13 +13,23 @@ import java.util.List;
 @Data
 @RequiredArgsConstructor
 public class CrewInfoDetailDto {
-    @ApiModelProperty(
-            value = "활동 아이디",
-            example = "11ee31531aa0db249f0095c688e46305"
-    )
-    private final String activityId;
-
+    private final ActivityInfo activityInfo;
     private final List<CrewInfoDetailData> crewInfo;
+
+    @Data
+    public static class ActivityInfo {
+        @ApiModelProperty(
+                value = "활동 아이디",
+                example = "11ee31531aa0db249f0095c688e46305"
+        )
+        private final String activityId;
+        @ApiModelProperty(
+                value = "활동 상태",
+                example = "OPEN(모집중), RECRUITMENT_CLOSE(모집종료),CLOSED(활동종료), CANCEL(활동취소)"
+        )
+        private final ActivityStatus activityStatus;
+    }
+
     @Data
     public static class CrewInfoDetailData {
         @ApiModelProperty(

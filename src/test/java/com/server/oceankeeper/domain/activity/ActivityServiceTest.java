@@ -21,6 +21,7 @@ import com.server.oceankeeper.domain.user.entitiy.UserRole;
 import com.server.oceankeeper.domain.user.entitiy.UserStatus;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
@@ -44,8 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
@@ -64,6 +64,8 @@ class ActivityServiceTest extends DummyObject {
     private CrewRepository crewRepository;
     @Mock
     private TokenUtil tokenUtil;
+    @Mock
+    private EventPublisher eventPublisher;
 
     private OUser createUser() {
         return OUser.builder()
@@ -141,7 +143,7 @@ class ActivityServiceTest extends DummyObject {
         assertThat(resultActivity.getRecruitStartAt()).isEqualTo(request.getRecruitStartAt());
         assertThat(resultActivity.getRecruitEndAt()).isEqualTo(request.getRecruitEndAt());
         assertThat(resultActivity.getStartAt()).isEqualTo(request.getStartAt());
-        assertThat(resultActivityDetail.getRewards()).isEqualTo(request.getRewards());
+        assertThat(resultActivity.getRewards()).isEqualTo(request.getRewards());
         assertThat(resultActivity.getTitle()).isEqualTo(request.getTitle());
         assertThat(resultActivity.getLocation()).isEqualTo(request.getLocation().toEntity());
         assertThat(resultActivity.getParticipants()).isEqualTo(0);
@@ -168,7 +170,8 @@ class ActivityServiceTest extends DummyObject {
                 .preparation("긴 상하의")
                 .rewards("점심제공")
                 .etc("오세요")
-                .build();;
+                .build();
+        ;
 
         //when
         //then
@@ -196,7 +199,8 @@ class ActivityServiceTest extends DummyObject {
                 .preparation("긴 상하의")
                 .rewards("점심제공")
                 .etc("오세요")
-                .build();;
+                .build();
+        ;
 
         //when
         //then
@@ -220,7 +224,6 @@ class ActivityServiceTest extends DummyObject {
         when(crewService.findCrews(any(Activity.class))).thenReturn(crews);
         when(activityDetailRepository.findByActivity(any())).thenReturn(Optional.ofNullable(expectActivityDetail));
         when(tokenUtil.getUserFromHeader(any())).thenReturn(expectUser);
-        doNothing().when(crewService).resetCrewInfo(any());
 
         //when
         //then
@@ -232,15 +235,16 @@ class ActivityServiceTest extends DummyObject {
         assertThat(expectActivityDetail.getProgramDetails()).isNull();
         assertThat(expectActivityDetail.getPreparation()).isNull();
         assertThat(expectActivityDetail.getTransportation()).isNull();
-        assertThat(expectActivityDetail.getRewards()).isNull();
+        assertThat(expectActivity.getRewards()).isNull();
         assertThat(expectActivityDetail.getEtc()).isNull();
+
+        //verify(publisher, atLeast(2)).publishEvent(any());
     }
 
     private ActivityDetail emptyActivityDetail(Activity activity) {
         return new ActivityDetail(
                 null,
-                activity,UUID.randomUUID(),
-                null,
+                activity, UUID.randomUUID(),
                 null,
                 null,
                 null,
@@ -417,6 +421,9 @@ class ActivityServiceTest extends DummyObject {
 
         OUser mockUser = OUser.builder()
                 .id(123L)
+                .nickname("nickname")
+                .provider("provider")
+                .providerId("providerid")
                 .uuid(UUIDGenerator.changeUuidFromString("831ea182ffcd11edbe560242ac120002"))
                 .build();
         when(userRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockUser));
@@ -425,7 +432,7 @@ class ActivityServiceTest extends DummyObject {
                 .id(10L)
                 .uuid(UUID.randomUUID())
                 .build();
-        when(crewService.addCrew(any(), any(), any())).thenReturn(newCrew);
+        when(crewService.addCrew(any(), any(), any(), any())).thenReturn(newCrew);
 
         //when
         ApplyApplicationReqDto request = getApplicationRequest();
@@ -435,6 +442,7 @@ class ActivityServiceTest extends DummyObject {
         System.out.println("response : " + response);
         assertThat(response.getApplicationId()).isEqualTo(UUIDGenerator.changeUuidToString(newCrew.getUuid()));
         assertThat(mockActivity.getParticipants()).isEqualTo(2);
+        //verify(publisher, atLeast(1)).publishEvent(any());
     }
 
     @Test
@@ -444,13 +452,11 @@ class ActivityServiceTest extends DummyObject {
         ModifyApplicationReqDto request = getModifyApplicationRequest();
         RegisterActivityReqDto mockActivity = getRegisterActivityRequest();
         Activity expectActivity = mockActivity.toActivityEntity();
-        ActivityDetail expectActivityDetail = mockActivity.toActivityDetailEntity();
 
         OUser expectUser = createUser();
         Crews expectedCrew = createCrew(expectActivity, expectUser);
 
-        when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
-        when(crewService.findApplication(any(), (Activity) any())).thenReturn(expectedCrew);
+        when(crewService.findApplication(any(), (String) any())).thenReturn(expectedCrew);
         when(tokenUtil.getUserFromHeader(any())).thenReturn(expectUser);
         String activityId = UUIDGenerator.changeUuidToString(expectActivity.getUuid());
 
@@ -487,15 +493,19 @@ class ActivityServiceTest extends DummyObject {
 
         OUser mockUser = OUser.builder()
                 .id(123L)
+                .nickname("nickname")
+                .provider("provider")
+                .providerId("providerid")
                 .uuid(UUIDGenerator.changeUuidFromString("831ea182ffcd11edbe560242ac120002"))
                 .build();
         when(userRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockUser));
+
         ApplyApplicationReqDto request = getApplicationRequest();
         Crews newCrew = Crews.builder()
                 .id(10L)
                 .uuid(UUID.randomUUID())
                 .build();
-        when(crewService.addCrew(any(), any(), any())).thenReturn(newCrew);
+        when(crewService.addCrew(any(), any(), any(), any())).thenReturn(newCrew);
         activityService.applyActivity(request);
 
         //when
@@ -518,9 +528,13 @@ class ActivityServiceTest extends DummyObject {
 
         OUser mockUser = OUser.builder()
                 .id(123L)
+                .nickname("nickname")
+                .provider("provider")
+                .providerId("providerid")
                 .uuid(UUIDGenerator.changeUuidFromString("831ea182ffcd11edbe560242ac120002"))
                 .build();
         when(userRepository.findByUuid(any())).thenReturn(Optional.ofNullable(mockUser));
+
         ApplyApplicationReqDto request = getApplicationRequest();
         Crews newCrew = Crews.builder()
                 .activity(mockActivity)
@@ -528,7 +542,7 @@ class ActivityServiceTest extends DummyObject {
                 .id(10L)
                 .uuid(UUID.randomUUID())
                 .build();
-        when(crewService.addCrew(any(), any(), any())).thenReturn(newCrew);
+        when(crewService.addCrew(any(), any(), any(), any())).thenReturn(newCrew);
         ApplyActivityResDto result = activityService.applyActivity(request);
         when(crewService.findApplication(any(), anyString())).thenReturn(newCrew);
         when(tokenUtil.getUserFromHeader(any())).thenReturn(mockUser);
@@ -538,6 +552,7 @@ class ActivityServiceTest extends DummyObject {
 
         //then
         assertThat(mockActivity.getParticipants()).isEqualTo(3); //하나 줄어듦
+        //verify(publisher, atLeast(1)).publishEvent(any());
     }
 
     @Test
@@ -613,7 +628,6 @@ class ActivityServiceTest extends DummyObject {
                 .transportation("자차 (카쉐어링가능)")
                 .question(null)
                 .startPoint("경기도")
-                .privacyAgreement(true)
                 .build();
     }
 }

@@ -32,6 +32,10 @@ public class Crews extends BaseEntity {
     @JoinColumn(name = "USER_ID")
     private OUser user;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "HOST_ID")
+    private OUser host;
+
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private CrewRole activityRole;
@@ -72,7 +76,7 @@ public class Crews extends BaseEntity {
     private boolean privacyAgreement;
 
     @Builder
-    public Crews(Long id, UUID uuid, Activity activity, OUser user, CrewRole activityRole,
+    public Crews(Long id, UUID uuid, Activity activity, OUser user, OUser host, CrewRole activityRole,
                  CrewStatus crewStatus, String name, String phoneNumber, String id1365, String email,
                  String startPoint, String transportation, String question, LocalDateTime applyAt,
                  LocalDateTime cancelAt, LocalDateTime expiredAt, LocalDateTime finishAt, String dayOfBirth,
@@ -81,6 +85,7 @@ public class Crews extends BaseEntity {
         this.uuid = uuid;
         this.activity = activity;
         this.user = user;
+        this.host = host;
         this.activityRole = activityRole;
         this.crewStatus = crewStatus;
         this.name = name;

@@ -13,16 +13,13 @@ import com.server.oceankeeper.domain.crew.service.CrewService;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.util.UUIDGenerator;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,7 +65,7 @@ class CrewServiceTest extends DummyObject {
                 .build();
 
         //when
-        Crews result = crewService.addCrew(request, mockActivity, mockUser);
+        Crews result = crewService.addCrew(request, mockActivity, mockUser, any());
 
         //then
         assertThat(result).isEqualTo(mockCrew);

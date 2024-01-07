@@ -74,6 +74,9 @@ class ActivityRepositoryTest extends DummyObject {
         Activity activityFromKim5 = newMockActivity(35, ActivityStatus.OPEN, LocationTag.WEST, GarbageCategory.DEPOSITED, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120005"));
         em.persist(activityFromKim5);
+        Activity activityFromKim6 = newMockActivity(35, ActivityStatus.CLOSED, LocationTag.WEST, GarbageCategory.DEPOSITED, -20,
+                UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120006"));
+        em.persist(activityFromKim6);
         Activity activityFromLee = newMockActivity(10, ActivityStatus.OPEN, LocationTag.JEJU, GarbageCategory.FLOATING, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120011"));
         em.persist(activityFromLee);
@@ -84,24 +87,31 @@ class ActivityRepositoryTest extends DummyObject {
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120022"));
         em.persist(activityFromPark2);
 
-        Crews crews = newCrew(activityFromKim, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
-        Crews crews1 = newCrew(activityFromKim2, kim, CrewStatus.CLOSED, CrewRole.HOST);
-        Crews crews12 = newCrew(activityFromKim3, kim, CrewStatus.CANCEL, CrewRole.HOST);
-        Crews crews13 = newCrew(activityFromKim4, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
-        Crews crews14 = newCrew(activityFromKim5, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
-        Crews crews2 = newCrew(activityFromLee, lee, CrewStatus.IN_PROGRESS, CrewRole.HOST);
-        Crews crews3 = newCrew(activityFromPark, park, CrewStatus.IN_PROGRESS, CrewRole.HOST);
-        Crews crews6 = newCrew(activityFromPark2, park, CrewStatus.CANCEL, CrewRole.HOST);
+        Crews crews = newCrew(activityFromKim, kim, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
+        Crews crews1 = newCrew(activityFromKim2, kim, kim, CrewStatus.CLOSED, CrewRole.HOST);
+        Crews crews12 = newCrew(activityFromKim3, kim, kim, CrewStatus.CANCEL, CrewRole.HOST);
+        Crews crews13 = newCrew(activityFromKim4, kim, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
+        Crews crews14 = newCrew(activityFromKim5, kim, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
+        Crews crews16 = newCrew(activityFromKim6, kim, kim, CrewStatus.CLOSED, CrewRole.HOST);
+        Crews crews26 = newCrew(activityFromKim6, lee, kim, CrewStatus.CLOSED, CrewRole.CREW);
+        Crews crews36 = newCrew(activityFromKim6, park, kim, CrewStatus.CLOSED, CrewRole.CREW);
 
-        Crews crews4 = newCrew(activityFromLee, kim, CrewStatus.REJECT, CrewRole.CREW);
-        Crews crews5 = newCrew(activityFromPark, kim, CrewStatus.NO_SHOW, CrewRole.CREW);
-        Crews crews62 = newCrew(activityFromPark2, kim, CrewStatus.CANCEL, CrewRole.CREW);
+        Crews crews2 = newCrew(activityFromLee, lee, lee, CrewStatus.IN_PROGRESS, CrewRole.HOST);
+        Crews crews3 = newCrew(activityFromPark, park, park, CrewStatus.IN_PROGRESS, CrewRole.HOST);
+        Crews crews6 = newCrew(activityFromPark2, park, park, CrewStatus.CANCEL, CrewRole.HOST);
+
+        Crews crews4 = newCrew(activityFromLee, kim, lee, CrewStatus.REJECT, CrewRole.CREW);
+        Crews crews5 = newCrew(activityFromPark, kim, park, CrewStatus.NO_SHOW, CrewRole.CREW);
+        Crews crews62 = newCrew(activityFromPark2, kim, park, CrewStatus.CANCEL, CrewRole.CREW);
 
         em.persist(crews);
         em.persist(crews1);
         em.persist(crews12);
         em.persist(crews13);
         em.persist(crews14);
+        em.persist(crews16);
+        em.persist(crews26);
+        em.persist(crews36);
         em.persist(crews2);
         em.persist(crews3);
         em.persist(crews4);
@@ -155,7 +165,7 @@ class ActivityRepositoryTest extends DummyObject {
 
         //When
         Slice<ActivityDao> result = activityRepository
-                .getMyActivities(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
+                .getMyActivitiesWithoutCancel(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
                         null, ActivityStatus.OPEN, null, LocalDateTime.now().plusDays(5), Pageable.ofSize(2));
 
         //Then
@@ -171,7 +181,7 @@ class ActivityRepositoryTest extends DummyObject {
 
         //When
         Slice<ActivityDao> result = activityRepository
-                .getMyActivities(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
+                .getMyActivitiesWithoutCancel(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
                         UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"),
                         ActivityStatus.OPEN, null, LocalDateTime.now().plusDays(5), Pageable.ofSize(1));
 
@@ -188,13 +198,13 @@ class ActivityRepositoryTest extends DummyObject {
 
         //When
         Slice<ActivityDao> result = activityRepository
-                .getMyActivities(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
+                .getMyActivitiesWithoutCancel(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
                         null, ActivityStatus.CLOSED, null, LocalDateTime.now().plusDays(6), Pageable.ofSize(5));
 
         //Then
-        assertThat(result.getContent().size()).isEqualTo(1);
+        assertThat(result.getContent().size()).isEqualTo(2);
         assertThat(result.getContent().get(0).getActivityId())
-                .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120002"));
+                .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120006"));
     }
 
     @Test
@@ -204,7 +214,7 @@ class ActivityRepositoryTest extends DummyObject {
 
         //When
         Slice<ActivityDao> result = activityRepository
-                .getMyActivities(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
+                .getMyActivitiesWithoutCancel(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
                         null, ActivityStatus.OPEN, null, LocalDateTime.now().plusDays(9), Pageable.ofSize(15));
 
         //Then
@@ -216,17 +226,17 @@ class ActivityRepositoryTest extends DummyObject {
     }
 
     @Test
-    @DisplayName("김이 속한 전체 활동을 조회한다")
+    @DisplayName("김이 속한 활동 중 취소한 활동을 제외하고 조회한다")
     void testCrewActivities() throws Exception {
         //Given
 
         //When
         Slice<ActivityDao> result = activityRepository
-                .getMyActivities(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
+                .getMyActivitiesWithoutCancel(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"),
                         null, null, null, null, Pageable.ofSize(15));
 
         //Then
-        assertThat(result.getContent().size()).isEqualTo(6);
+        assertThat(result.getContent().size()).isEqualTo(7);
         assertThat(result.getContent().get(0).getActivityId())
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
         assertThat(result.getContent().get(1).getActivityId())
@@ -247,8 +257,10 @@ class ActivityRepositoryTest extends DummyObject {
         assertThat(result.getContent().size()).isEqualTo(5);
         assertThat(result.getContent().get(0).getActivityId())
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
+        assertThat(result.getContent().get(0).getHostNickname()).isEqualTo("park");
         assertThat(result.getContent().get(1).getActivityId())
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120011"));
+        assertThat(result.getContent().get(1).getHostNickname()).isEqualTo("lee");
         assertThat(result.stream().map(AllActivityDao::getActivityId).collect(Collectors.toList())).isSortedAccordingTo(Comparator.reverseOrder());
     }
 
@@ -263,9 +275,9 @@ class ActivityRepositoryTest extends DummyObject {
 
         //Then
         System.out.println("result = " + result.getContent());
-        assertThat(result.getContent().size()).isEqualTo(1);
+        assertThat(result.getContent().size()).isEqualTo(2);
         assertThat(result.getContent().get(0).getActivityId())
-                .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120002"));
+                .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120006"));
         assertThat(result.stream().map(AllActivityDao::getActivityId).collect(Collectors.toList())).isSortedAccordingTo(Comparator.reverseOrder());
     }
 
@@ -305,7 +317,7 @@ class ActivityRepositoryTest extends DummyObject {
 
     @Test
     @DisplayName("신청자 리스트를 조회한다")
-    void testFindCrewInfo(){
+    void testFindCrewInfo() {
         //given
 
         //when
@@ -315,5 +327,27 @@ class ActivityRepositoryTest extends DummyObject {
         //then
         assertThat(result.size()).isEqualTo(1);
         assertThat(result.get(0).getCrewStatus()).isEqualTo(CrewStatus.NO_SHOW);
+    }
+
+    @Test
+    @DisplayName("기한이 지난 크루정보는 삭제한다.")
+    void testDeleteClosedCrewInfo() {
+        //given
+        //when
+        long result = activityRepository
+                .deleteByCrewStatusAndDays(CrewStatus.CLOSED,10);
+        //then
+        assertThat(result).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("기한이 지나지 않은 크루정보는 삭제하지 않는다.")
+    void testNotDeleteNotClosedCrewInfo() {
+        //given
+        //when
+        long result = activityRepository
+                .deleteByCrewStatusAndDays(CrewStatus.CLOSED,30);
+        //then
+        assertThat(result).isEqualTo(0);
     }
 }

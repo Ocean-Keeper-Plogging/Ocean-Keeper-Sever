@@ -8,6 +8,9 @@ import com.server.oceankeeper.domain.notice.dto.response.NoticeListResDto;
 import com.server.oceankeeper.domain.notice.dto.response.NoticeResDto;
 import com.server.oceankeeper.domain.notice.entity.Notice;
 import com.server.oceankeeper.domain.notice.repository.NoticeRepository;
+import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
+import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class NoticeService {
     private final NoticeRepository repository;
+    private final EventPublisher publisher;
 
     @Transactional
     public NoticeListResDto get(Long noticeId, Integer size) {
@@ -35,6 +39,8 @@ public class NoticeService {
     public NoticeResDto post(NoticeReqDto request) {
         Notice notice = request.toEntity();
         repository.save(notice);
+
+        publisher.emit(new ActivityEvent(this, null, OceanKeeperEventType.NEW_NOTICE_EVENT));
         return NoticeResDto.fromEntity(notice);
     }
 

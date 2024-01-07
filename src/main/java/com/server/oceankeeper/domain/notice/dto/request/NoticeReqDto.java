@@ -11,8 +11,9 @@ public class NoticeReqDto {
     private final String title;
 
     public Notice toEntity(){
+        String newContents = contents.replaceAll("\\\\", "");
         return Notice.builder()
-                .contents(contents)
+                .contents(newContents)
                 .title(title)
                 .createdAt(LocalDateTime.now())
                 .build();

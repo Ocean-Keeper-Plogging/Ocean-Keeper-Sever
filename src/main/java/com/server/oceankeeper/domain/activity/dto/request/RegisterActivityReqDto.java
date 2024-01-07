@@ -176,6 +176,7 @@ public class RegisterActivityReqDto {
                 .recruitEndAt(recruitEndAt)
                 .startAt(startAt)
                 .activityStatus(ActivityStatus.OPEN)
+                .rewards(rewards == null ? "" : rewards)
                 .build();
     }
 
@@ -189,7 +190,6 @@ public class RegisterActivityReqDto {
                 .transportation(transportation)
                 .programDetails(programDetails)
                 .preparation(preparation)
-                .rewards(rewards)
                 .etc(etc)
                 .build();
     }

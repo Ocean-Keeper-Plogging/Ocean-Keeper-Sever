@@ -3,6 +3,7 @@ package com.server.oceankeeper.domain.activity.repository;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.server.oceankeeper.domain.activity.dao.*;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
@@ -27,7 +28,6 @@ import java.util.stream.Collectors;
 
 import static com.server.oceankeeper.domain.activity.entity.QActivity.activity;
 import static com.server.oceankeeper.domain.crew.entitiy.QCrews.crews;
-import static com.server.oceankeeper.domain.statistics.entity.QActivityInfo.activityInfo;
 import static com.server.oceankeeper.domain.user.entitiy.QOUser.oUser;
 
 @RequiredArgsConstructor
@@ -45,6 +45,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                                 oUser.nickname.as("hostNickname"),
                                 activity.quota.as("quota"),
                                 activity.participants.as("participants"),
+                                activity.rewards.coalesce("").as("rewards"),
                                 activity.thumbnail.as("activityImageUrl"),
                                 activity.recruitStartAt,
                                 activity.recruitEndAt,
@@ -55,7 +56,8 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .innerJoin(crews.activity, activity)
                 .innerJoin(crews.user, oUser)
                 .where(
-                        checkActivityStatus(activityStatus, startAt),
+                        //checkActivityStatus(activityStatus, startAt),
+                        condition(activityStatus, activity.activityStatus::eq),
                         activity.activityStatus.ne(ActivityStatus.CANCEL),
                         condition(tag, activity.locationTag::eq),
                         condition(category, activity.garbageCategory::eq),
@@ -70,12 +72,12 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
     }
 
     @Override
-    public Slice<ActivityDao> getMyActivities(UUID userId, UUID activityId, ActivityStatus activityStatus, CrewRole crewRole, LocalDateTime startAt, Pageable pageable) {
+    public Slice<ActivityDao> getMyActivitiesWithoutCancel(UUID userId, UUID activityId, ActivityStatus activityStatus, CrewRole crewRole, LocalDateTime startAt, Pageable pageable) {
         List<ActivityDao> result = queryFactory.select(
                         Projections.constructor(ActivityDao.class,
                                 activity.uuid.as("activityId"),
                                 activity.title.as("title"),
-                                oUser.nickname.as("hostNickname"),
+                                crews.host.nickname.as("host"),
                                 activity.quota.as("quota"),
                                 activity.participants.as("participants"),
                                 activity.thumbnail.as("activityImageUrl"),
@@ -171,6 +173,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
     public List<CrewInfoDetailDao> getCrewInfo(UUID activityId) {
         List<CrewInfoDetailDao> result = queryFactory.select(
                         Projections.constructor(CrewInfoDetailDao.class,
+                                crews.activity.activityStatus,
                                 crews.name.as("username"),
                                 crews.user.nickname,
                                 crews.crewStatus,
@@ -186,6 +189,36 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 )
                 .orderBy(crews.id.asc())
                 .fetch();
+        return result;
+    }
+
+    @Override
+    public List<CrewDeviceTokensDao> getUserFromActivityId(UUID activityId) {
+        List<CrewDeviceTokensDao> result = queryFactory.select(
+                        Projections.constructor(CrewDeviceTokensDao.class,
+                                crews.user.as("user"))
+                )
+                .from(crews)
+                .leftJoin(crews.activity, activity)
+                .leftJoin(crews.user, oUser)
+                .where(
+                        crews.activity.uuid.eq(activityId)
+                )
+                .orderBy(crews.id.asc())
+                .fetch();
+        return result;
+    }
+
+    public long deleteByCrewStatusAndDays(CrewStatus status, long days) {
+        long result = queryFactory.delete(crews)
+                .where(crews.id.in(JPAExpressions.select(crews.id)
+                        .from(crews)
+                        .leftJoin(crews.activity, activity)
+                        .where(
+                                condition(status, crews.crewStatus::eq),
+                                crews.activity.startAt.before(LocalDateTime.now().minusDays(days))
+                        )))
+                .execute();
         return result;
     }
 

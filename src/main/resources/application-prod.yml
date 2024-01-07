@@ -26,7 +26,10 @@ spring:
     hibernate:
       ddl-auto: update #create update none
     properties:
-      '[hibernate.default_batch_fetch_size]': 100
+      order_inserts: true
+      order_updates: true
+      jdbc:
+        batch_size: 100
   servlet:
     multipart:
       enabled: true
@@ -38,7 +41,7 @@ spring:
 
 logging:
   level:
-    '[com.server.oceankeeper]': INFO
+    '[com.server.oceankeeper]': DEBUG
 
 cloud:
   aws:
@@ -55,3 +58,6 @@ cloud:
 jwt:
   password: ${JWT_PASSWORD}
   secret: ${JWT_SECRET}
+
+fcm:
+  time: 3600

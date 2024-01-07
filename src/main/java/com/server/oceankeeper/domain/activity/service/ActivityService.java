@@ -1,8 +1,8 @@
 package com.server.oceankeeper.domain.activity.service;
 
 import com.server.oceankeeper.domain.activity.dao.*;
-import com.server.oceankeeper.domain.activity.dto.CrewInfoDetailDto;
-import com.server.oceankeeper.domain.activity.dto.CrewInfoFileDto;
+import com.server.oceankeeper.domain.activity.dto.inner.RegisterActivityEventDto;
+import com.server.oceankeeper.domain.activity.dto.inner.UserListDto;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyActivityReqDto;
 import com.server.oceankeeper.domain.activity.dto.request.ModifyApplicationReqDto;
@@ -16,7 +16,10 @@ import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
 import com.server.oceankeeper.domain.crew.service.CrewService;
+import com.server.oceankeeper.domain.message.entity.MessageEvent;
+import com.server.oceankeeper.domain.statistics.dto.ActivityInfoResDto;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
+import com.server.oceankeeper.domain.user.dto.UserInfoDto;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
@@ -29,24 +32,18 @@ import com.server.oceankeeper.util.TokenUtil;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -62,6 +59,8 @@ public class ActivityService {
     private final UserRepository userRepository;
     private final CrewService crewService;
     private final TokenUtil tokenUtil;
+    private final ExcelMaker excelMaker;
+    private final EventPublisher publisher;
 
     @Transactional
     public List<MyScheduledActivityDto> getMyScheduleActivity(String id) {
@@ -165,10 +164,18 @@ public class ActivityService {
                 r.getRecruitEndAt().toString(),
                 getStartDay(r.getStartAt()),
                 getActivityStatus(r.getRecruitEndAt(), r.getStartAt()),
-                r.getLocation())).collect(Collectors.toList());
+                r.getLocation(),
+                r.getRewards(),
+                checkRecruitmentStarted(r.getRecruitStartAt(), r.getRecruitEndAt()))).collect(Collectors.toList());
 
         return new GetActivityResDto(activities,
                 new GetActivityResDto.Meta(activities.size(), !response.hasNext()));
+    }
+
+    private boolean checkRecruitmentStarted(LocalDate recruitStartAt, LocalDate recruitEndAt) {
+        LocalDate current = LocalDate.now();
+        return (current.isEqual(recruitStartAt) || current.isAfter(recruitStartAt))
+                && (current.isEqual(recruitEndAt) || current.isBefore(recruitEndAt));
     }
 
     @Transactional
@@ -180,6 +187,7 @@ public class ActivityService {
         OUser user = getUser(request.getUserId());
 
         Activity activity = request.toActivityEntity();
+
         activityRepository.save(activity);
 
         ActivityDetail activityDetail = request.toActivityDetailEntity();
@@ -188,14 +196,22 @@ public class ActivityService {
 
         crewService.addHost(activity, user);
 
-        //TODO:활동 등록 기록은 활동이 끝난 다음에 처리
-        //EventPublisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_EVENT));
+        publisher.emit(new ActivityEvent(
+                this,
+                new RegisterActivityEventDto(activity.getStartAt(), activity.getRecruitEndAt(), UUIDGenerator.changeUuidToString(activity.getUuid()), user),
+                OceanKeeperEventType.ACTIVITY_REGISTRATION_EVENT));
+
+        publisher.emit(new ActivityEvent(
+                this,
+                new RegisterActivityEventDto(activity.getStartAt(), activity.getRecruitEndAt(), UUIDGenerator.changeUuidToString(activity.getUuid()), user),
+                OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT));
 
         return new RegisterActivityResDto(UUIDGenerator.changeUuidToString(activity.getUuid()));
     }
 
     private void checkRecruitDay(LocalDate recruitStartAt, LocalDate recruitEndAt, LocalDateTime startAt) {
-        if (recruitStartAt.isAfter(recruitEndAt) || startAt.isBefore(recruitEndAt.atStartOfDay())) {
+        if (recruitStartAt.isAfter(recruitEndAt) || startAt.isBefore(recruitEndAt.plusDays(1).atStartOfDay().minusSeconds(1)) ||
+                startAt.isBefore(LocalDateTime.now())) {
             throw new IllegalRequestException("모집 기간과 활동 시작 시각을 확인해주세요");
         }
     }
@@ -211,6 +227,7 @@ public class ActivityService {
         Activity activity = getActivity(request.getActivityId());
 
         OUser applyUser = getUser(request.getUserId());
+        log.debug("apply user : {}", applyUser);
 
         //이미 추가된 사람인지 체크
         if (crewService.existCrew(applyUser, activity)) {
@@ -218,9 +235,10 @@ public class ActivityService {
         }
 
         activity.addParticipant();
-        Crews crew = crewService.addCrew(request, activity, applyUser);
+        OUser host = crewService.findOwner(activity);
+        Crews crew = crewService.addCrew(request, activity, applyUser, host);
 
-        EventPublisher.emit(new ActivityEvent(this, applyUser, OceanKeeperEventType.ACTIVITY_PARTICIPATION_EVENT));
+        publisher.emit(new ActivityEvent(this, applyUser, OceanKeeperEventType.ACTIVITY_PARTICIPATION_EVENT));
 
         return new ApplyActivityResDto(
                 UUIDGenerator.changeUuidToString(activity.getUuid())
@@ -246,6 +264,8 @@ public class ActivityService {
             log.error("current user :{}\n host :{}", user, host);
             throw new IllegalRequestException("요청한 유저에게 활동 수정 권한이 없습니다.");
         }
+
+        boolean activityStartTimeChanged = false;
 
         if (request.getTitle() != null)
             activity.setTitle(request.getTitle());
@@ -277,6 +297,7 @@ public class ActivityService {
                     request.getRecruitEndAt() != null ? request.getRecruitEndAt() : activity.getRecruitEndAt(),
                     request.getStartAt());
             activity.setStartAt(request.getStartAt());
+            activityStartTimeChanged = true;
         }
         if (request.getThumbnailUrl() != null)
             activity.setThumbnail(request.getThumbnailUrl());
@@ -294,13 +315,25 @@ public class ActivityService {
         if (request.getPreparation() != null)
             activityDetail.setPreparation(request.getPreparation());
         if (request.getRewards() != null)
-            activityDetail.setRewards(request.getRewards());
+            activity.setRewards(request.getRewards());
         if (request.getEtc() != null)
             activityDetail.setEtc(request.getEtc());
 
         activityRepository.save(activity);
         activityDetail.setActivity(activity);
         activityDetailRepository.save(activityDetail);
+
+        if (activityStartTimeChanged) {
+            publisher.emit(new ActivityEvent(
+                    this,
+                    new RegisterActivityEventDto(activity.getStartAt(), activity.getRecruitStartAt(), UUIDGenerator.changeUuidToString(activity.getUuid()), null),
+                    OceanKeeperEventType.ACTIVITY_CHANGED_EVENT));
+
+            publisher.emit(new MessageEvent(
+                    this,
+                    getUserListDtoByActivityId(activityId),
+                    OceanKeeperEventType.ACTIVITY_CHANGED_EVENT));
+        }
     }
 
     private ActivityDetail getActivityDetail(Activity activity) {
@@ -311,9 +344,8 @@ public class ActivityService {
     @Transactional
     public void modifyApplication(String applicationId, ModifyApplicationReqDto request, HttpServletRequest servletRequest) {
         OUser user = tokenUtil.getUserFromHeader(servletRequest);
-        Activity activity = getActivity(applicationId);
 
-        Crews crew = crewService.findApplication(user, activity);
+        Crews crew = crewService.findApplication(user, applicationId);
         if (request.getName() != null) crew.setName(request.getName());
         if (request.getEmail() != null) crew.setEmail(request.getEmail());
         if (request.getId1365() != null) crew.setId1365(request.getId1365());
@@ -328,7 +360,6 @@ public class ActivityService {
     @Transactional
     public ApplicationDto getLastApplication(HttpServletRequest servletRequest) {
         OUser user = tokenUtil.getUserFromHeader(servletRequest);
-        log.info("JBJB user:{},", user);
         return crewService.getApplicationDto(user);
     }
 
@@ -364,7 +395,7 @@ public class ActivityService {
     public Slice<ActivityDao> getActivityDao(String userId, String activityId, String status, String roleStr, Integer pageSize) {
         CrewRole role = CrewRole.getRole(roleStr);
         ActivityStatus activityStatus = ActivityStatus.getStatus(status);
-        Slice<ActivityDao> response = activityRepository.getMyActivities(
+        Slice<ActivityDao> response = activityRepository.getMyActivitiesWithoutCancel(
                 UUIDGenerator.changeUuidFromString(userId),
                 activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
                 activityStatus,
@@ -393,16 +424,24 @@ public class ActivityService {
         if (activity.getActivityStatus().equals(ActivityStatus.CANCEL))
             throw new DuplicatedResourceException("이미 취소된 활동입니다.");
 
-        //해당 활동에 속한 모두에게 활동 취소됨을 알림
-        crewService.findCrews(activity).forEach(crewService::resetCrewInfo);
         ActivityDetail activityDetail = getActivityDetail(activity);
 
         activityDetail.reset();
         activity.reset();
+
+        //해당 활동에 속한 크루원에게 활동 취소됨을 알림
+        List<Crews> crews = crewService.findCrews(activity);
+        for (Crews crew : crews) {
+            crew.reset();
+        }
+        UserListDto dto = new UserListDto(crews.stream().filter(c -> c.getActivityRole().equals(CrewRole.CREW))
+                .map(Crews::getUser).collect(Collectors.toList()));
+        publisher.emit(new MessageEvent(this, dto, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+        publisher.emit(new ActivityEvent(this, dto, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
     }
 
     @Transactional
-    public Crews findCrews(String applicationId) {
+    public Crews findCrew(String applicationId) {
         return crewService.findCrews(applicationId);
     }
 
@@ -445,7 +484,10 @@ public class ActivityService {
                 .mapToObj(i -> new CrewInfoDetailDto.CrewInfoDetailData(i + 1, crewInfo.get(i)))
                 .collect(Collectors.toList());
         log.debug("crew detail info :{}", data);
-        return new CrewInfoDetailDto(activityId, data);
+        if (!crewInfo.isEmpty())
+            return new CrewInfoDetailDto(new CrewInfoDetailDto.ActivityInfo(activityId, crewInfo.get(0).getActivityStatus()), data);
+
+        return new CrewInfoDetailDto(new CrewInfoDetailDto.ActivityInfo(activityId, null), data);
     }
 
     @Transactional
@@ -457,13 +499,76 @@ public class ActivityService {
     public CrewInfoFileDto getCrewInfoFile(String activityId, HttpServletRequest request) {
         synchronized (this) {
             Activity activity = validateHost(activityId, request);
+            ActivityStatus activityStatus = getActivityStatus(activity.getRecruitEndAt(), activity.getStartAt());
+
+            if (!(activityStatus.equals(ActivityStatus.RECRUITMENT_CLOSE)
+                    || activityStatus.equals(ActivityStatus.CLOSED)))
+                throw new IllegalRequestException("모집 종료 이후 엑셀 다운로드 가능합니다.");
 
             try {
-                return makeExcelFile(activity);
+                List<Crews> crews = crewService.findCrews(activity);
+                return excelMaker.makeExcelFile(crews);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Transactional
+    public void startActivitySoon(String activityId) {
+        log.info("[startActivitySoon] activity id:{}", activityId);
+        UserListDto dto = getUserListDtoByActivityId(activityId);
+        publisher.emit(new MessageEvent(this, dto, OceanKeeperEventType.ACTIVITY_START_SOON_EVENT));
+    }
+
+    private UserListDto getUserListDtoByActivityId(String activityId) {
+        List<CrewDeviceTokensDao> result = activityRepository.getUserFromActivityId(UUIDGenerator.changeUuidFromString(activityId));
+        return new UserListDto(result.stream().map(CrewDeviceTokensDao::getUser).collect(Collectors.toList()));
+    }
+
+    @Transactional
+    public void finishRecruitment(String activityId) {
+        log.info("[finishRecruitment] activity id:{}", activityId);
+
+        Activity activity = getActivity(activityId);
+        if (activity.getActivityStatus().equals(ActivityStatus.OPEN))
+            activity.closeRecruitment();
+        else
+            throw new RuntimeException("모집중이지 않은 활동");
+
+        List<Crews> crews = crewService.findCrews(activity);
+        sendActivityRecruitmentCloseMessage(crews);
+    }
+
+    @Transactional
+    public void finishActivity(String activityId) {
+        log.info("[finishActivity] activity id:{}", activityId);
+
+        Activity activity = getActivity(activityId);
+        if (activity.getActivityStatus().equals(ActivityStatus.RECRUITMENT_CLOSE))
+            activity.closeActivity();
+        else
+            throw new RuntimeException("모집 종료되지 않은 활동");
+
+        List<Crews> crews = crewService.findCrews(activity);
+        for (Crews crew : crews)
+            crew.closeApplication();
+
+        //활동 종료 메세지 전송
+        sendActivityCloseMessage(crews);
+    }
+
+    private void sendActivityMessage(List<Crews> crews, OceanKeeperEventType eventType) {
+        UserListDto dto = new UserListDto(crews.stream().map(Crews::getUser).collect(Collectors.toList()));
+        publisher.emit(new MessageEvent(this, dto, eventType));
+    }
+
+    private void sendActivityCloseMessage(List<Crews> crews) {
+        sendActivityMessage(crews, OceanKeeperEventType.ACTIVITY_CLOSE_EVENT);
+    }
+
+    private void sendActivityRecruitmentCloseMessage(List<Crews> crews) {
+        sendActivityMessage(crews, OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT);
     }
 
     private Activity validateHost(String activityId, HttpServletRequest request) {
@@ -478,75 +583,75 @@ public class ActivityService {
         return activity;
     }
 
-    private CrewInfoFileDto makeExcelFile(Activity activity) throws IOException {
-        Workbook xWorkbook = new XSSFWorkbook(); //엑셀파일 생성
-        Sheet xSheet = xWorkbook.createSheet("sheet1"); //시트 생성
-        Row xRow = null; //행 객체 생성
-        Cell xCell = null; //열 객체 생성
-
-        initializeExcelFormat(xSheet);
-
-        int count = 1;
-        int row = 1;
-
-        for (Crews application : crewService.findCrews(activity)) {
-            if(application.getActivityRole().equals(CrewRole.HOST))
-                continue;
-            xRow = xSheet.createRow(row);
-            xCell = xRow.createCell(0);
-            xCell.setCellValue(count);
-            xCell = xRow.createCell(1);
-            xCell.setCellValue(getValue(application.getName()));
-            xCell = xRow.createCell(2);
-            xCell.setCellValue(getValue(application.getPhoneNumber()));
-            xCell = xRow.createCell(3);
-            xCell.setCellValue(getValue(application.getId1365()));
-            xCell = xRow.createCell(4);
-            xCell.setCellValue(getValue(application.getEmail()));
-            xCell = xRow.createCell(5);
-            xCell.setCellValue(getValue(application.getDayOfBirth()));
-
-            row++;
-            count++;
+    @EventListener
+    @Transactional
+    public void handleEvent(ActivityEvent event) {
+        if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_INFO_DELETE_EVENT)) {
+            handleActivityInfoDeleteEvent();
         }
-
-        xRow = xSheet.getRow(xSheet.getFirstRowNum());
-        Iterator<Cell> cellIterator = xRow.cellIterator();
-        while (cellIterator.hasNext()) {
-            Cell cell = cellIterator.next();
-            int columnIndex = cell.getColumnIndex();
-            xSheet.autoSizeColumn(columnIndex);
-        }
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        xWorkbook.write(outputStream);
-
-
-        ByteArrayResource resource = new ByteArrayResource(outputStream.toByteArray());
-        outputStream.close();
-        return new CrewInfoFileDto(resource);
     }
 
-    private void initializeExcelFormat(Sheet xSheet) {
-        Row xRow;
-        Cell xCell;
-        xRow = xSheet.createRow(0);
-
-        xCell = xRow.createCell(0);
-        xCell.setCellValue("No.");
-        xCell = xRow.createCell(1);
-        xCell.setCellValue("이름");
-        xCell = xRow.createCell(2);
-        xCell.setCellValue("연락처");
-        xCell = xRow.createCell(3);
-        xCell.setCellValue("1365 아이디");
-        xCell = xRow.createCell(4);
-        xCell.setCellValue("이메일");
-        xCell = xRow.createCell(5);
-        xCell.setCellValue("생년월일");
+    @Transactional
+    public void handleActivityInfoDeleteEvent() {
+        long result = activityRepository.deleteByCrewStatusAndDays(CrewStatus.CLOSED, 14);
+        if (result != 0) {
+            log.debug("삭제 성공");
+        } else {
+            log.error("삭제 실패");
+        }
     }
 
-    private String getValue(String data) {
-        return data == null ? "" : data;
+    @Transactional
+    public FullApplicationResDto getFullApplication(String applicationId, HttpServletRequest request) {
+        FullApplicationDao queryResult = crewService.getFullApplication(applicationId);
+
+        //Validator
+        Long hostId = queryResult.getHostId();
+        OUser requester = tokenUtil.getUserFromHeader(request);
+
+        if (!hostId.equals(requester.getId())) {
+            log.error("current user :{}\n host :{}", requester, hostId);
+            throw new IllegalRequestException("요청한 유저에게는 신청서 읽기 권한이 없습니다.");
+        }
+        //Validator end
+
+        UserInfoDto userInfo = UserInfoDto.builder()
+                .nickname(queryResult.getNickname())
+                .profile(queryResult.getProfileUrl())
+                .build();
+
+        ApplicationDto applicationDto = ApplicationDto.builder()
+                .name(queryResult.getCrewName())
+                .id1365(queryResult.getId1365())
+                .phoneNumber(queryResult.getPhoneNumber())
+                .question(queryResult.getQuestion())
+                .transportation(queryResult.getTransportation())
+                .startPoint(queryResult.getStartPoint())
+                .email(queryResult.getEmail())
+                .build();
+
+        ActivityInfoResDto activityInfo = new ActivityInfoResDto(
+                queryResult.getCountActivity(),
+                queryResult.getCountHosting(),
+                queryResult.getCountNoShow());
+
+        ActivityTransportationDto activityTransportationDto = new ActivityTransportationDto(queryResult.getSupportedTransportation());
+
+        return new FullApplicationResDto(userInfo, applicationDto, activityInfo, activityTransportationDto);
+    }
+
+    @Transactional
+    public void reCalculate() {
+        log.debug("JBJB recalculate dates");
+        List<Activity> activities = activityRepository.findAll();
+        for (Activity activity : activities) {
+            ActivityStatus newStatus = getActivityStatus(activity.getRecruitEndAt(), activity.getStartAt());
+            if (newStatus.equals(ActivityStatus.OPEN))
+                activity.setActivityStatus(ActivityStatus.OPEN);
+            else if (newStatus.equals(ActivityStatus.RECRUITMENT_CLOSE))
+                activity.closeRecruitment();
+            else if (newStatus.equals(ActivityStatus.CLOSED))
+                activity.closeActivity();
+        }
     }
 }

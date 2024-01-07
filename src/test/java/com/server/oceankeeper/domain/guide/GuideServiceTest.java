@@ -9,6 +9,7 @@ import com.server.oceankeeper.domain.guide.dto.response.GuideResDto;
 import com.server.oceankeeper.domain.guide.entity.Guide;
 import com.server.oceankeeper.domain.guide.repository.GuideRepository;
 import com.server.oceankeeper.domain.guide.service.GuideService;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

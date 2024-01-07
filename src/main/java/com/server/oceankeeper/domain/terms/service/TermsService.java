@@ -1,9 +1,13 @@
 package com.server.oceankeeper.domain.terms.service;
 
+import com.server.oceankeeper.domain.message.entity.MessageEvent;
+import com.server.oceankeeper.domain.terms.dto.request.TermsReqDto;
 import com.server.oceankeeper.domain.terms.dto.response.TermsDetailResDto;
 import com.server.oceankeeper.domain.terms.dto.response.TermsResDto;
 import com.server.oceankeeper.domain.terms.entity.Terms;
 import com.server.oceankeeper.domain.terms.repository.TermsRepository;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
+import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +21,14 @@ import java.time.LocalDateTime;
 @Slf4j
 public class TermsService {
     private final TermsRepository repository;
+    private final EventPublisher publisher;
 
     @Transactional
-    public TermsResDto post(String request) {
-        Terms terms = new Terms(null, request, LocalDateTime.now());
+    public TermsResDto post(TermsReqDto request) {
+        String termsStr = request.getContents().replaceAll("\\\\","");
+        Terms terms = new Terms(null, termsStr, LocalDateTime.now());
         repository.save(terms);
+        publisher.emit(new MessageEvent(this,null, OceanKeeperEventType.TERMS_CHANGED_EVENT));
         return TermsResDto.fromEntity(terms);
     }
 

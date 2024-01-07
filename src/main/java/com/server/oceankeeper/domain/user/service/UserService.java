@@ -5,6 +5,7 @@ import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.user.dto.JoinReqDto;
 import com.server.oceankeeper.domain.user.dto.JoinResDto;
 import com.server.oceankeeper.domain.user.dto.UserIdAndNicknameReqDto;
+import com.server.oceankeeper.domain.user.dto.WithdrawalReqDto;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
@@ -19,9 +20,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
+import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -33,6 +36,8 @@ public class UserService {
     @Value("${jwt.password}")
     private String password;
 
+    private final EventPublisher publisher;
+
     @Transactional
     public JoinResDto join(JoinReqDto joinReqDto) {
         log.debug("디버그 : " + joinReqDto + " by UserService join");
@@ -43,7 +48,7 @@ public class UserService {
         user.initializePassword(passwordEncoder.encode(password)); //TODO: 더 나은 보안 방법이 없을까 고민
         OUser userSaved = userRepository.save(user);
 
-        EventPublisher.emit(new ActivityEvent(this, userSaved, OceanKeeperEventType.USER_JOINED_EVENT));
+        publisher.emit(new ActivityEvent(this, userSaved, OceanKeeperEventType.USER_JOINED_EVENT));
         return new JoinResDto(userSaved);
     }
 
@@ -68,12 +73,20 @@ public class UserService {
 
         user.changeNickname(nickname);
 
-        EventPublisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.NICKNAME_CHANGE_EVENT));
+        publisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.NICKNAME_CHANGE_EVENT));
     }
 
     @Transactional
-    public void withdrawal() {
-        return;
+    public void withdrawal(@Valid WithdrawalReqDto withdrawalReqDto) {
+        log.debug("디버그 : " + withdrawalReqDto + " by UserService withdrawal");
+
+        String provider = withdrawalReqDto.getProvider();
+        String providerId = withdrawalReqDto.getProviderId();
+
+        OUser user = userRepository.findByProviderAndProviderId(provider, providerId).orElseThrow(
+                () -> new ResourceNotFoundException("해당 유저가 존재하지 않습니다."));
+        user.withdraw();
+        publisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.USER_WITHDRAWAL_EVENT));
     }
 
     private void inspectDuplicatedUser(JoinReqDto joinReqDto) {
@@ -98,5 +111,25 @@ public class UserService {
     public OUser findByUUID(String userId) {
         return userRepository.findByUuid(UUIDGenerator.changeUuidFromString(userId))
                 .orElseThrow(() -> new IdNotFoundException("해당 아이디가 존재하지 않습니다."));
+    }
+
+    @Transactional
+    public String findNickname(String nickname) {
+        return userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 닉네임을 가진 유저가 존재하지 않습니다.")).getDeviceToken();
+    }
+
+    @Transactional
+    public void setAlarm(Boolean alarm, OUser user) {
+        user.setAlarm(alarm);
+    }
+
+    @Transactional
+    public List<OUser> findUsersByNotificationAlarm(boolean alarm) {
+        return userRepository.findAllByAlarm(alarm);
+    }
+
+    public boolean getAlarm(OUser user) {
+        return user.isAlarm();
     }
 }

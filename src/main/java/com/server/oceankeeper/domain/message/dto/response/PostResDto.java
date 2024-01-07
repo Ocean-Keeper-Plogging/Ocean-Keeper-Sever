@@ -63,20 +63,22 @@ public class PostResDto {
         )
         private final GarbageCategory garbageCategory;
 
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yy-MM-dd [hh:mm]", timezone = "Asia/Seoul")
         @ApiModelProperty(
                 value = "메세지 보낸 시각",
                 notes = "메세지 보낸시각을 표시합니다",
-                example = "2023-05-05T10:15:23"
+                example = "23-05-05 [10:15]"
         )
         private final LocalDateTime messageSentAt;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss", timezone = "Asia/Seoul")
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yy-MM-dd hh:mm", timezone = "Asia/Seoul")
         @ApiModelProperty(
                 value = "활동 시작시각",
                 notes = "활동 시작시각을 표시합니다.",
-                example = "2023-05-10T10:00:00"
+                example = "23-05-10 10:00"
         )
         private final LocalDateTime activityStartAt;
+
         @ApiModelProperty(
                 value = "메세지 읽음 여부",
                 notes = "메세지를 받은 사람의 메세지 읽음 여부를 표시합니다.",

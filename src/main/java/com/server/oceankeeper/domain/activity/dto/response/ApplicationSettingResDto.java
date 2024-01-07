@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.activity.dto;
+package com.server.oceankeeper.domain.activity.dto.response;
 
 import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import io.swagger.annotations.ApiModelProperty;
@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ApplicationSettingResDto {
     @ApiModelProperty(
-            value="api 실행 결과 true/false",
+            value = "api 실행 결과 true/false",
             example = "true",
             required = true
     )

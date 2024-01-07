@@ -2,6 +2,8 @@ package com.server.oceankeeper.domain.user.entitiy;
 
 import com.server.oceankeeper.global.BaseEntity;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -15,7 +17,9 @@ import java.util.UUID;
 @Table(name = "users", indexes = {
         @Index(name = "i_uuid", columnList = "uuid", unique = true),
         @Index(name = "i_provider_providerid", columnList = "provider, providerId", unique = true)})
-public class  OUser extends BaseEntity {
+@SQLDelete(sql = "UPDATE users SET withdrawn = true WHERE id = ?")
+@Where(clause = "withdrawn = false")
+public class OUser extends BaseEntity {
     @Id // primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,11 +55,18 @@ public class  OUser extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private boolean withdrawn;
+
+    @Column(nullable = false)
+    private boolean alarm;
+    private LocalDateTime deletedAt;
+
     @Builder
     public OUser(Long id, String nickname, String email, String profile,
                  UserStatus status, String provider, String providerId,
                  UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt,
-                 String password, String deviceToken, UUID uuid) {
+                 String password, String deviceToken, UUID uuid, boolean withdrawn, boolean alarm) {
         this.id = id;
         this.deviceToken = deviceToken;
         this.nickname = nickname;
@@ -69,6 +80,8 @@ public class  OUser extends BaseEntity {
         this.updatedAt = updatedAt;
         this.password = password;
         this.uuid = uuid;
+        this.withdrawn = withdrawn;
+        this.alarm = alarm;
     }
 
     public void changeNickname(String nickname) {
@@ -101,6 +114,15 @@ public class  OUser extends BaseEntity {
         result = 31 * result + providerId.hashCode();
         result = 31 * result + nickname.hashCode();
         return result;
+    }
+
+    public void withdraw() {
+        withdrawn = true;
+        deletedAt = LocalDateTime.now();
+    }
+
+    public void setAlarm(boolean alarm) {
+        this.alarm = alarm;
     }
 }
 

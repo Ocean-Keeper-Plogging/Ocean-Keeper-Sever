@@ -1,20 +1,15 @@
 package com.server.oceankeeper.domain.message;
 
 import com.server.oceankeeper.domain.activity.entity.Activity;
-import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
-import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
-import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
 import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.message.entity.OMessage;
 import com.server.oceankeeper.domain.message.repository.MessageRepository;
-import com.server.oceankeeper.domain.message.service.MessageService;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.global.config.QuerydslConfig;
 import com.server.oceankeeper.util.UUIDGenerator;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -38,30 +33,30 @@ class MessageRepositoryTest extends DummyObject {
     private EntityManager em;
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
     }
 
     @Test
-    public void test(){
+    public void test() {
         UUID userUUID = UUIDGenerator.createUuid();
-        OUser user = newMockUser(99L,userUUID);
+        OUser user = newMockUser(99L, userUUID);
         em.persist(user);
 
         UUID userUUID2 = UUIDGenerator.createUuid();
-        OUser user2 = newMockUser(100L,userUUID2);
+        OUser user2 = newMockUser(100L, userUUID2);
         em.persist(user2);
 
         UUID userUUID3 = UUIDGenerator.createUuid();
-        OUser user3 = newMockUser(101L,userUUID3);
+        OUser user3 = newMockUser(101L, userUUID3);
         em.persist(user3);
 
         UUID activityUUID = UUIDGenerator.createUuid();
         Activity activity = newMockActivity(activityUUID);
         em.persist(activity);
 
-        Crews crews = newCrew(activity, user, CrewStatus.IN_PROGRESS, CrewRole.HOST);
-        Crews crews2 = newCrew(activity, user2, CrewStatus.IN_PROGRESS, CrewRole.CREW);
-        Crews crews3 = newCrew(activity, user3, CrewStatus.IN_PROGRESS, CrewRole.CREW);
+        Crews crews = newCrew(activity, user, user, CrewStatus.IN_PROGRESS, CrewRole.HOST);
+        Crews crews2 = newCrew(activity, user2, user, CrewStatus.IN_PROGRESS, CrewRole.CREW);
+        Crews crews3 = newCrew(activity, user3, user, CrewStatus.IN_PROGRESS, CrewRole.CREW);
         em.persist(crews);
         em.persist(crews2);
         em.persist(crews3);

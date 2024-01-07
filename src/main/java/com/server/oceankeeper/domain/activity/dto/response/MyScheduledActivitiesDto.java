@@ -1,6 +1,8 @@
 package com.server.oceankeeper.domain.activity.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
 

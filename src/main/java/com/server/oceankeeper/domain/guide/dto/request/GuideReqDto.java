@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class GuideReqDto {
+public class  GuideReqDto {
     private final String videoLink;
     private final String videoName;
     private final String title;

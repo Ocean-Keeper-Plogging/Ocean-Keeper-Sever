@@ -1,11 +1,14 @@
 package com.server.oceankeeper.domain.user.service;
 
 
+import com.server.oceankeeper.domain.statistics.entity.ActivityInfo;
+import com.server.oceankeeper.domain.statistics.repository.ActivityInfoRepository;
 import com.server.oceankeeper.domain.user.dto.JoinReqDto;
 import com.server.oceankeeper.domain.user.dto.JoinResDto;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.util.UUIDGenerator;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -32,6 +36,10 @@ class UserServiceTest extends DummyObject {
     private UserRepository userRepository;
     @Mock
     private BCryptPasswordEncoder passwordEncoder;
+    @Mock
+    private ActivityInfoRepository activityInfoRepository;
+    @Mock
+    private EventPublisher eventPublisher;
 
     @Test
     public void join_success() throws Exception {
@@ -54,6 +62,14 @@ class UserServiceTest extends DummyObject {
 
         //when
         JoinResDto joinResDto = userService.join(joinReqDto);
+        ActivityInfo newActivityInfo = ActivityInfo.builder()
+                .user(test)
+                .countNoShow(0)
+                .countActivity(0)
+                .countHosting(0)
+                .countCancel(0)
+                .build();
+        activityInfoRepository.save(newActivityInfo);
 
         //then
         assertThat(joinResDto.getId()).isEqualTo(id);

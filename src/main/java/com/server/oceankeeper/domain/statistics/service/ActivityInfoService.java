@@ -1,11 +1,13 @@
 package com.server.oceankeeper.domain.statistics.service;
 
+import com.server.oceankeeper.domain.activity.dto.inner.RegisterActivityEventDto;
+import com.server.oceankeeper.domain.activity.dto.inner.UserListDto;
 import com.server.oceankeeper.domain.statistics.dto.ActivityInfoResDto;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
-import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.domain.statistics.entity.ActivityInfo;
 import com.server.oceankeeper.domain.statistics.repository.ActivityInfoRepository;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
@@ -43,17 +45,28 @@ public class ActivityInfoService {
         } else if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT)) {
             cancelEvent(event);
             log.debug("activity canceled");
+        } else if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT)) {
+            cancelCrewActivityEvent(event);
+            log.debug("activity canceled");
         }
     }
 
     private void cancelEvent(ActivityEvent event) {
-        OUser user = event.getUser();
+        UserListDto userList = (UserListDto) event.getObject();
+        for (OUser user : userList.getUser()) {
+            ActivityInfo info = getActivityInfo(user);
+            info.subActivityCount();
+        }
+    }
+
+    private void cancelCrewActivityEvent(ActivityEvent event) {
+        OUser user = (OUser) event.getObject();
         ActivityInfo info = getActivityInfo(user);
         info.addCancelCount();
     }
 
     private void userJoined(ActivityEvent event) {
-        OUser user = event.getUser();
+        OUser user = (OUser) event.getObject();
         ActivityInfo info = ActivityInfo.builder()
                 .user(user)
                 .countActivity(0)
@@ -65,8 +78,9 @@ public class ActivityInfoService {
     }
 
     private void participateActivity(ActivityEvent event) {
-        OUser user = event.getUser();
+        OUser user = (OUser) event.getObject();
         ActivityInfo info = getActivityInfo(user);
+        info.addActivityCount();
         activityInfoRepository.save(info);
     }
 
@@ -76,15 +90,16 @@ public class ActivityInfoService {
     }
 
     private void noShowActivity(ActivityEvent event) {
-        OUser user = event.getUser();
+        OUser user = (OUser) event.getObject();
         ActivityInfo info = getActivityInfo(user);
         info.addNoShowCount();
         activityInfoRepository.save(info);
     }
 
     private void registerActivity(ActivityEvent event) {
-        OUser user = event.getUser();
-        ActivityInfo info = getActivityInfo(user);
+        RegisterActivityEventDto eventDto = (RegisterActivityEventDto) event.getObject();
+        ActivityInfo info = getActivityInfo(eventDto.getHost());
+        info.addHostingCount();
         activityInfoRepository.save(info);
     }
 

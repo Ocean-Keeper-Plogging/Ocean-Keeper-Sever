@@ -30,7 +30,7 @@ public class LoginUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getProvider() + "_" + user.getProviderId();
+        return user.getProvider() + "-9___1-" + user.getProviderId();
     }
 
     @Override

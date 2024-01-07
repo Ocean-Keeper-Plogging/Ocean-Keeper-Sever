@@ -36,7 +36,6 @@ public class FCMConfig {
                     .build();
             firebaseApp = FirebaseApp.initializeApp(options);
         }
-        log.info("JBJB firebaseApp :{}",firebaseApp);
 
         return FirebaseMessaging.getInstance(firebaseApp);
     }

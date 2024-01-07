@@ -69,6 +69,7 @@ public class AllActivityResDto {
     )
     private final String activityImageUrl;
 
+
     @ApiModelProperty(
             value = "활동 모집 시작일",
             required = true
@@ -99,4 +100,18 @@ public class AllActivityResDto {
             required = true
     )
     private final String location;
+
+    @ApiModelProperty(
+            value = "리워드 여부 없으면 empty string",
+            example = "점심 제공",
+            required = true
+    )
+    private final String rewards;
+
+    @ApiModelProperty(
+            value = "모집 시작 여부",
+            example = "시작했으면 true,시작 안했으면 false",
+            required = true
+    )
+    private final boolean recruitmentStarted;
 }

@@ -46,6 +46,7 @@ public class MessageService {
     private final ActivityService activityService;
     private final UserAccessValidationUtil userAccessValidationUtil;
     private final TokenUtil tokenUtil;
+    private final EventPublisher publisher;
 
     @Transactional
     public PostResDto getInbox(String userId, Long id, String type, Integer size, HttpServletRequest request) {
@@ -124,6 +125,7 @@ public class MessageService {
         Activity activity = null;
 
         activity = activityService.getActivity(req.getActivityId());
+        log.debug("JBJB sender user:{}",user);
 
         List<Long> messageIdList = new ArrayList<>();
         for (String nickname : req.getTargetNicknames()) {
@@ -147,7 +149,7 @@ public class MessageService {
             messageDetailRepository.save(messageDetail);
             messageIdList.add(message.getId());
 
-            EventPublisher.emit(new MessageEvent(this, nickname, OceanKeeperEventType.MESSAGE_SENT_EVENT));
+            publisher.emit(new MessageEvent(this, nickname, OceanKeeperEventType.MESSAGE_SENT_EVENT));
         }
 
         return new MessageSendResDto(messageIdList);
@@ -214,7 +216,7 @@ public class MessageService {
     public void handleEvent(ActivityEvent event) {
         if (event.getEvent().equals(OceanKeeperEventType.NICKNAME_CHANGE_EVENT)) {
             log.debug("닉네임 변경 이벤트 처리");
-            String newNickname = event.getUser().getNickname();
+            String newNickname = ((OUser)event.getObject()).getNickname();
             List<OMessage> messages = messageRepository.findByMessageFrom(newNickname);
             for (OMessage message : messages) {
                 message.changeMessageFrom(newNickname);

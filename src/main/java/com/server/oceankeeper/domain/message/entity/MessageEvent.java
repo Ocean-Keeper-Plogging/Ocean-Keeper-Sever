@@ -10,14 +10,14 @@ import org.springframework.context.ApplicationEvent;
 @ToString
 public class MessageEvent extends ApplicationEvent {
     @Getter
-    private final String nickname;
+    private final Object object;
     @Getter
     private final OceanKeeperEventType event;
 
 
-    public MessageEvent(Object source, String nickname, OceanKeeperEventType event) {
+    public MessageEvent(Object source, Object object, OceanKeeperEventType event) {
         super(source);
-        this.nickname = nickname;
+        this.object = object;
         this.event = event;
     }
 }

@@ -1,11 +1,13 @@
 package com.server.oceankeeper.domain.terms.controller;
 
+import com.server.oceankeeper.domain.terms.dto.request.TermsReqDto;
 import com.server.oceankeeper.domain.terms.dto.response.TermsDetailResDto;
 import com.server.oceankeeper.domain.terms.dto.response.TermsResDto;
 import com.server.oceankeeper.domain.terms.service.TermsService;
 import com.server.oceankeeper.global.response.APIResponse;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +17,11 @@ public class TermsController {
     private final TermsService service;
 
     @ApiOperation(value = "이용약관 작성[권한 필요]")
-    @PostMapping("/admin/terms")
-    public APIResponse<TermsResDto> postTerms(@RequestBody String contents, BindingResult bindingResult) {
-        TermsResDto response = service.post(contents);
+    @PostMapping(value = "/admin/terms",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    public APIResponse<TermsResDto> postTerms(@RequestBody TermsReqDto request, BindingResult bindingResult) {
+        TermsResDto response = service.post(request);
         return APIResponse.createPostResponse(response);
     }
 

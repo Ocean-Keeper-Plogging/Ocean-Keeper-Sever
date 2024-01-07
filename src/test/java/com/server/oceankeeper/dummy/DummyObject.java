@@ -4,6 +4,7 @@ import com.server.oceankeeper.domain.activity.entity.*;
 import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
 import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
+import com.server.oceankeeper.domain.statistics.entity.ActivityInfo;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.entitiy.UserRole;
 import com.server.oceankeeper.domain.user.entitiy.UserStatus;
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 public class DummyObject {
     static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    static String encPassword = passwordEncoder.encode("-");
+    static String encPassword = passwordEncoder.encode("-9___1-");
 
     //리포지토리까지 사용할 경우의 객체
     protected OUser newUserWithR(String nickname, String provider, String providerId, UUID uuid) {
@@ -33,6 +34,16 @@ public class DummyObject {
                 .role(UserRole.USER)
                 .updatedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now().minusMinutes(10))
+                .build();
+    }
+
+    protected ActivityInfo newUserInfoWithR(OUser user) {
+        return ActivityInfo.builder()
+                .user(user)
+                .countCancel(0)
+                .countHosting(0)
+                .countActivity(0)
+                .countNoShow(0)
                 .build();
     }
 
@@ -81,7 +92,7 @@ public class DummyObject {
     protected Activity newMockActivity(int quota, ActivityStatus activityStatus,
                                        LocationTag locationTag, GarbageCategory garbageCategory, int startAtPlusDay, UUID uuid) {
         return Activity.builder()
-                .participants(1)
+                .participants(100)
                 .quota(quota)
                 .uuid(uuid)
                 .activityStatus(activityStatus)
@@ -94,6 +105,7 @@ public class DummyObject {
                 .title("activity " + genRandomString())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .rewards("")
                 .build();
     }
 
@@ -122,11 +134,12 @@ public class DummyObject {
                 .toString();
     }
 
-    protected Crews newCrew(Activity activity, OUser user, CrewStatus crewStatus, CrewRole role) {
+    protected Crews newCrew(Activity activity, OUser user, OUser host,CrewStatus crewStatus, CrewRole role) {
         return Crews.builder()
                 .crewStatus(crewStatus)
                 .activity(activity)
                 .user(user)
+                .host(host)
                 .uuid(UUID.randomUUID())
                 .activityRole(role)
                 .startPoint("서울")

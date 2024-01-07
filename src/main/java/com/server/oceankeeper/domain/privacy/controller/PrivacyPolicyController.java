@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.privacy.controller;
 
+import com.server.oceankeeper.domain.privacy.dto.request.PrivacyPolicyReqDto;
 import com.server.oceankeeper.domain.privacy.dto.response.PrivacyPolicyDetailResDto;
 import com.server.oceankeeper.domain.privacy.dto.response.PrivacyPolicyResDto;
 import com.server.oceankeeper.domain.privacy.service.PrivacyPolicyService;
@@ -16,7 +17,7 @@ public class PrivacyPolicyController {
 
     @ApiOperation(value = "PrivacyPolicy 작성[권한 필요]")
     @PostMapping("/admin/privacy-policy")
-    public APIResponse<PrivacyPolicyResDto> postPrivacyPolicy(@RequestBody String contents, BindingResult bindingResult) {
+    public APIResponse<PrivacyPolicyResDto> postPrivacyPolicy(@RequestBody PrivacyPolicyReqDto contents, BindingResult bindingResult) {
         PrivacyPolicyResDto response = service.post(contents);
         return APIResponse.createPostResponse(response);
     }

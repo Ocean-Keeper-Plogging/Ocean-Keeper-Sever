@@ -10,6 +10,9 @@ import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +27,18 @@ public class LoginService {
     private final RedisRepository refreshTokenRepository;
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
+    //private final AuthenticationManager authenticationManager;
+    @Value("${jwt.password}")
+    private String password;
+
 
     @Transactional
-    public LoginResDto login(LoginReqDto loginReqDto, Authentication authentication) {
+    public LoginResDto login(LoginReqDto loginReqDto,Authentication authentication) {
+        //TODO: Move logic into service layer
+//        UsernamePasswordAuthenticationToken authenticationToken = loginReqDto.toAuthentication(password);
+//        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+//        log.debug("login request :{}, auth : {}, auth name :{}", loginReqDto, authentication, authentication.getName());
+
         OUser user = changeDeviceToken(loginReqDto);
 
         TokenInfo tokenDto = tokenProvider.generateTokenDto(authentication);
@@ -85,7 +97,7 @@ public class LoginService {
         final String providerId = logoutReqDto.getProviderId();
 
         //TODO : 하드코딩 제거
-        final String username = provider + "_" + providerId;
+        final String username = provider + "-9___1-" + providerId;
         log.info("logout user name : {}", username);
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByKey(username);
         log.debug("refresh token :{}", refreshToken);

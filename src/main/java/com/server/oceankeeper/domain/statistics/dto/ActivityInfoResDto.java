@@ -20,4 +20,10 @@ public class ActivityInfoResDto {
         this.hosting = activityInfo.getCountHosting();
         this.noShow = activityInfo.getCountNoShow();
     }
+
+    public ActivityInfoResDto(Integer activity, Integer hosting, Integer noShow) {
+        this.activity = activity;
+        this.hosting = hosting;
+        this.noShow = noShow;
+    }
 }

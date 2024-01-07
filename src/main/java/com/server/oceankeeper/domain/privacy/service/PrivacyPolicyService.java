@@ -1,7 +1,8 @@
 package com.server.oceankeeper.domain.privacy.service;
 
-import com.server.oceankeeper.domain.privacy.dto.response.PrivacyPolicyResDto;
+import com.server.oceankeeper.domain.privacy.dto.request.PrivacyPolicyReqDto;
 import com.server.oceankeeper.domain.privacy.dto.response.PrivacyPolicyDetailResDto;
+import com.server.oceankeeper.domain.privacy.dto.response.PrivacyPolicyResDto;
 import com.server.oceankeeper.domain.privacy.entity.PrivacyPolicy;
 import com.server.oceankeeper.domain.privacy.repository.PrivacyPolicyRepository;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
@@ -19,10 +20,11 @@ public class PrivacyPolicyService {
     private final PrivacyPolicyRepository repository;
 
     @Transactional
-    public PrivacyPolicyResDto post(String request) {
-        PrivacyPolicy terms = new PrivacyPolicy(null, request, LocalDateTime.now());
-        repository.save(terms);
-        return PrivacyPolicyResDto.fromEntity(terms);
+    public PrivacyPolicyResDto post(PrivacyPolicyReqDto request) {
+        String policyStr = request.getContents().replaceAll("\\\\", "");
+        PrivacyPolicy privacyPolicy = new PrivacyPolicy(null, policyStr, LocalDateTime.now());
+        repository.save(privacyPolicy);
+        return PrivacyPolicyResDto.fromEntity(privacyPolicy);
     }
 
     @Transactional

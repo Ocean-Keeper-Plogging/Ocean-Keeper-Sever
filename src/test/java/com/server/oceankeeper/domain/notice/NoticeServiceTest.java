@@ -9,6 +9,7 @@ import com.server.oceankeeper.domain.notice.dto.response.NoticeResDto;
 import com.server.oceankeeper.domain.notice.entity.Notice;
 import com.server.oceankeeper.domain.notice.repository.NoticeRepository;
 import com.server.oceankeeper.domain.notice.service.NoticeService;
+import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +36,8 @@ class NoticeServiceTest {
     private NoticeService service;
     @Mock
     private NoticeRepository repository;
+    @Mock
+    private EventPublisher publisher;
 
     @Test
     void getNotice() {

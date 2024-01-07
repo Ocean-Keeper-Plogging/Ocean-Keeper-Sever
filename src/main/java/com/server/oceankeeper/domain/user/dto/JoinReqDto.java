@@ -80,7 +80,7 @@ public class JoinReqDto {
                 .provider(provider)
                 .providerId(providerId)
                 .nickname(nickname)
-                .email(email)
+                .email(email == null ? "":email)
                 .profile(profile)
                 .status(UserStatus.ACTIVE)
                 .role(UserRole.USER)

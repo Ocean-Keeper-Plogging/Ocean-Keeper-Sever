@@ -23,6 +23,7 @@ public class AllActivityDao {
     private String hostNickname;
     private Integer quota;
     private Integer participants;
+    private String rewards;
 
     private String activityImageUrl;
 
