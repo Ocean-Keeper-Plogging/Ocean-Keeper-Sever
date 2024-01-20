@@ -14,6 +14,7 @@ import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class NotificationService {
     }
 
     @Transactional
-    public NotificationAlarmDto setNotification(String userId, Boolean alarm,HttpServletRequest request) {
+    public NotificationAlarmDto setNotification(String userId, Boolean alarm, HttpServletRequest request) {
         OUser user = userService.findByUUID(userId);
         OUser requester = tokenUtil.getUserFromHeader(request);
 
@@ -132,10 +133,13 @@ public class NotificationService {
     }
 
     @Transactional
-    public void saveMessageAllUsers(MessageEvent event) {
-        List<OUser> users = userService.findUsersByNotificationAlarm(true);
+    public Slice<OUser> saveNotificationAndGetAlarmedUsers(MessageEvent event, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Slice<OUser> users = userService.findUsersByNotificationAlarm(true, pageable);
+        log.info("JBJB users:{}", users);
         for (OUser user : users) {
             saveNewMessage(user, MessagePreFormat.get(event.getEvent()));
         }
+        return users;
     }
 }

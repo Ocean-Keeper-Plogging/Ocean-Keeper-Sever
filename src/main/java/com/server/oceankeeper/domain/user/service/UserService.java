@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,8 +127,8 @@ public class UserService {
     }
 
     @Transactional
-    public List<OUser> findUsersByNotificationAlarm(boolean alarm) {
-        return userRepository.findAllByAlarm(alarm);
+    public Slice<OUser> findUsersByNotificationAlarm(boolean alarm, Pageable pageable) {
+        return userRepository.findAllByAlarm(alarm,pageable);
     }
 
     public boolean getAlarm(OUser user) {

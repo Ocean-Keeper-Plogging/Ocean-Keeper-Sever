@@ -1,9 +1,6 @@
 package com.server.oceankeeper.domain.notification.service;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
 import com.server.oceankeeper.domain.activity.dto.inner.UserListDto;
 import com.server.oceankeeper.domain.message.entity.MessageEvent;
 import com.server.oceankeeper.domain.notification.dto.FCMRequestDto;
@@ -13,11 +10,13 @@ import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,49 +32,32 @@ public class FCMService {
     public void handle(MessageEvent event) {
         if (event.getEvent().equals(OceanKeeperEventType.MESSAGE_SENT_EVENT)) {
             handleMessageSentEvent(event);
-        } else if (event.getEvent().equals(OceanKeeperEventType.USER_JOINED_EVENT)) {
-            handleUserJoinEvent(event);
-        } else if (event.getEvent().equals(OceanKeeperEventType.USER_WITHDRAWAL_EVENT)) {
-            handleUserWithdrawnEvent(event);
         } else if (event.getEvent().equals(OceanKeeperEventType.NEW_NOTICE_EVENT) ||
                 event.getEvent().equals(OceanKeeperEventType.TERMS_CHANGED_EVENT)) {
             handleAdminMessageEvent(event);
         } else if (
                 event.getEvent().equals(OceanKeeperEventType.ACTIVITY_START_SOON_EVENT) ||
-                event.getEvent().equals(OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT) ||
-                event.getEvent().equals(OceanKeeperEventType.ACTIVITY_CHANGED_EVENT) ||
-                event.getEvent().equals(OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT) ||
-                event.getEvent().equals(OceanKeeperEventType.ACTIVITY_CLOSE_EVENT)
+                        event.getEvent().equals(OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT) ||
+                        event.getEvent().equals(OceanKeeperEventType.ACTIVITY_CHANGED_EVENT) ||
+                        event.getEvent().equals(OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT)
         ) {
             handleActivityEvent(event);
         }
     }
 
     private void handleAdminMessageEvent(MessageEvent event) {
-        notificationService.saveMessageAllUsers(event);
-        sendFCMMessageToTopic(MessagePreFormat.get(event.getEvent()).getValue());
-    }
-
-    private void handleUserWithdrawnEvent(MessageEvent event) {
-        log.info("[handleUserWithdrawnEvent] event");
-        OUser user = (OUser) event.getObject();
-        try {
-            firebaseMessaging.unsubscribeFromTopic(List.of(user.getDeviceToken()), ALL_MEMBER_TOPIC);
-            log.info("user unsubscribe event");
-        } catch (FirebaseMessagingException e) {
-            throw new RuntimeException(e);
+        log.info("[handleAdminMessageEvent] event = {}", event);
+        int page = 0;
+        final int size = 100;
+        boolean continued = true;
+        while (continued) {
+            Slice<OUser> users = notificationService.saveNotificationAndGetAlarmedUsers(event, page, size);
+            sendFCMMessageToTopic(MessagePreFormat.get(event.getEvent()).getValue(),
+                    users.stream().map(OUser::getDeviceToken).collect(Collectors.toList()));
+            continued = users.hasNext();
+            page += size;
         }
-    }
 
-    private void handleUserJoinEvent(MessageEvent event) {
-        log.info("JBJB USER_JOINED_EVENT event");
-        OUser user = (OUser) event.getObject();
-        try {
-            firebaseMessaging.subscribeToTopic(List.of(user.getDeviceToken()), ALL_MEMBER_TOPIC);
-            log.info("JBJB user event");
-        } catch (FirebaseMessagingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Transactional
@@ -99,22 +81,20 @@ public class FCMService {
     }
 
     @Transactional
-    public String sendFCMMessageToTopic(String contents) {
+    public void sendFCMMessageToTopic(String contents, List<String> deviceTokenList) {
         Notification notification = Notification.builder()
                 .setBody(contents)
                 .build();
-        Message message = Message.builder()
-                .setTopic(ALL_MEMBER_TOPIC)
+        MulticastMessage multicastMessage = MulticastMessage.builder()
                 .setNotification(notification)
+                .addAllTokens(deviceTokenList)
                 .build();
+        log.info("JBJB device list :{}",deviceTokenList);
         try {
-            firebaseMessaging.send(message);
+            firebaseMessaging.sendEachForMulticast(multicastMessage);
             log.info("Firebase Message sent. message = {}", contents);
-            return "true";
         } catch (FirebaseMessagingException e) {
             log.error("Firebase 메세지 전송 실패 : {}", e.getMessagingErrorCode().toString());
-            //throw new IOException(String.format("Firebase 메세지 전송 실패 :%s", e.getMessagingErrorCode().toString()));
-            return "false";
         }
     }
 
@@ -130,6 +110,7 @@ public class FCMService {
         UserListDto crews = (UserListDto) event.getObject();
         for (OUser user : crews.getUser()) {
             FCMRequestDto request = notificationService.sendNotification(user, event.getEvent());
+            log.info("[handleActivityEvent] request:{}", request);
             if (request != null)
                 sendFCMMessage(request);
         }

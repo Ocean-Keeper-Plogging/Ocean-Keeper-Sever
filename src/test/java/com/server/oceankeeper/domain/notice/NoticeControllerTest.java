@@ -31,6 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -71,7 +72,7 @@ class NoticeControllerTest {
     @DisplayName("공지사항 조회")
     void getNotice() throws Exception {
         //given
-        when(service.get(any(), any())).thenReturn(null);
+        when(service.get(any(), any(), eq(false))).thenReturn(null);
 
         //when
         ResultActions resultActions = mvc.perform(get("/notice")
@@ -148,7 +149,7 @@ class NoticeControllerTest {
     @DisplayName("공지사항 작성")
     void postNotice() throws Exception {
         //given
-        when(service.get(any(), any())).thenReturn(null);
+        when(service.get(any(), any(), eq(false))).thenReturn(null);
 
         //when
         ResultActions resultActions = mvc.perform(get("/notice")
@@ -166,7 +167,7 @@ class NoticeControllerTest {
     @DisplayName("공지사항 상세 내용 조회")
     void getNoticeDetail() throws Exception {
         //given
-        when(service.getDetail(any())).thenReturn(null);
+        when(service.getDetail(any(), eq(false))).thenReturn(null);
 
         //when
         ResultActions resultActions = mvc.perform(get("/notice/detail")
@@ -184,7 +185,7 @@ class NoticeControllerTest {
     @DisplayName("공지사항 상세 내용 조회했으나 아이디없음")
     void getNoticeDetail_err() throws Exception {
         //given
-        when(service.getDetail(any())).thenThrow(new ResourceNotFoundException("해당 공지사항 없음"));
+        when(service.getDetail(any(), eq(false))).thenThrow(new ResourceNotFoundException("해당 공지사항 없음"));
 
         //when
         ResultActions resultActions = mvc.perform(get("/notice/detail")

@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.activity;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
@@ -24,6 +25,7 @@ import com.server.oceankeeper.domain.statistics.service.ActivityInfoService;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
+import com.server.oceankeeper.global.config.AwsS3Config;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.util.S3Util;
 import com.server.oceankeeper.util.UUIDGenerator;
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -55,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @AutoConfigureTestDatabase
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-//@Disabled("looks like context re-use error")
+@Disabled("s3 mocking error")
 public class ActivityIntegrationTest extends DummyObject {
     @Autowired
     private MockMvc mvc;
@@ -68,6 +71,10 @@ public class ActivityIntegrationTest extends DummyObject {
     @Autowired
     private ActivityMessageFacadeService activityMessageService;
 
+    @Mock
+    private AwsS3Config awsS3Config;
+    @Mock
+    private AmazonS3 amazonS3;
     @MockBean
     private S3Util s3Util;
     @MockBean

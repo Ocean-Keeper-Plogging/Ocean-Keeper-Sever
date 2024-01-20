@@ -28,7 +28,7 @@ public interface ActivityQueryDslRepository {
 
     List<CrewInfoDetailDao> getCrewInfo(UUID activityId);
 
-    List<CrewDeviceTokensDao> getUserFromActivityId(UUID activityId);
+    List<CrewDeviceTokensDao> getUserFromActivityId(UUID activityId, CrewRole crewRole);
 
-    long deleteByCrewStatusAndDays(CrewStatus status, long days);
+    long selectByCrewStatusAndDaysUpdateCrewStatusAsDeleted(CrewStatus status, long days);
 }

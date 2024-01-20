@@ -22,8 +22,9 @@ public class NoticeController {
     @ApiOperation(value = "공지사항 리스트 조회[권한 필요]")
     @GetMapping("/notice")
     public ResponseEntity<APIResponse<NoticeListResDto>> get(@RequestParam(value = "notice-id", required = false) Long noticeId,
-                                                             @RequestParam(value = "size", required = false) Integer size) {
-        NoticeListResDto response = service.get(noticeId, size);
+                                                             @RequestParam(value = "size", required = false) Integer size,
+                                                             @RequestParam(value = "markdown", required = false) boolean markdown) {
+        NoticeListResDto response = service.get(noticeId, size, markdown);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createGetResponse(response));
     }
 
@@ -43,8 +44,9 @@ public class NoticeController {
 
     @ApiOperation(value = "공지사항 상세 조회[권한 필요]")
     @GetMapping("/notice/detail")
-    public ResponseEntity<APIResponse<NoticeDetailResDto>> getDetail(@RequestParam("notice-id") Long noticeId) {
-        NoticeDetailResDto response = service.getDetail(noticeId);
+    public ResponseEntity<APIResponse<NoticeDetailResDto>> getDetail(@RequestParam("notice-id") Long noticeId,
+                                                                     @RequestParam(value = "markdown", required = false) boolean markdown) {
+        NoticeDetailResDto response = service.getDetail(noticeId, markdown);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createGetResponse(response));
     }
 

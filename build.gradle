@@ -61,7 +61,8 @@ dependencies {
     implementation group: 'org.quartz-scheduler', name: 'quartz', version: '2.3.2'
 
     //markdown
-    implementation 'org.commonmark:commonmark:0.21.0'
+    implementation 'com.vladsch.flexmark:flexmark-html2md-converter:0.64.0'
+    implementation 'org.jsoup:jsoup:1.17.2'
 }
 
 tasks.named('test') {

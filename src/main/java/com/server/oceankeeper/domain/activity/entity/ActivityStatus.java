@@ -22,9 +22,12 @@ public enum ActivityStatus {
             case "open":
                 return OPEN;
             case "closed":
+            case "close":
                 return CLOSED;
             case "recruitment-closed":
             case "recruitment-close":
+            case "recruitment_closed":
+            case "recruitment_close":
                 return RECRUITMENT_CLOSE;
             case "cancel":
                 return CANCEL;

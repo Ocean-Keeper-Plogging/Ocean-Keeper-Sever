@@ -9,14 +9,15 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Setter //TODO : 개선
-@Table(indexes = @Index(name = "i_uuid", columnList = "uuid",unique = true))
+@Table(indexes = @Index(name = "i_uuid", columnList = "uuid", unique = true))
 public class ActivityDetail {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @MapsId
-    @OneToOne(fetch=FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name="ACTIVITY_ID")
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "ACTIVITY_ID")
     @Setter
     private Activity activity;
 

@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +57,9 @@ public class MessageService {
 
         MessageType messageType = MessageType.toClass(type);
         Slice<MessageDao> result = getMessageDao(id, size, userId, null, messageType);
+
+        for (MessageDao dao : result)
+            log.debug("[getInbox] result = {}", dao);
 
         return new PostResDto(result.stream()
                 .map(m -> new PostResDto.MessageDto(
@@ -97,6 +99,9 @@ public class MessageService {
                 user,
                 size != null ? PageRequest.ofSize(size) : PageRequest.ofSize(5));
 
+        for (MessageDao dao : result)
+            log.debug("[getSentMessageInbox] result = {}", dao);
+
         return new PostResDto(result.stream()
                 .map(m -> new PostResDto.MessageDto(
                         m.getId(),
@@ -125,7 +130,7 @@ public class MessageService {
         Activity activity = null;
 
         activity = activityService.getActivity(req.getActivityId());
-        log.debug("JBJB sender user:{}",user);
+        log.debug("JBJB sender user:{}", user);
 
         List<Long> messageIdList = new ArrayList<>();
         for (String nickname : req.getTargetNicknames()) {
@@ -216,7 +221,7 @@ public class MessageService {
     public void handleEvent(ActivityEvent event) {
         if (event.getEvent().equals(OceanKeeperEventType.NICKNAME_CHANGE_EVENT)) {
             log.debug("닉네임 변경 이벤트 처리");
-            String newNickname = ((OUser)event.getObject()).getNickname();
+            String newNickname = ((OUser) event.getObject()).getNickname();
             List<OMessage> messages = messageRepository.findByMessageFrom(newNickname);
             for (OMessage message : messages) {
                 message.changeMessageFrom(newNickname);

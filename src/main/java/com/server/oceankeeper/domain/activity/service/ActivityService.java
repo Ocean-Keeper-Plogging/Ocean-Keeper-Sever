@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -331,7 +332,7 @@ public class ActivityService {
 
             publisher.emit(new MessageEvent(
                     this,
-                    getUserListDtoByActivityId(activityId),
+                    getUserListDtoByActivityId(activityId, null),
                     OceanKeeperEventType.ACTIVITY_CHANGED_EVENT));
         }
     }
@@ -496,7 +497,8 @@ public class ActivityService {
     }
 
     @Transactional
-    public CrewInfoFileDto getCrewInfoFile(String activityId, HttpServletRequest request) {
+    //public CrewInfoFileDto getCrewInfoFile(String activityId, HttpServletRequest request) {
+    public void getCrewInfoFile(String activityId, HttpServletRequest request, HttpServletResponse response) {
         synchronized (this) {
             Activity activity = validateHost(activityId, request);
             ActivityStatus activityStatus = getActivityStatus(activity.getRecruitEndAt(), activity.getStartAt());
@@ -507,7 +509,7 @@ public class ActivityService {
 
             try {
                 List<Crews> crews = crewService.findCrews(activity);
-                return excelMaker.makeExcelFile(crews);
+                excelMaker.makeExcelFile(crews, response);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -517,12 +519,12 @@ public class ActivityService {
     @Transactional
     public void startActivitySoon(String activityId) {
         log.info("[startActivitySoon] activity id:{}", activityId);
-        UserListDto dto = getUserListDtoByActivityId(activityId);
+        UserListDto dto = getUserListDtoByActivityId(activityId, CrewRole.CREW);
         publisher.emit(new MessageEvent(this, dto, OceanKeeperEventType.ACTIVITY_START_SOON_EVENT));
     }
 
-    private UserListDto getUserListDtoByActivityId(String activityId) {
-        List<CrewDeviceTokensDao> result = activityRepository.getUserFromActivityId(UUIDGenerator.changeUuidFromString(activityId));
+    private UserListDto getUserListDtoByActivityId(String activityId, CrewRole crewRole) {
+        List<CrewDeviceTokensDao> result = activityRepository.getUserFromActivityId(UUIDGenerator.changeUuidFromString(activityId), crewRole);
         return new UserListDto(result.stream().map(CrewDeviceTokensDao::getUser).collect(Collectors.toList()));
     }
 
@@ -541,6 +543,22 @@ public class ActivityService {
     }
 
     @Transactional
+    public void testFinishActivity() {
+        List<Activity> activities = activityRepository.findAll();
+        for (Activity activity : activities) {
+            ActivityStatus status = activity.getActivityStatus();
+            List<Crews> crews = crewService.findCrews(activity);
+            if (status.equals(ActivityStatus.CLOSED)) {
+                for (Crews crew : crews)
+                    if (!(crew.getCrewStatus().equals(CrewStatus.REJECT)
+                            || crew.getCrewStatus().equals(CrewStatus.CANCEL)
+                            || crew.getCrewStatus().equals(CrewStatus.NO_SHOW)))
+                        crew.closeApplication();
+            }
+        }
+    }
+
+    @Transactional
     public void finishActivity(String activityId) {
         log.info("[finishActivity] activity id:{}", activityId);
 
@@ -555,7 +573,7 @@ public class ActivityService {
             crew.closeApplication();
 
         //활동 종료 메세지 전송
-        sendActivityCloseMessage(crews);
+        //sendActivityCloseMessage(crews);
     }
 
     private void sendActivityMessage(List<Crews> crews, OceanKeeperEventType eventType) {
@@ -593,11 +611,11 @@ public class ActivityService {
 
     @Transactional
     public void handleActivityInfoDeleteEvent() {
-        long result = activityRepository.deleteByCrewStatusAndDays(CrewStatus.CLOSED, 14);
+        long result = activityRepository.selectByCrewStatusAndDaysUpdateCrewStatusAsDeleted(CrewStatus.CLOSED, 14);
         if (result != 0) {
             log.debug("삭제 성공");
         } else {
-            log.error("삭제 실패");
+            log.debug("삭제 없음");
         }
     }
 

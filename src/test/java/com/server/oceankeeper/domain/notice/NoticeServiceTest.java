@@ -48,7 +48,7 @@ class NoticeServiceTest {
                 false);
         when(repository.getData(any(), any())).thenReturn(expected);
 
-        NoticeListResDto result = service.get(null, 5);
+        NoticeListResDto result = service.get(null, 5, false);
         assertThat(result.getNotices().get(0).getId()).isEqualTo(2L);
         assertThat(result.getNotices().size()).isEqualTo(2L);
         assertThat(result.getMeta().isLast()).isEqualTo(true);
@@ -93,7 +93,7 @@ class NoticeServiceTest {
         Notice notice = makeData();
         when(repository.findById(any())).thenReturn(Optional.ofNullable(notice));
 
-        NoticeDetailResDto result = service.getDetail(notice.getId());
+        NoticeDetailResDto result = service.getDetail(notice.getId(),false);
         assertThat(result.getId()).isEqualTo(notice.getId());
         assertThat(result.getTitle()).isEqualTo(notice.getTitle());
         assertThat(result.getContents()).isEqualTo(notice.getContents());

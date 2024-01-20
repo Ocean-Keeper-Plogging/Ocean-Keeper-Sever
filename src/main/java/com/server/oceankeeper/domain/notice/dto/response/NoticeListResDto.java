@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 public class NoticeListResDto {
-    private final List<NoticeDao> notices;
+    private final List<NoticeDto> notices;
     private final Meta meta;
     @Getter
     @RequiredArgsConstructor

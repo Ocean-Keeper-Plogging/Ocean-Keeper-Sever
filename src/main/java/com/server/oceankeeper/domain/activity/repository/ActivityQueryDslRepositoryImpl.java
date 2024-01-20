@@ -3,7 +3,7 @@ package com.server.oceankeeper.domain.activity.repository;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.server.oceankeeper.domain.activity.dao.*;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
@@ -160,11 +160,11 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .join(crews.user, oUser)
                 .join(crews.activity, activity)
                 .where(
-                        crews.user.eq(user),
-                        crews.activityRole.eq(CrewRole.HOST),
+                        crews.host.eq(user),
+                        crews.activityRole.eq(CrewRole.CREW),
                         crews.activity.uuid.eq(activityId),
-                        crews.activity.activityStatus.ne(ActivityStatus.CANCEL),
-                        crews.crewStatus.eq(CrewStatus.IN_PROGRESS))
+                        crews.activity.activityStatus.ne(ActivityStatus.CANCEL)
+                )
                 .orderBy(crews.activity.title.asc())
                 .fetch();
     }
@@ -193,7 +193,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
     }
 
     @Override
-    public List<CrewDeviceTokensDao> getUserFromActivityId(UUID activityId) {
+    public List<CrewDeviceTokensDao> getUserFromActivityId(UUID activityId, CrewRole crewRole) {
         List<CrewDeviceTokensDao> result = queryFactory.select(
                         Projections.constructor(CrewDeviceTokensDao.class,
                                 crews.user.as("user"))
@@ -202,24 +202,36 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .leftJoin(crews.activity, activity)
                 .leftJoin(crews.user, oUser)
                 .where(
-                        crews.activity.uuid.eq(activityId)
+                        crews.activity.uuid.eq(activityId),
+                        condition(crewRole, crews.activityRole::eq)
                 )
                 .orderBy(crews.id.asc())
                 .fetch();
         return result;
     }
 
-    public long deleteByCrewStatusAndDays(CrewStatus status, long days) {
-        long result = queryFactory.delete(crews)
-                .where(crews.id.in(JPAExpressions.select(crews.id)
-                        .from(crews)
-                        .leftJoin(crews.activity, activity)
-                        .where(
-                                condition(status, crews.crewStatus::eq),
-                                crews.activity.startAt.before(LocalDateTime.now().minusDays(days))
-                        )))
+    public long selectByCrewStatusAndDaysUpdateCrewStatusAsDeleted(CrewStatus status, long days) {
+        List<Long> applicationIdList = queryFactory
+                .select(crews.id)
+                .from(crews)
+                .leftJoin(crews.activity, activity)
+                .where(
+                        condition(status, crews.crewStatus::eq),
+                        crews.activity.startAt.loe(LocalDateTime.now().minusDays(days))
+                ).fetch();
+        long count = queryFactory.update(crews)
+                .set(crews.name, Expressions.nullExpression())
+                .set(crews.phoneNumber, Expressions.nullExpression())
+                .set(crews.id1365, Expressions.nullExpression())
+                .set(crews.email, Expressions.nullExpression())
+                .set(crews.startPoint, Expressions.nullExpression())
+                .set(crews.transportation, Expressions.nullExpression())
+                .set(crews.question, Expressions.nullExpression())
+                .set(crews.dayOfBirth, Expressions.nullExpression())
+                .set(crews.expiredAt, Expressions.constant(LocalDateTime.now()))
+                .where(crews.id.in(applicationIdList))
                 .execute();
-        return result;
+        return count;
     }
 
     private <T> Slice<T> checkLastPage(Pageable pageable, List<T> result) {

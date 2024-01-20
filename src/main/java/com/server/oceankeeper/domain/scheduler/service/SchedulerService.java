@@ -46,9 +46,9 @@ public class SchedulerService {
         }
     }
 
-    @Scheduled(cron="* 0 0 * * *")
-    public void deleteCrewData(){
-        publisher.emit(new ActivityEvent(this,null,OceanKeeperEventType.ACTIVITY_INFO_DELETE_EVENT));
+    @Scheduled(cron = "0 0 0 * * *")
+    public void deleteCrewData() {
+        publisher.emit(new ActivityEvent(this, null, OceanKeeperEventType.ACTIVITY_INFO_DELETE_EVENT));
     }
 
 
@@ -73,7 +73,7 @@ public class SchedulerService {
         Date date = Date.from(activityStartAt.atZone(ZoneId.systemDefault()).toInstant());
 
         TimeZone tz = Calendar.getInstance().getTimeZone();
-        log.debug("JBJB 활동 곧 시작 이벤트 등록 tz : {}, id:{}, date:{}",tz.getDisplayName(),tz.getID(), date);
+        log.debug("JBJB 활동 곧 시작 이벤트 등록 tz : {}, id:{}, date:{}", tz.getDisplayName(), tz.getID(), date);
 
         registerSchedule(eventDto.getActivityId(), date, OceanKeeperEventType.ACTIVITY_START_SOON_EVENT, ActivityStarterJob.class);
     }
@@ -87,7 +87,7 @@ public class SchedulerService {
         Date recruitmentEndDate = Date.from(recruitmentEndTime.atZone(ZoneId.systemDefault()).toInstant());
 
         TimeZone tz = Calendar.getInstance().getTimeZone();
-        log.debug("JBJB 활동 모집 종료 이벤트 등록 tz : {}, id:{}, date:{}",tz.getDisplayName(),tz.getID(), recruitmentEndDate);
+        log.debug("JBJB 활동 모집 종료 이벤트 등록 tz : {}, id:{}, date:{}", tz.getDisplayName(), tz.getID(), recruitmentEndDate);
 
         //활동 모집종료 스케줄링 등록, 활동 종료 스케줄링 등록
         registerSchedule(eventDto.getActivityId(), recruitmentEndDate, event.getEvent(), RecruitmentEndJob.class);
@@ -101,7 +101,7 @@ public class SchedulerService {
         Date activityEndDate = Date.from(activityEndTime.atZone(ZoneId.systemDefault()).toInstant());
 
         TimeZone tz = Calendar.getInstance().getTimeZone();
-        log.debug("JBJB 활동 종료 이벤트 등록 tz : {}, id:{}, date:{}",tz.getDisplayName(),tz.getID(), activityEndDate);
+        log.debug("JBJB 활동 종료 이벤트 등록 tz : {}, id:{}, date:{}", tz.getDisplayName(), tz.getID(), activityEndDate);
 
         registerSchedule(eventDto.getActivityId(), activityEndDate, OceanKeeperEventType.ACTIVITY_CLOSE_EVENT, ActivityEndJob.class);
     }

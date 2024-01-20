@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public enum MessagePreFormat {
     NEW_MESSAGE("새로운 쪽지가 도착했습니다.",0)
     ,ACTIVITY_END("키퍼님이 신청한 활동의 모집이 종료됐습니다.",10)
-    ,ACTIVITY_STANDBY("키퍼님이 신청한 활동이 1시간 뒤 시작됩니다.",11)
+    ,ACTIVITY_START_SOON_EVENT("키퍼님이 신청한 활동이 1시간 뒤 시작됩니다.",11)
     ,ACTIVITY_CANCEL("키퍼님이 신청한 활동이 취소됐습니다.",12)
     ,ACTIVITY_EDIT("키퍼님이 신청한 활동에 변경내역이 있습니다.",13)
     ,GUIDE_EDIT("이용약관 변경내역이 있습니다.",20)

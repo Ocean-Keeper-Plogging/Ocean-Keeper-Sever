@@ -335,7 +335,7 @@ class ActivityRepositoryTest extends DummyObject {
         //given
         //when
         long result = activityRepository
-                .deleteByCrewStatusAndDays(CrewStatus.CLOSED,10);
+                .selectByCrewStatusAndDaysUpdateCrewStatusAsDeleted(CrewStatus.CLOSED,10);
         //then
         assertThat(result).isEqualTo(3);
     }
@@ -346,7 +346,7 @@ class ActivityRepositoryTest extends DummyObject {
         //given
         //when
         long result = activityRepository
-                .deleteByCrewStatusAndDays(CrewStatus.CLOSED,30);
+                .selectByCrewStatusAndDaysUpdateCrewStatusAsDeleted(CrewStatus.CLOSED,30);
         //then
         assertThat(result).isEqualTo(0);
     }

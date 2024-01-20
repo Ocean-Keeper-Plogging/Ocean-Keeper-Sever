@@ -42,6 +42,15 @@ spring:
 logging:
   level:
     '[com.server.oceankeeper]': DEBUG
+  logback:
+    rollingpolicy:
+      max-history: 30
+      max-file-size: 100MB
+      file-name-pattern: ${LOG_FILE}.%d{yyyy-MM-dd}-%i.log
+  file:
+    name: logs/oceankeeper.log
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS,Asia/Seoul
 
 cloud:
   aws:
