@@ -32,7 +32,7 @@ public class JoinReqDto {
     @Pattern(regexp = "^[a-zA-Z0-9가-힣]{2,20}$", message = "한글/영문/숫자로만 구성된 2~20자 이내의 닉네임을 사용해주세요")
     @ApiModelProperty(
             value = "닉네임",
-            notes="한글/영문/숫자로만 구성된 2~20자 이내의 닉네임",
+            notes = "한글/영문/숫자로만 구성된 2~20자 이내의 닉네임",
             dataType = "string",
             required = true
     )
@@ -80,11 +80,12 @@ public class JoinReqDto {
                 .provider(provider)
                 .providerId(providerId)
                 .nickname(nickname)
-                .email(email == null ? "":email)
+                .email(email == null ? "" : email)
                 .profile(profile)
                 .status(UserStatus.ACTIVE)
                 .role(UserRole.USER)
                 .deviceToken(deviceToken)
+                .alarm(true)
                 .build();
     }
 }

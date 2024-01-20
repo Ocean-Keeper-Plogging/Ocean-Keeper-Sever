@@ -88,7 +88,6 @@ public class UserService {
         OUser user = userRepository.findByProviderAndProviderId(provider, providerId).orElseThrow(
                 () -> new ResourceNotFoundException("해당 유저가 존재하지 않습니다."));
         user.withdraw();
-        publisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.USER_WITHDRAWAL_EVENT));
     }
 
     private void inspectDuplicatedUser(JoinReqDto joinReqDto) {
