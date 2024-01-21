@@ -1,6 +1,5 @@
 package com.server.oceankeeper.domain.statistics.entity;
 
-import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import lombok.Getter;
 import lombok.ToString;

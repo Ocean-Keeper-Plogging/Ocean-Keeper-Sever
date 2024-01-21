@@ -438,7 +438,7 @@ public class ActivityService {
         UserListDto dto = new UserListDto(crews.stream().filter(c -> c.getActivityRole().equals(CrewRole.CREW))
                 .map(Crews::getUser).collect(Collectors.toList()));
         publisher.emit(new MessageEvent(this, dto, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
-        publisher.emit(new ActivityEvent(this, dto, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+        publisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
     }
 
     @Transactional

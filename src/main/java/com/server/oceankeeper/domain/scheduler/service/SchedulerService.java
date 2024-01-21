@@ -37,8 +37,8 @@ public class SchedulerService {
     @PostConstruct
     void init() {
         try {
-            scheduler.clear();
-            //scheduler.start();
+            //scheduler.clear();
+            scheduler.start();
             log.debug("scheduler started");
             log.debug("fcm time : {}", activityStarterTime);
         } catch (SchedulerException e) {
