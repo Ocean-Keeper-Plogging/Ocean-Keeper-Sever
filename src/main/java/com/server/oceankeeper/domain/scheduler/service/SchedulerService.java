@@ -60,7 +60,22 @@ public class SchedulerService {
             handleActivityModificationEvent(event);
         } else if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT)) {
             handleActivityRecruitmentEndEvent(event);
+        } else if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT)) {
+            handleActivityCancelEndEvent(event);
         }
+    }
+
+    private void handleActivityCancelEndEvent(ActivityEvent event) {
+        log.debug("[handleActivityCancelEndEvent] event:{}", event);
+        RegisterActivityEventDto eventDto = (RegisterActivityEventDto) event.getObject();
+        try {
+            deleteSchedule(eventDto.getActivityId(), OceanKeeperEventType.ACTIVITY_START_SOON_EVENT);
+            deleteSchedule(eventDto.getActivityId(), OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT);
+            deleteSchedule(eventDto.getActivityId(), OceanKeeperEventType.ACTIVITY_CLOSE_EVENT);
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     private void handleActivityStartSoonEvent(ActivityEvent event) {
@@ -113,7 +128,7 @@ public class SchedulerService {
 
         LocalDateTime activityStartAt = setActivityStarterTime(eventDto);
         Date activityStartDate = Date.from(activityStartAt.atZone(ZoneId.systemDefault()).toInstant());
-        Date recruitmentEndDate = Date.from(eventDto.getRecruitEndAt().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        Date recruitmentEndDate = Date.from(eventDto.getRecruitEndAt().plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 
         try {
             //활동 1시간전 알림,활동 모집종료 알림,활동 종료 알림 재등록
@@ -146,6 +161,7 @@ public class SchedulerService {
         JobDetail jobDetail = jobMaker.buildJobDetail(activityId, eventType, job);
         Trigger trigger = jobMaker.buildTrigger(activityId, date, eventType);
         try {
+            log.debug("[registerSchedule] activityId:{}, date:{}, eventType:{}", activityId, date, eventType);
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             log.error("scheduling error e:{}", e.toString());

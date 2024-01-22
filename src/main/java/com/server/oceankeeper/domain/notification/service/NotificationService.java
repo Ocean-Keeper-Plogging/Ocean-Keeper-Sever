@@ -136,7 +136,7 @@ public class NotificationService {
     public Slice<OUser> saveNotificationAndGetAlarmedUsers(MessageEvent event, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Slice<OUser> users = userService.findUsersByNotificationAlarm(true, pageable);
-        log.info("JBJB users:{}", users);
+        log.info("JBJB users:{}", users.getContent());
         for (OUser user : users) {
             saveNewMessage(user, MessagePreFormat.get(event.getEvent()));
         }

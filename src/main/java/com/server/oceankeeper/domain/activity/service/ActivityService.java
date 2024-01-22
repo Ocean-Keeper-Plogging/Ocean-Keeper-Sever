@@ -327,7 +327,7 @@ public class ActivityService {
         if (activityStartTimeChanged) {
             publisher.emit(new ActivityEvent(
                     this,
-                    new RegisterActivityEventDto(activity.getStartAt(), activity.getRecruitStartAt(), UUIDGenerator.changeUuidToString(activity.getUuid()), null),
+                    new RegisterActivityEventDto(activity.getStartAt(), activity.getRecruitEndAt(), UUIDGenerator.changeUuidToString(activity.getUuid()), null),
                     OceanKeeperEventType.ACTIVITY_CHANGED_EVENT));
 
             publisher.emit(new MessageEvent(
@@ -414,6 +414,7 @@ public class ActivityService {
 
     @Transactional
     public void cancelActivity(String activityId, HttpServletRequest servletRequest) {
+        log.info("[cancelActivity] activityId: {}", activityId);
         OUser user = tokenUtil.getUserFromHeader(servletRequest);
         Activity activity = getActivity(activityId);
         Crews host = crewService.findApplication(user, activity);
@@ -437,8 +438,8 @@ public class ActivityService {
         }
         UserListDto dto = new UserListDto(crews.stream().filter(c -> c.getActivityRole().equals(CrewRole.CREW))
                 .map(Crews::getUser).collect(Collectors.toList()));
-        publisher.emit(new MessageEvent(this, dto, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
         publisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+        publisher.emit(new MessageEvent(this, dto, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
     }
 
     @Transactional
@@ -586,7 +587,9 @@ public class ActivityService {
     }
 
     private void sendActivityRecruitmentCloseMessage(List<Crews> crews) {
-        sendActivityMessage(crews, OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT);
+        UserListDto dto = new UserListDto(crews.stream().filter(c -> c.getActivityRole().equals(CrewRole.CREW))
+                .map(Crews::getUser).collect(Collectors.toList()));
+        publisher.emit(new MessageEvent(this, dto, OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT));
     }
 
     private Activity validateHost(String activityId, HttpServletRequest request) {

@@ -89,7 +89,7 @@ public class FCMService {
                 .setNotification(notification)
                 .addAllTokens(deviceTokenList)
                 .build();
-        log.info("JBJB device list :{}",deviceTokenList);
+        log.info("JBJB device list :{}", deviceTokenList);
         try {
             firebaseMessaging.sendEachForMulticast(multicastMessage);
             log.info("Firebase Message sent. message = {}", contents);

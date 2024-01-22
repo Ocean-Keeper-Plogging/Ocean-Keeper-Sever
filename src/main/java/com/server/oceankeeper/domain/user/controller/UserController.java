@@ -1,14 +1,15 @@
  package com.server.oceankeeper.domain.user.controller;
 
 import com.server.oceankeeper.domain.user.dto.*;
+import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.service.UserService;
 import com.server.oceankeeper.global.response.APIResponse;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

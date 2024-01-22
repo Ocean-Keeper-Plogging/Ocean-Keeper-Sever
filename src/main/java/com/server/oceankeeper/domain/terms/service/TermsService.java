@@ -25,10 +25,10 @@ public class TermsService {
 
     @Transactional
     public TermsResDto post(TermsReqDto request) {
-        String termsStr = request.getContents().replaceAll("\\\\","");
+        String termsStr = request.getContents().replaceAll("\\\\", "");
         Terms terms = new Terms(null, termsStr, LocalDateTime.now());
         repository.save(terms);
-        publisher.emit(new MessageEvent(this,null, OceanKeeperEventType.TERMS_CHANGED_EVENT));
+        publisher.emit(new MessageEvent(this, null, OceanKeeperEventType.TERMS_CHANGED_EVENT));
         return TermsResDto.fromEntity(terms);
     }
 

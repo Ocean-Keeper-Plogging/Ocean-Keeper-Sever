@@ -7,6 +7,7 @@ import com.server.oceankeeper.domain.user.dto.JoinResDto;
 import com.server.oceankeeper.domain.user.dto.UserIdAndNicknameReqDto;
 import com.server.oceankeeper.domain.user.dto.WithdrawalReqDto;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entitiy.UserRole;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
@@ -127,7 +128,7 @@ public class UserService {
 
     @Transactional
     public Slice<OUser> findUsersByNotificationAlarm(boolean alarm, Pageable pageable) {
-        return userRepository.findAllByAlarm(alarm,pageable);
+        return userRepository.findAllByAlarmAndRole(alarm, UserRole.USER, pageable);
     }
 
     public boolean getAlarm(OUser user) {
