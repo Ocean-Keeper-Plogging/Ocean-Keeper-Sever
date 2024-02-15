@@ -20,6 +20,6 @@ public class ActivityEndJob implements Job {
         String activityId = context.getJobDetail().getJobDataMap().getString("activityId");
 
         log.debug("활동 종료 job scheduling success. activity id :{}", activityId);
-        activityService.finishActivity(activityId);
+        activityService.closeActivity(activityId);
     }
 }

@@ -210,7 +210,7 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
         return result;
     }
 
-    public long selectByCrewStatusAndDaysUpdateCrewStatusAsDeleted(CrewStatus status, long days) {
+    public long selectByCrewStatusAndStartAtAndUpdateCrewStatusAsDeleted(CrewStatus status, long days) {
         List<Long> applicationIdList = queryFactory
                 .select(crews.id)
                 .from(crews)

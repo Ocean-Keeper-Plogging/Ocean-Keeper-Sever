@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Table
@@ -37,18 +36,27 @@ public class ActivityInfo extends BaseEntity {
     @NotNull
     private Integer countCancel;
 
+    public void subActivityCount() {
+        if (this.countActivity > 0)
+            this.countActivity--;
+    }
+
+    public void subHostingCount() {
+        if (this.countHosting > 0) this.countHosting--;
+    }
+
     public void addActivityCount() {
         this.countActivity++;
     }
-    public void subActivityCount() {
-        this.countActivity--;
-    }
+
     public void addHostingCount() {
         this.countHosting++;
     }
+
     public void addNoShowCount() {
         this.countNoShow++;
     }
+
     public void addCancelCount() {
         this.countCancel++;
     }

@@ -1,12 +1,15 @@
 package com.server.oceankeeper.domain.scheduler.service;
 
 import com.server.oceankeeper.domain.activity.dto.inner.RegisterActivityEventDto;
+import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.scheduler.job.ActivityEndJob;
 import com.server.oceankeeper.domain.scheduler.job.ActivityStarterJob;
 import com.server.oceankeeper.domain.scheduler.job.RecruitmentEndJob;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
+import com.server.oceankeeper.domain.user.dto.UserAndActivityDto;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
+import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
@@ -22,6 +25,7 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -67,11 +71,11 @@ public class SchedulerService {
 
     private void handleActivityCancelEndEvent(ActivityEvent event) {
         log.debug("[handleActivityCancelEndEvent] event:{}", event);
-        RegisterActivityEventDto eventDto = (RegisterActivityEventDto) event.getObject();
+        UserAndActivityDto dto = (UserAndActivityDto) (event.getObject());
         try {
-            deleteSchedule(eventDto.getActivityId(), OceanKeeperEventType.ACTIVITY_START_SOON_EVENT);
-            deleteSchedule(eventDto.getActivityId(), OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT);
-            deleteSchedule(eventDto.getActivityId(), OceanKeeperEventType.ACTIVITY_CLOSE_EVENT);
+            deleteSchedule(UUIDGenerator.changeUuidToString(dto.getActivity().getUuid()), OceanKeeperEventType.ACTIVITY_START_SOON_EVENT);
+            deleteSchedule(UUIDGenerator.changeUuidToString(dto.getActivity().getUuid()), OceanKeeperEventType.ACTIVITY_RECRUITMENT_CLOSED_EVENT);
+            deleteSchedule(UUIDGenerator.changeUuidToString(dto.getActivity().getUuid()), OceanKeeperEventType.ACTIVITY_CLOSE_EVENT);
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }

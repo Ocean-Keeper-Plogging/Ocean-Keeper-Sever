@@ -30,5 +30,5 @@ public interface ActivityQueryDslRepository {
 
     List<CrewDeviceTokensDao> getUserFromActivityId(UUID activityId, CrewRole crewRole);
 
-    long selectByCrewStatusAndDaysUpdateCrewStatusAsDeleted(CrewStatus status, long days);
+    long selectByCrewStatusAndStartAtAndUpdateCrewStatusAsDeleted(CrewStatus status, long days);
 }

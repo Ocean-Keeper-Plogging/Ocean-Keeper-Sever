@@ -268,5 +268,5 @@ public class ActivityController {
     public void test3(){activityService.handleActivityInfoDeleteEvent();}
 
     @PostMapping(value = "/close")
-    public void test4(){activityService.testFinishActivity();}
+    public void test4(){activityService.testCloseActivity();}
 }

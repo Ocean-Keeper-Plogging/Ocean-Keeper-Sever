@@ -100,7 +100,7 @@ public class NotificationService {
             throw new IllegalRequestException("해당 유저의 알림을 확인할 권한이 없습니다.");
 
         Slice<Notification> response = notificationRepository.getNotification(user, id, Pageable.ofSize(size != null ? size : 20));
-        log.debug("[getNotificationList] response:{}", response);
+        log.debug("[getNotificationList] response:{}", response.getContent());
         List<NotificationResDto.NotificationData> result = response.getContent().stream()
                 .map(r -> new NotificationResDto.NotificationData(
                         r.getId(),
@@ -119,13 +119,13 @@ public class NotificationService {
     }
 
     private String convertDate(LocalDateTime createdAt) {
-        long minutes = Duration.between(createdAt, LocalDateTime.now()).toMinutes();
-        if (minutes <= 0) {
-            throw new RuntimeException("이상한 값이 입력되었습니다. 생성일:" + createdAt);
-        } else if (minutes <= 60) {
-            return minutes + "분 전";
-        } else if (minutes <= 1440) {
-            return minutes / 60 + "시간 전";
+        long seconds = Duration.between(createdAt, LocalDateTime.now()).toSeconds();
+        if (seconds <= 0) {
+            throw new RuntimeException("이상한 값이 입력되었습니다. 생성일:" + createdAt + " ,현재 시각: " + LocalDateTime.now());
+        } else if (seconds <= 60 * 60) {
+            return seconds / 60 + "분 전";
+        } else if (seconds <= 1440 * 60) {
+            return seconds / 3600 + "시간 전";
         } else {
             DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             return createdAt.format(pattern);
@@ -136,7 +136,7 @@ public class NotificationService {
     public Slice<OUser> saveNotificationAndGetAlarmedUsers(MessageEvent event, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Slice<OUser> users = userService.findUsersByNotificationAlarm(true, pageable);
-        log.info("JBJB users:{}", users.getContent());
+        log.info("[saveNotificationAndGetAlarmedUsers] users:{}", users.getContent());
         for (OUser user : users) {
             saveNewMessage(user, MessagePreFormat.get(event.getEvent()));
         }

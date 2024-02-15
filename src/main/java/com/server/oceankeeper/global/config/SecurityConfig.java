@@ -50,7 +50,6 @@ public class SecurityConfig {
         http.csrf().disable();
         http.cors().configurationSource(configurationSource());
 
-        //jwt 사용 => 세션 사용안함
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.formLogin().disable();
         http.httpBasic().disable();
@@ -96,7 +95,6 @@ public class SecurityConfig {
     }
 
     public CorsConfigurationSource configurationSource() {
-        log.debug("디버그 : configurationSource cors 설정이 SecurityFilterChain에 등록됨");
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*"); // GET, POST, PUT, DELETE (Javascript 요청 허용)

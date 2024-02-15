@@ -101,19 +101,19 @@ public class CrewService {
     }
 
     @Transactional
-    public ApplicationDto getApplicationDto(OUser user) {
-        Crews applicationInfo = crewRepository.findFirstByUserOrderByCreatedAtDesc(user)
+    public ApplicationDto getNotEmptyApplicationDto(OUser user) {
+        Crews applicationInfo = crewRepository.findFirstByUserAndNameIsNotNullOrderByIdDesc(user)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 유저의 활동 지원서가 존재하지 않습니다."));
 
         return ApplicationDto.builder()
-                .dayOfBirth(applicationInfo.getDayOfBirth())
-                .email(applicationInfo.getEmail())
-                .id1365(applicationInfo.getId1365())
-                .name(applicationInfo.getName())
-                .phoneNumber(applicationInfo.getPhoneNumber())
-                .question(applicationInfo.getQuestion())
-                .transportation(applicationInfo.getTransportation())
-                .startPoint(applicationInfo.getStartPoint())
+                .dayOfBirth(applicationInfo.getDayOfBirth() == null ? "" : applicationInfo.getDayOfBirth())
+                .email(applicationInfo.getEmail() == null ? "" : applicationInfo.getEmail())
+                .id1365(applicationInfo.getId1365() == null ? "" : applicationInfo.getId1365())
+                .name(applicationInfo.getName() == null ? "" : applicationInfo.getName())
+                .phoneNumber(applicationInfo.getPhoneNumber() == null ? "" : applicationInfo.getPhoneNumber())
+                .question(applicationInfo.getQuestion() == null ? "" : applicationInfo.getQuestion())
+                .transportation(applicationInfo.getTransportation() == null ? "" : applicationInfo.getTransportation())
+                .startPoint(applicationInfo.getStartPoint() == null ? "" : applicationInfo.getStartPoint())
                 .build();
     }
 

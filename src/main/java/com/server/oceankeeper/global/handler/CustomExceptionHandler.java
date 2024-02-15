@@ -5,6 +5,7 @@ import com.server.oceankeeper.global.exception.*;
 import com.server.oceankeeper.global.response.APIResponse;
 import com.server.oceankeeper.global.response.ErrorCode;
 import com.server.oceankeeper.global.response.ErrorResponse;
+import org.apache.commons.fileupload.FileUploadBase;
 import org.hibernate.exception.GenericJDBCException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,17 @@ public class CustomExceptionHandler {
                         new ErrorResponse(
                                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
                                 "필수 파라미터가 누락되었습니다.",
+                                ErrorCode.INVALID_REQUEST)));
+    }
+
+    @ExceptionHandler(FileUploadBase.SizeLimitExceededException.class)
+    public ResponseEntity<APIResponse<ErrorResponse>> SizeLimitExceededException(FileUploadBase.SizeLimitExceededException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                "파일 사이즈가 너무 큽니다. 다른 이미지를 사용해주세요",
                                 ErrorCode.INVALID_REQUEST)));
     }
 

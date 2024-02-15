@@ -19,6 +19,7 @@ import com.server.oceankeeper.domain.crew.service.CrewService;
 import com.server.oceankeeper.domain.message.entity.MessageEvent;
 import com.server.oceankeeper.domain.statistics.dto.ActivityInfoResDto;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
+import com.server.oceankeeper.domain.user.dto.UserAndActivityDto;
 import com.server.oceankeeper.domain.user.dto.UserInfoDto;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
@@ -361,7 +362,7 @@ public class ActivityService {
     @Transactional
     public ApplicationDto getLastApplication(HttpServletRequest servletRequest) {
         OUser user = tokenUtil.getUserFromHeader(servletRequest);
-        return crewService.getApplicationDto(user);
+        return crewService.getNotEmptyApplicationDto(user);
     }
 
     @Transactional
@@ -415,9 +416,9 @@ public class ActivityService {
     @Transactional
     public void cancelActivity(String activityId, HttpServletRequest servletRequest) {
         log.info("[cancelActivity] activityId: {}", activityId);
-        OUser user = tokenUtil.getUserFromHeader(servletRequest);
+        OUser hostUser = tokenUtil.getUserFromHeader(servletRequest);
         Activity activity = getActivity(activityId);
-        Crews host = crewService.findApplication(user, activity);
+        Crews host = crewService.findApplication(hostUser, activity);
 
         //해당 크루가 호스트인지 확인
         if (!host.getActivityRole().equals(CrewRole.HOST))
@@ -438,7 +439,8 @@ public class ActivityService {
         }
         UserListDto dto = new UserListDto(crews.stream().filter(c -> c.getActivityRole().equals(CrewRole.CREW))
                 .map(Crews::getUser).collect(Collectors.toList()));
-        publisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
+        //Notify crews to be canceled activity
+        publisher.emit(new ActivityEvent(this, new UserAndActivityDto(hostUser, activity, dto), OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
         publisher.emit(new MessageEvent(this, dto, OceanKeeperEventType.ACTIVITY_REGISTRATION_CANCEL_EVENT));
     }
 
@@ -544,7 +546,7 @@ public class ActivityService {
     }
 
     @Transactional
-    public void testFinishActivity() {
+    public void testCloseActivity() {
         List<Activity> activities = activityRepository.findAll();
         for (Activity activity : activities) {
             ActivityStatus status = activity.getActivityStatus();
@@ -560,8 +562,8 @@ public class ActivityService {
     }
 
     @Transactional
-    public void finishActivity(String activityId) {
-        log.info("[finishActivity] activity id:{}", activityId);
+    public void closeActivity(String activityId) {
+        log.info("[closeActivity] activity id:{}", activityId);
 
         Activity activity = getActivity(activityId);
         if (activity.getActivityStatus().equals(ActivityStatus.RECRUITMENT_CLOSE))
@@ -573,18 +575,19 @@ public class ActivityService {
         for (Crews crew : crews)
             crew.closeApplication();
 
-        //활동 종료 메세지 전송
+        //Send activity close event fcm
         //sendActivityCloseMessage(crews);
     }
 
-    private void sendActivityMessage(List<Crews> crews, OceanKeeperEventType eventType) {
-        UserListDto dto = new UserListDto(crews.stream().map(Crews::getUser).collect(Collectors.toList()));
-        publisher.emit(new MessageEvent(this, dto, eventType));
-    }
-
-    private void sendActivityCloseMessage(List<Crews> crews) {
-        sendActivityMessage(crews, OceanKeeperEventType.ACTIVITY_CLOSE_EVENT);
-    }
+    //TODO: If needed, use it
+//    private void sendActivityMessage(List<Crews> crews, OceanKeeperEventType eventType) {
+//        UserListDto dto = new UserListDto(crews.stream().map(Crews::getUser).collect(Collectors.toList()));
+//        publisher.emit(new MessageEvent(this, dto, eventType));
+//    }
+//
+//    private void sendActivityCloseMessage(List<Crews> crews) {
+//        sendActivityMessage(crews, OceanKeeperEventType.ACTIVITY_CLOSE_EVENT);
+//    }
 
     private void sendActivityRecruitmentCloseMessage(List<Crews> crews) {
         UserListDto dto = new UserListDto(crews.stream().filter(c -> c.getActivityRole().equals(CrewRole.CREW))
@@ -594,7 +597,7 @@ public class ActivityService {
 
     private Activity validateHost(String activityId, HttpServletRequest request) {
         OUser user = tokenUtil.getUserFromHeader(request);
-        //validation
+
         Activity activity = getActivity(activityId);
         OUser host = findOwner(activity);
         if (!user.equals(host)) {
@@ -614,11 +617,11 @@ public class ActivityService {
 
     @Transactional
     public void handleActivityInfoDeleteEvent() {
-        long result = activityRepository.selectByCrewStatusAndDaysUpdateCrewStatusAsDeleted(CrewStatus.CLOSED, 14);
+        long result = activityRepository.selectByCrewStatusAndStartAtAndUpdateCrewStatusAsDeleted(CrewStatus.CLOSED, 14);
         if (result != 0) {
-            log.debug("삭제 성공");
+            log.debug("14일 지난 활동 신청서 삭제 성공 count:{}", result);
         } else {
-            log.debug("삭제 없음");
+            log.debug("14일 지난 활동 신청서 삭제 없음");
         }
     }
 
@@ -666,6 +669,8 @@ public class ActivityService {
         log.debug("JBJB recalculate dates");
         List<Activity> activities = activityRepository.findAll();
         for (Activity activity : activities) {
+            if (activity.getActivityStatus().equals(ActivityStatus.CANCEL))
+                continue;
             ActivityStatus newStatus = getActivityStatus(activity.getRecruitEndAt(), activity.getStartAt());
             if (newStatus.equals(ActivityStatus.OPEN))
                 activity.setActivityStatus(ActivityStatus.OPEN);

@@ -2,7 +2,6 @@ package com.server.oceankeeper.domain.crew.repository;
 
 import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
 import com.server.oceankeeper.domain.crew.entitiy.Crews;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import org.springframework.data.repository.CrudRepository;
@@ -18,7 +17,7 @@ public interface CrewRepository extends CrudRepository<Crews, Long>,CrewQueryDsl
 
     Optional<Crews> findByUserAndUuid(OUser user, UUID uuid);
 
-    Optional<Crews> findFirstByUserOrderByCreatedAtDesc(OUser user);
+    Optional<Crews> findFirstByUserAndNameIsNotNullOrderByIdDesc(OUser user);
 
     Optional<Crews> findByActivityAndActivityRole(Activity activity, CrewRole activityRole);
     Optional<Crews> findByIdAndActivityRole(Long activityId, CrewRole activityRole);

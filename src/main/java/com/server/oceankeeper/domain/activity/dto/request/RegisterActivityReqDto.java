@@ -118,7 +118,6 @@ public class RegisterActivityReqDto {
             example = "안녕하세요. 00 활동입니다.",
             required = true
     )
-    @Length(max = 10)
     @NotEmpty
     private final String activityStory;
 

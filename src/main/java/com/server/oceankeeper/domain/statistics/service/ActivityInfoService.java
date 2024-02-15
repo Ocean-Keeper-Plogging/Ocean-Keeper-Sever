@@ -1,11 +1,11 @@
 package com.server.oceankeeper.domain.statistics.service;
 
 import com.server.oceankeeper.domain.activity.dto.inner.RegisterActivityEventDto;
-import com.server.oceankeeper.domain.activity.dto.inner.UserListDto;
 import com.server.oceankeeper.domain.statistics.dto.ActivityInfoResDto;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.statistics.entity.ActivityInfo;
 import com.server.oceankeeper.domain.statistics.repository.ActivityInfoRepository;
+import com.server.oceankeeper.domain.user.dto.UserAndActivityDto;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
@@ -52,17 +52,21 @@ public class ActivityInfoService {
     }
 
     private void cancelEvent(ActivityEvent event) {
-        UserListDto userList = (UserListDto) event.getObject();
-        for (OUser user : userList.getUser()) {
-            ActivityInfo info = getActivityInfo(user);
-            info.subActivityCount();
-        }
+        OUser user = (OUser) event.getObject();
+        ActivityInfo info = getActivityInfo(user);
+        info.subActivityCount();
     }
 
     private void cancelCrewActivityEvent(ActivityEvent event) {
-        OUser user = (OUser) event.getObject();
-        ActivityInfo info = getActivityInfo(user);
+        UserAndActivityDto dto = (UserAndActivityDto) event.getObject();
+        ActivityInfo info = getActivityInfo(dto.getUser());
         info.addCancelCount();
+        info.subHostingCount();
+
+        for (OUser crew : dto.getCrews().getUser()) {
+            info = getActivityInfo(crew);
+            info.subActivityCount();
+        }
     }
 
     private void userJoined(ActivityEvent event) {

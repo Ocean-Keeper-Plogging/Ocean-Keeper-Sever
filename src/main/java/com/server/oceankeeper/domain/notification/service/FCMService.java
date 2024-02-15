@@ -25,8 +25,6 @@ public class FCMService {
     private final NotificationService notificationService;
     private final FirebaseMessaging firebaseMessaging;
 
-    public static String ALL_MEMBER_TOPIC = "OCEANKEEPER_ALL_MEMBER";
-
     @EventListener
     @Async
     public void handle(MessageEvent event) {
