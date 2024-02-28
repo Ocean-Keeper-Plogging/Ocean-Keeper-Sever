@@ -17,7 +17,6 @@ import java.util.UUID;
         @Index(name = "i_startAt", columnList = "startAt"),
         @Index(name = "i_garbage", columnList = "garbageCategory"),
         @Index(name = "i_location", columnList = "locationTag"),
-        @Index(name = "i_reward", columnList = "rewards"),
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Activity extends BaseEntity {
@@ -62,7 +61,6 @@ public class Activity extends BaseEntity {
     @Column(nullable = false)
     private ActivityStatus activityStatus;
 
-    @Column(length = 1000)
     private String rewards;
 
     @Override
@@ -121,7 +119,7 @@ public class Activity extends BaseEntity {
     }
 
     public void removeParticipant() {
-        if (participants >= 1)
+        if (participants > 0)
             participants--;
     }
 

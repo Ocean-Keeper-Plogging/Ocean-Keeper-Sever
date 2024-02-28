@@ -103,7 +103,7 @@ public class ActivityMessageFacadeService {
 
         boolean result = true;
         boolean checkIsHost = false;
-        boolean checkActivityAlive = false;
+        boolean isParticipationAcceptancePossible = false;
         List<String> rejectTargetNicknames = new ArrayList<>();
         UUID activityId = null;
         MessageSendResDto messageId = null;
@@ -121,13 +121,13 @@ public class ActivityMessageFacadeService {
                 checkIsHost = true;
             }
 
-            if (!checkActivityAlive) {
+            if (!isParticipationAcceptancePossible) {
                 Activity activity = application.getActivity();
                 LocalDate recruitEndAt = activity.getRecruitEndAt();
                 LocalDateTime startAt = activity.getStartAt();
-                if (!getActivityStatus(recruitEndAt, startAt).equals(ActivityStatus.RECRUITMENT_CLOSE))
-                    throw new IllegalRequestException("해당 프로젝트가 모집종료 상태가 아닙니다");
-                checkActivityAlive = true;
+                if (!isParticipationAcceptPossible(recruitEndAt, startAt))
+                    throw new IllegalRequestException("해당 프로젝트가 모집 종료 또는 활동 종료 상태가 아닙니다");
+                isParticipationAcceptancePossible = true;
             }
 
             application.changeCrewStatus(newStatus);
@@ -158,5 +158,15 @@ public class ActivityMessageFacadeService {
             return new ApplicationSettingResDto(result, newStatus, messageId.getMessageId());
         else
             return new ApplicationSettingResDto(result, newStatus);
+    }
+
+    private static boolean isParticipationAcceptPossible(LocalDate recruitEndAt, LocalDateTime startAt) {
+        return getActivityStatus(recruitEndAt, startAt).equals(ActivityStatus.RECRUITMENT_CLOSE)
+                || isAcceptancePossibleInClosedActivity(recruitEndAt, startAt);
+    }
+
+    private static boolean isAcceptancePossibleInClosedActivity(LocalDate recruitEndAt, LocalDateTime startAt) {
+        return getActivityStatus(recruitEndAt, startAt).equals(ActivityStatus.CLOSED) &&
+                LocalDateTime.now().isBefore(startAt.plusDays(14));
     }
 }
