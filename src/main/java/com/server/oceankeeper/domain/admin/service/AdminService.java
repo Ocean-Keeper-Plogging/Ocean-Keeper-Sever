@@ -1,9 +1,8 @@
 package com.server.oceankeeper.domain.admin.service;
 
 import com.server.oceankeeper.domain.admin.dto.req.AdminLoginReqDto;
-import com.server.oceankeeper.domain.admin.dto.req.AdminLogoutReqDto;
 import com.server.oceankeeper.domain.admin.dto.res.AdminLoginResDto;
-import com.server.oceankeeper.domain.user.dto.*;
+import com.server.oceankeeper.domain.user.dto.TokenInfo;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.entitiy.RefreshToken;
 import com.server.oceankeeper.domain.user.repository.RedisRepository;
@@ -14,11 +13,9 @@ import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.Optional;
 
@@ -45,13 +42,12 @@ public class AdminService {
 
         refreshTokenRepository.save(refreshToken);
 
-        return new AdminLoginResDto(user.getNickname(), UUIDGenerator.changeUuidToString(user.getUuid()),tokenDto);
+        return new AdminLoginResDto(user.getNickname(), UUIDGenerator.changeUuidToString(user.getUuid()), tokenDto);
     }
 
     @Transactional
-    public void logout(AdminLogoutReqDto logoutReqDto) {
-        final String nickname = logoutReqDto.getId();
-        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByKey(nickname);
+    public void logout(String id) {
+        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByKey(id + "-9___1-admin");
         log.debug("refresh token :{}", refreshToken);
         if (refreshToken.isEmpty()) {
             throw new IllegalRequestException("이미 로그아웃 되었습니다.");

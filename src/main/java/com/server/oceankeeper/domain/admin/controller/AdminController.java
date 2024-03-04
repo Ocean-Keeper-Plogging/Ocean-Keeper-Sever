@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -55,14 +56,13 @@ public class AdminController {
     @ApiOperation(value = "로그아웃 [권한 필요]", notes = "어드민 로그아웃을 요청합니다. 리프레시 토큰을 무효화합니다."
             , response = String.class)
     @PostMapping(value = "/admin/logout",
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE)
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
             @ApiResponse(code = 201, message = "로그아웃 성공"),
             @ApiResponse(code = 401, message = "권한 없음"),
             @ApiResponse(code = 500, message = "서버 에러")})
-    public ResponseEntity<APIResponse<String>> logout(@RequestBody @Valid AdminLogoutReqDto logoutReqDto, BindingResult bindingResult) {
-        adminService.logout(logoutReqDto);
+    public ResponseEntity<APIResponse<String>> logout(@RequestParam String id) {
+        adminService.logout(id);
         return ResponseEntity.status(HttpStatus.CREATED).body(APIResponse.createPostResponse("로그아웃 성공"));
     }
 }
