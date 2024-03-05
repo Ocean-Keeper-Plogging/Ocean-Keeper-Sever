@@ -40,11 +40,9 @@ public class JoinReqDto {
     private final String nickname;
 
     @Pattern(regexp = "^[a-zA-Z0-9]{2,20}@[a-zA-Z0-9]{2,20}\\.[a-zA-Z]{2,3}$", message = "유효한 이메일 형식으로 작성해주세요")
-    @NotEmpty
     @ApiModelProperty(
             value = "이메일",
-            dataType = "string",
-            required = true
+            dataType = "string"
     )
     private final String email;
 
