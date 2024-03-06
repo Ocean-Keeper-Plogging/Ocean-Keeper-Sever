@@ -1,6 +1,7 @@
 package com.server.oceankeeper.domain.user.entitiy;
 
 import com.server.oceankeeper.global.BaseEntity;
+import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -18,7 +19,7 @@ import java.util.UUID;
         @Index(name = "i_uuid", columnList = "uuid", unique = true),
         @Index(name = "i_provider_providerid", columnList = "provider, providerId", unique = true)})
 @SQLDelete(sql = "UPDATE users SET withdrawn = true WHERE id = ?")
-@Where(clause = "withdrawn = false")
+//@Where(clause = "withdrawn = false")
 public class OUser extends BaseEntity {
     @Id // primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -117,8 +118,17 @@ public class OUser extends BaseEntity {
     }
 
     public void withdraw() {
+        deviceToken = "";
+        email = "deleted@deleted.com";
+        profile = "";
+        password = UUIDGenerator.createUuid().toString();
+        alarm = false;
+
         withdrawn = true;
         deletedAt = LocalDateTime.now();
+        status = UserStatus.WITHDRAW;
+        provider = "deleted";
+        providerId = UUIDGenerator.createUuid().toString();
     }
 
     public void setAlarm(boolean alarm) {

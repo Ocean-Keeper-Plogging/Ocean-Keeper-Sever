@@ -155,7 +155,10 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,java,gradle,windows
-src/main/resources/application-test.yml
+#src/main/resources/application-test.yml
 
 # Avoid push API test
 http**
+
+# Avoid env file
+.env

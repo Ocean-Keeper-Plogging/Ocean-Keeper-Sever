@@ -151,6 +151,11 @@ public class CrewService {
     }
 
     @Transactional
+    public List<Crews> findUserCrewInfo(OUser user) {
+        return crewRepository.findByUserAndCrewStatus(user, CrewStatus.IN_PROGRESS);
+    }
+
+    @Transactional
     public void deleteCrew(OUser user, Crews crew) {
         log.info("JBJB [deleteCrew] crew:{}", crew);
         crewRepository.delete(crew);

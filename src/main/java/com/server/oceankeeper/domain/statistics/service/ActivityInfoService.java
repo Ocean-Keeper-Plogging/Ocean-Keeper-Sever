@@ -16,8 +16,11 @@ import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -42,6 +45,9 @@ public class ActivityInfoService {
         } else if (event.getEvent().equals(OceanKeeperEventType.USER_JOINED_EVENT)) {
             userJoined(event);
             log.debug("user joined");
+        } else if (event.getEvent().equals(OceanKeeperEventType.USER_WITHDRAWAL_EVENT)) {
+            userWithdrawn(event);
+            log.debug("user withdrawn");
         } else if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT)) {
             cancelEvent(event);
             log.debug("activity canceled");
@@ -49,6 +55,12 @@ public class ActivityInfoService {
             cancelCrewActivityEvent(event);
             log.debug("activity canceled");
         }
+    }
+
+    private void userWithdrawn(ActivityEvent event) {
+        OUser user = (OUser) event.getObject();
+        ActivityInfo info = getActivityInfo(user);
+        info.reset();
     }
 
     private void cancelEvent(ActivityEvent event) {

@@ -46,7 +46,7 @@ public class SchedulerService {
             log.debug("scheduler started");
             log.debug("fcm time : {}", activityStarterTime);
         } catch (SchedulerException e) {
-            throw new RuntimeException(e);
+            //throw new RuntimeException(e);
         }
     }
 

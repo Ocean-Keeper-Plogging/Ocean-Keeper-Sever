@@ -49,11 +49,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPutResponse("닉네임 변경 완료"));
     }
 
-    //TODO: Implement user withdrawal
-    @ApiOperation(value = "회원 탈퇴 [미구현][권한 필요]", notes = "회원을 탈퇴합니다.")
+    @ApiOperation(value = "회원 탈퇴 [권한 필요]", notes = "회원을 탈퇴합니다.")
     @DeleteMapping(value = "/auth/withdrawal", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> withdrawal(@RequestBody @Valid WithdrawalReqDto withdrawalReqDto, BindingResult bindingResult) {
         userService.withdrawal(withdrawalReqDto);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,"미구현"));
+        return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createDeleteResponse("회원 탈퇴 완료"));
     }
 }

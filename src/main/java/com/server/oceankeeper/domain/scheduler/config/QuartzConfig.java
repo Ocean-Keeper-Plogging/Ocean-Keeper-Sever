@@ -46,7 +46,7 @@ public class QuartzConfig {
     @Bean
     public Properties quartzProperties() {
         YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
-        yamlPropertiesFactoryBean.setResources(new ClassPathResource("/quartz/quartz.yml"));
+        yamlPropertiesFactoryBean.setResources(new ClassPathResource("quartz/quartz.yml"));
         yamlPropertiesFactoryBean.afterPropertiesSet();
         return yamlPropertiesFactoryBean.getObject();
     }

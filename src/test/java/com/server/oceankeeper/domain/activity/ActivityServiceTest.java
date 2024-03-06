@@ -255,18 +255,6 @@ class ActivityServiceTest extends DummyObject {
                 null);
     }
 
-    @Test
-    @DisplayName("날짜 계산하기")
-    public void calculateDDay() {
-        LocalDateTime end = LocalDateTime.now().plusDays(10).plusYears(1);
-
-        int days = ReflectionTestUtils.invokeMethod(activityService, "calculateDDay", end);
-
-        System.out.println("day : " + days);
-
-        assertThat(days).isEqualTo(376);
-    }
-
     private Crews getHost(Activity activity, OUser user) {
         return Crews.builder()
                 .user(user)

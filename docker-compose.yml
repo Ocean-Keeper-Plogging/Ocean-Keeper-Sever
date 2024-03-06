@@ -1,0 +1,25 @@
+version: "3"
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    container_name: api_server
+    env_file: .env
+    environment:
+        TJ: "Asia/Seoul"
+    depends_on:
+      - redis
+  redis:
+      image: redis:alpine
+      command: redis-server --port 6379
+      container_name: redis_server
+      hostname: redis_server
+      labels:
+        - "name=redis"
+        - "mode=standalone"
+      ports:
+        - "6379:6379"

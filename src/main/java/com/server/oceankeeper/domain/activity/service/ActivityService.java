@@ -38,6 +38,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -368,6 +369,11 @@ public class ActivityService {
     @Transactional
     public void cancelApplication(String applicationId, HttpServletRequest servletRequest) {
         OUser user = tokenUtil.getUserFromHeader(servletRequest);
+        cancelApplication(applicationId, user);
+    }
+
+    private void cancelApplication(String applicationId, OUser user) {
+        log.info("[cancelApplication] applicationId:{}, user:{}", applicationId, user);
         Crews crew = crewService.findApplication(user, applicationId);
 
         Activity activity = crew.getActivity();
@@ -417,6 +423,11 @@ public class ActivityService {
     public void cancelActivity(String activityId, HttpServletRequest servletRequest) {
         log.info("[cancelActivity] activityId: {}", activityId);
         OUser hostUser = tokenUtil.getUserFromHeader(servletRequest);
+        cancelActivity(activityId, hostUser);
+    }
+
+    private void cancelActivity(String activityId, OUser hostUser) {
+        log.info("[cancelActivity] activityId:{}, user:{}", activityId, hostUser);
         Activity activity = getActivity(activityId);
         Crews host = crewService.findApplication(hostUser, activity);
 
@@ -612,6 +623,21 @@ public class ActivityService {
     public void handleEvent(ActivityEvent event) {
         if (event.getEvent().equals(OceanKeeperEventType.ACTIVITY_INFO_DELETE_EVENT)) {
             handleActivityInfoDeleteEvent();
+        }
+        if (event.getEvent().equals(OceanKeeperEventType.USER_WITHDRAWAL_EVENT)) {
+            handleUserWithdrawnEvent(event);
+        }
+    }
+
+    @Transactional
+    public void handleUserWithdrawnEvent(ActivityEvent event) {
+        OUser user = (OUser) event.getObject();
+        List<Crews> participatedApplicationInfo = crewService.findUserCrewInfo(user);
+        for (Crews application : participatedApplicationInfo) {
+            if (application.getHost().equals(user))
+                cancelActivity(UUIDGenerator.changeUuidToString(application.getActivity().getUuid()), user);
+            else
+                cancelApplication(UUIDGenerator.changeUuidToString(application.getUuid()), user);
         }
     }
 

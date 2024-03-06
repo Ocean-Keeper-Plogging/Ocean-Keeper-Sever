@@ -5,6 +5,7 @@ import com.server.oceankeeper.domain.statistics.entity.ActivityInfo;
 import com.server.oceankeeper.domain.statistics.repository.ActivityInfoRepository;
 import com.server.oceankeeper.domain.user.dto.JoinReqDto;
 import com.server.oceankeeper.domain.user.dto.JoinResDto;
+import com.server.oceankeeper.domain.user.dto.WithdrawalReqDto;
 import com.server.oceankeeper.domain.user.entitiy.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
@@ -12,6 +13,7 @@ import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.util.UUIDGenerator;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -117,5 +120,36 @@ class UserServiceTest extends DummyObject {
             //then
             Assertions.assertEquals(e.getClass(), DuplicatedResourceException.class);
         }
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴하기")
+    public void deleteUser(){
+        JoinReqDto joinReqDto = JoinReqDto.builder().
+                provider("naver").
+                providerId("12345").
+                nickname("test").
+                email("kim@naver.com").
+                deviceToken("1").build();
+
+        //stub1.
+        when(userRepository.existsByProviderAndProviderId(any(), any())).thenReturn(false);
+        when(userRepository.existsByNickname(any())).thenReturn(false);
+
+        //stub2.
+        UUID uuid = UUIDGenerator.createUuid();
+        String id = UUIDGenerator.changeUuidToString(uuid);
+        OUser test = newMockUser(1L, "test", "naver", "1234", uuid);
+        when(userRepository.save(any())).thenReturn(test);
+        userService.join(joinReqDto);
+
+        //stub3.
+        when(userRepository.findByProviderAndProviderId(any(),any())).thenReturn(Optional.ofNullable(test));
+
+
+        userService.withdrawal(new WithdrawalReqDto("naver","1234","1"));
+
+        assertThat(test.getProvider()).isEqualTo("deleted");
+        assertThat(test.getProviderId()).isNotEqualTo("1234");
     }
 }

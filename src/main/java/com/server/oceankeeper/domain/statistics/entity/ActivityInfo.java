@@ -71,4 +71,11 @@ public class ActivityInfo extends BaseEntity {
         this.countNoShow = countNoShow;
         this.countCancel = countCancel;
     }
+
+    public void reset() {
+        this.countActivity = -1;
+        this.countHosting = -1;
+        this.countNoShow = -1;
+        this.countCancel = -1;
+    }
 }
