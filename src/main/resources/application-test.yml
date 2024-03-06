@@ -6,6 +6,12 @@ server:
       force: true
 
 spring:
+  config:
+    activate:
+      on-profile: test
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   datasource:
     url: jdbc:h2:mem:test;MODE=MySQL
     driver-class-name: org.h2.Driver
@@ -25,8 +31,15 @@ spring:
   output:
     ansi:
       enabled: always
+  redis:
+    host: localhost
+    port: 6379
 
 logging:
   level:
-    '[shop.mtcoding.bank]': DEBUG
+    '[com.server.oceankeeper]': DEBUG
     '[org.hibernate.type]': TRACE
+
+jwt:
+  password: jwtpasswordisjwtpasswordabcdedfgijklmnopqrstuvwxyzabcdedfgijklmnopqrstuvwxyzabcdedfgijklmnopqrstuvwxyzabcdedfgijklmnopqrstuvwxyz
+  secret: jwtsecretisjwtsecretabcdedfgijklmnopqrstuvwxyzabcdedfgijklmnopqrstuvwxyzabcdedfgijklmnopqrstuvwxyzabcdedfgijklmnopqrstuvwxyz

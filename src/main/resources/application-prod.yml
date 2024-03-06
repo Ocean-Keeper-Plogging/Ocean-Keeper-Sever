@@ -1,23 +1,72 @@
 server:
-  port: 5000
+  port: 80
   servlet:
     encoding:
       charset: utf-8
       force: true
 
 spring:
+  config:
+    activate:
+      on-profile: prod
   datasource:
-    url: jdbc:mariadb://${rds.hostname}:${rds.port}/${rds.db.name}
-    driver-class-name: org.mysql.jdbc.Driver
-    username: ${rds.username}
-    password: ${rds.password}
+    url: jdbc:mysql://${rds_hostname}:${rds_port}/${rds_db_name}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${rds_username}
+    password: ${rds_password}
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: update #create update none
     properties:
-      '[hibernate.default_batch_fetch_size]': 100
+      order_inserts: true
+      order_updates: true
+      jdbc:
+        batch_size: 100
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 20MB
+  redis:
+    host: localhost
+    port: 6379
 
 logging:
   level:
-    '[shop.mtcoding.bank]': INFO
+    '[com.server.oceankeeper]': DEBUG
+  logback:
+    rollingpolicy:
+      max-history: 30
+      max-file-size: 100MB
+      file-name-pattern: ${LOG_FILE}.%d{yyyy-MM-dd}-%i.log
+  file:
+    name: logs/oceankeeper.log
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS,Asia/Seoul
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${S3_ACCESS_KEY}
+      secret-key: ${S3_SECRET_KEY}
+
+    s3:
+      bucket: ${S3_BUCKET_NAME}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+jwt:
+  password: ${JWT_PASSWORD}
+  secret: ${JWT_SECRET}
+
+fcm:
+  time: 3600

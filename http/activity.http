@@ -1,0 +1,18 @@
+### 내 활동 찾기
+GET localhost:9285/activity/user/2
+Content-Type: application/json
+#Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJPY2VhbiBLZWVwZXIiLCJyb2xlIjoiVVNFUiIsImlkIjoyLCJleHAiOjE2ODQ4MTY4OTB9.JzUQ6GDghAyACDMPN3YKprqh0Qy8OqzzykfxrS6S70Yup14pBpeGP2FnnxH4uUhOnfYN9OGYG42AYv4beCVxlw
+## 3번꺼
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJPY2VhbiBLZWVwZXIiLCJyb2xlIjoiVVNFUiIsImlkIjozLCJleHAiOjE2ODQ4MjEzNzZ9.PFNDSTQm5Qgo-p1MKWXwUmwIEvWTvCLJidRTiv8yCNudhbB0MGcKvy9ncD1dN_NothZienQK-6yPM2Ir4TtEFg
+
+### 쓰레기 종류에 따른 활동 찾기
+//GET localhost:9285/activity/open/category?garbage-category=COASTAL
+//GET localhost:9285/activity/open?garbage-category=COASTAL
+GET localhost:9285/activity?status=open&garbage-category=COASTAL
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJPY2VhbiBLZWVwZXIiLCJyb2xlIjoiVVNFUiIsImlkIjoyLCJleHAiOjE2ODQ4MTY4OTB9.JzUQ6GDghAyACDMPN3YKprqh0Qy8OqzzykfxrS6S70Yup14pBpeGP2FnnxH4uUhOnfYN9OGYG42AYv4beCVxlw
+
+### 위치 태그에 따른 활동 찾기
+GET localhost:9285/activity/open?location-tag=WEST
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJPY2VhbiBLZWVwZXIiLCJyb2xlIjoiVVNFUiIsImlkIjoyLCJleHAiOjE2ODQ4MTY4OTB9.JzUQ6GDghAyACDMPN3YKprqh0Qy8OqzzykfxrS6S70Yup14pBpeGP2FnnxH4uUhOnfYN9OGYG42AYv4beCVxlw

@@ -1,40 +1,55 @@
 server:
-  port: 8081
+  port: 8080
   servlet:
     encoding:
       charset: utf-8
       force: true
 
 spring:
+  config:
+    activate:
+      on-profile: dev
+  web:
+    resources:
+      add-mappings: false
   datasource:
+    url: jdbc:mysql://${rds_hostname}:${rds_port}/${rds_db_name}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #나중에 환경변수 작업해놓기
-    url: ${LOCAL_DB_URL}
-    username: ${LOCAL_DB_USER}
-    password: ${LOCAL_DB_PASSWORD}
+    username: ${rds_username}
+    password: ${rds_password}
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
     view:
       prefix: /templates/
       suffix: .mustache
+    throw-exception-if-no-handler-found: true
   servlet:
     multipart:
       enabled: true
-      max-file-size : 30MB
-      max-request-size: 10MB
+      max-file-size: 3MB
+      max-request-size: 1MB
+  redis:
+    host: localhost
+    port: 6379
 
   jpa:
     hibernate:
-      ddl-auto: create #create update none
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: update #create update none
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        order_inserts: true
+        order_updates: true
+        jdbc:
+          batch_size: 100
 
 logging:
   level:
-    '[com.server.OceanKeeper]': DEBUG
+    '[com.server.oceankeeper]': DEBUG
     '[org.hibernate.type]': TRACE
+    root: INFO
 
 cloud:
   aws:
@@ -48,5 +63,9 @@ cloud:
       static: ap-northeast-2
     stack:
       auto: false
+jwt:
+  password: ${JWT_PASSWORD}
+  secret: ${JWT_SECRET}
 
-
+fcm:
+  time: 3600
