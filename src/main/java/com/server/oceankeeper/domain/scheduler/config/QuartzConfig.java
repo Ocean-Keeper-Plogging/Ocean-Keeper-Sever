@@ -24,14 +24,19 @@ import java.util.Properties;
 public class QuartzConfig {
     private final PlatformTransactionManager transactionManager;
     private final DataSource dataSource;
+    private final QuartzProperties quartzProperties;
 
     @Bean
-    public SchedulerFactoryBean schedulerFactoryBean(Properties quartzProperties,
+    public SchedulerFactoryBean schedulerFactoryBean(
                                                      ApplicationContext applicationContext) {
         QuartzJobFactory quartzJobFactory = new QuartzJobFactory();
         quartzJobFactory.setApplicationContext(applicationContext);
+
         SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean();
-        schedulerFactoryBean.setQuartzProperties(quartzProperties);
+
+        Properties properties = new Properties();
+        properties.putAll(quartzProperties.getProperties());
+        schedulerFactoryBean.setQuartzProperties(properties);
 
         schedulerFactoryBean.setJobFactory(quartzJobFactory);
         schedulerFactoryBean.setApplicationContext(applicationContext);
@@ -43,11 +48,11 @@ public class QuartzConfig {
         return schedulerFactoryBean;
     }
 
-    @Bean
-    public Properties quartzProperties() {
-        YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
-        yamlPropertiesFactoryBean.setResources(new ClassPathResource("quartz/quartz.yml"));
-        yamlPropertiesFactoryBean.afterPropertiesSet();
-        return yamlPropertiesFactoryBean.getObject();
-    }
+//    @Bean
+//    public Properties quartzProperties() {
+//        YamlPropertiesFactoryBean yamlPropertiesFactoryBean = new YamlPropertiesFactoryBean();
+//        yamlPropertiesFactoryBean.setResources(new ClassPathResource("quartz/quartz.yml"));
+//        yamlPropertiesFactoryBean.afterPropertiesSet();
+//        return yamlPropertiesFactoryBean.getObject();
+//    }
 }
