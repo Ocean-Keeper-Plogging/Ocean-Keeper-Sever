@@ -1,5 +1,5 @@
 server:
-  port: 80
+  port: 8000
   servlet:
     encoding:
       charset: utf-8
@@ -38,10 +38,36 @@ spring:
   redis:
     host: localhost
     port: 6379
+  quartz:
+    properties:
+      org.quartz:
+        scheduler:
+          jobFactory.class: org.quartz.simpl.PropertySettingJobFactory
+          instanceId: AUTO
+        threadPool:
+          class: org.quartz.simpl.SimpleThreadPool
+          threadCount: '5'
+        jobStore:
+          class: org.quartz.impl.jdbcjobstore.JobStoreTX
+          driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+          dataSource: quartzDataSource
+          misfireThreshold: '60000'
+          isClustered: true
+          clusterCheckinInterval: '15000'
+        dataSource:
+          quartzDataSource:
+            URL: jdbc:mysql://${rds_hostname}:${rds_port}/${rds_quartz_db_name}
+            driver: com.mysql.cj.jdbc.Driver
+            user: ${rds_username}
+            password: ${rds_password}
+            provider: hikaricp
+        jdbc:
+          initialize-schema: never
+
 
 logging:
   level:
-    '[com.server.oceankeeper]': DEBUG
+    '[com.server.oceankeeper]': INFO
   logback:
     rollingpolicy:
       max-history: 30

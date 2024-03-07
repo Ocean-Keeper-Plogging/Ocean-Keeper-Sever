@@ -72,7 +72,8 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.POST,"/admin/login").permitAll() //TODO: 다른유저는 이방식으로 로그인못하도록 수정필요
                 .antMatchers(HttpMethod.POST,"/auth/reissue").permitAll()
                 .antMatchers(HttpMethod.GET,"/auth/**").permitAll()
-                .antMatchers(HttpMethod.POST,"/test/**").permitAll()
+                .antMatchers(HttpMethod.GET,"/privacy-policy").permitAll()
+                .antMatchers(HttpMethod.GET,"/terms").permitAll()
                 .antMatchers("/admin/**").hasRole("" + UserRole.ADMIN)
                 //swagger
                 //TODO - prod단계에서 지워야함

@@ -44,6 +44,31 @@ spring:
         order_updates: true
         jdbc:
           batch_size: 100
+  quartz:
+    properties:
+      org.quartz:
+        scheduler:
+            jobFactory.class: org.quartz.simpl.PropertySettingJobFactory
+            instanceId: AUTO
+        threadPool:
+          class: org.quartz.simpl.SimpleThreadPool
+          threadCount: '5'
+        jobStore:
+          class: org.quartz.impl.jdbcjobstore.JobStoreTX
+          driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+          dataSource: quartzDataSource
+          misfireThreshold: '60000'
+          isClustered: true
+          clusterCheckinInterval: '15000'
+        dataSource:
+          quartzDataSource:
+            URL: jdbc:mysql://${rds_hostname}:${rds_port}/${rds_quartz_db_name}
+            driver: com.mysql.cj.jdbc.Driver
+            user: ${rds_username}
+            password: ${rds_password}
+            provider: hikaricp
+        jdbc:
+          initialize-schema: never
 
 logging:
   level:
