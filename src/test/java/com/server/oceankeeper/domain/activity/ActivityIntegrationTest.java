@@ -22,7 +22,7 @@ import com.server.oceankeeper.domain.scheduler.service.SchedulerService;
 import com.server.oceankeeper.domain.statistics.dto.ActivityInfoResDto;
 import com.server.oceankeeper.domain.statistics.repository.ActivityInfoRepository;
 import com.server.oceankeeper.domain.statistics.service.ActivityInfoService;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.global.config.AwsS3Config;

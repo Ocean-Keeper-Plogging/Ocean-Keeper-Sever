@@ -1,12 +1,11 @@
 package com.server.oceankeeper.domain.user.repository;
 
-import com.server.oceankeeper.domain.user.entitiy.OUser;
-import com.server.oceankeeper.domain.user.entitiy.UserRole;
+import com.server.oceankeeper.domain.user.entity.OUser;
+import com.server.oceankeeper.domain.user.entity.UserRole;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

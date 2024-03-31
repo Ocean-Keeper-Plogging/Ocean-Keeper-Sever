@@ -1,11 +1,9 @@
 package com.server.oceankeeper.domain.notification.repository;
 
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.server.oceankeeper.domain.guide.dto.GuideDao;
 import com.server.oceankeeper.domain.notification.entity.Notification;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;

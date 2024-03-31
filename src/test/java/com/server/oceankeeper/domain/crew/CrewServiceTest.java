@@ -5,12 +5,12 @@ import com.server.oceankeeper.domain.activity.entity.Activity;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
-import com.server.oceankeeper.domain.crew.entitiy.Crews;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.Crews;
 import com.server.oceankeeper.domain.crew.repository.CrewRepository;
 import com.server.oceankeeper.domain.crew.service.CrewService;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.util.UUIDGenerator;
 import org.junit.jupiter.api.Test;
@@ -37,16 +37,16 @@ class CrewServiceTest extends DummyObject {
 
     @Test
     void addCrew() {
-        Activity mockActivity = newMockActivity(5,
+        OUser host = newMockUser(1L, "kim", "naver", "providerId", UUID.randomUUID());
+        Activity mockActivity = newMockActivity(host, 5,
                 ActivityStatus.OPEN,
                 LocationTag.JEJU,
                 GarbageCategory.COASTAL,
                 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120013"));
-        OUser mockUser = newMockUser(1L, "kim", "naver", "providerId", UUID.randomUUID());
         Crews mockCrew = Crews.builder()
                 .activity(mockActivity)
-                .user(mockUser)
+                .user(host)
                 .id(1L)
                 .activityRole(CrewRole.CREW)
                 .crewStatus(CrewStatus.IN_PROGRESS)
@@ -65,7 +65,7 @@ class CrewServiceTest extends DummyObject {
                 .build();
 
         //when
-        Crews result = crewService.addCrew(request, mockActivity, mockUser, any());
+        Crews result = crewService.addCrew(request, mockActivity, host, any());
 
         //then
         assertThat(result).isEqualTo(mockCrew);
@@ -74,13 +74,13 @@ class CrewServiceTest extends DummyObject {
 
     @Test
     void addHost() {
-        Activity mockActivity = newMockActivity(5,
+        OUser host = newMockUser(1L, "kim", "naver", "providerId", UUID.randomUUID());
+        Activity mockActivity = newMockActivity(host,5,
                 ActivityStatus.OPEN,
                 LocationTag.EAST,
                 GarbageCategory.COASTAL,
                 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120012"));
-        OUser mockUser = newMockUser(1L, "kim", "naver", "providerId", UUID.randomUUID());
         Crews mockCrew = Crews.builder()
                 .activity(Activity.builder().build())
                 .id(1L)
@@ -90,7 +90,7 @@ class CrewServiceTest extends DummyObject {
                 .build();
         when(crewRepository.save(any())).thenReturn(mockCrew);
 
-        Crews result = crewService.addHost(mockActivity, mockUser);
+        Crews result = crewService.addHost(mockActivity, host);
         assertThat(result).isEqualTo(mockCrew);
         assertThat(result.getCrewStatus()).isEqualTo(CrewStatus.IN_PROGRESS);
     }

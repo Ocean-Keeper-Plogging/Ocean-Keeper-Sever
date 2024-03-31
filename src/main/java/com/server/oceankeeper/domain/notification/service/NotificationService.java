@@ -7,7 +7,7 @@ import com.server.oceankeeper.domain.notification.dto.NotificationAlarmDto;
 import com.server.oceankeeper.domain.notification.dto.NotificationResDto;
 import com.server.oceankeeper.domain.notification.entity.Notification;
 import com.server.oceankeeper.domain.notification.repository.NotificationRepository;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.service.UserService;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.IllegalRequestException;

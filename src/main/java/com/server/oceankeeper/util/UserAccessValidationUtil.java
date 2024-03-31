@@ -1,6 +1,6 @@
 package com.server.oceankeeper.util;
 
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;
 import com.server.oceankeeper.global.exception.UuidValidException;

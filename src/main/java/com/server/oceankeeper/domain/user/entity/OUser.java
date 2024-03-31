@@ -1,14 +1,16 @@
-package com.server.oceankeeper.domain.user.entitiy;
+package com.server.oceankeeper.domain.user.entity;
 
+import com.server.oceankeeper.domain.blockUser.entity.BlockUser;
 import com.server.oceankeeper.global.BaseEntity;
 import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -28,6 +30,9 @@ public class OUser extends BaseEntity {
     @NotNull
     @Column(columnDefinition = "BINARY(16)", nullable = false)
     private UUID uuid;
+
+    @OneToMany(mappedBy = "blockedUser")
+    private List<BlockUser> blockedUser = new ArrayList<>();
 
     @Column(nullable = false, length = 20)
     private String provider;
@@ -133,6 +138,11 @@ public class OUser extends BaseEntity {
 
     public void setAlarm(boolean alarm) {
         this.alarm = alarm;
+    }
+
+    public void addBlockedUser(BlockUser blockUser) {
+        this.blockedUser.add(blockUser);
+        blockUser.setBlocker(this);
     }
 }
 

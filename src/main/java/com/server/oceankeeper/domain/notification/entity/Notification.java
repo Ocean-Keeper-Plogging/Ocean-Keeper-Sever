@@ -1,7 +1,7 @@
 package com.server.oceankeeper.domain.notification.entity;
 
 import com.server.oceankeeper.domain.notification.dto.MessagePreFormat;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.global.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;

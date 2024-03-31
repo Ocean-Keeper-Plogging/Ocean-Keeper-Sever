@@ -1,12 +1,12 @@
 package com.server.oceankeeper.domain.message;
 
 import com.server.oceankeeper.domain.activity.entity.Activity;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
-import com.server.oceankeeper.domain.crew.entitiy.Crews;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.Crews;
 import com.server.oceankeeper.domain.message.entity.OMessage;
 import com.server.oceankeeper.domain.message.repository.MessageRepository;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.global.config.QuerydslConfig;
 import com.server.oceankeeper.util.UUIDGenerator;
@@ -39,8 +39,8 @@ class MessageRepositoryTest extends DummyObject {
     @Test
     public void test() {
         UUID userUUID = UUIDGenerator.createUuid();
-        OUser user = newMockUser(99L, userUUID);
-        em.persist(user);
+        OUser host = newMockUser(99L, userUUID);
+        em.persist(host);
 
         UUID userUUID2 = UUIDGenerator.createUuid();
         OUser user2 = newMockUser(100L, userUUID2);
@@ -51,22 +51,22 @@ class MessageRepositoryTest extends DummyObject {
         em.persist(user3);
 
         UUID activityUUID = UUIDGenerator.createUuid();
-        Activity activity = newMockActivity(activityUUID);
+        Activity activity = newMockActivity(host, activityUUID);
         em.persist(activity);
 
-        Crews crews = newCrew(activity, user, user, CrewStatus.IN_PROGRESS, CrewRole.HOST);
-        Crews crews2 = newCrew(activity, user2, user, CrewStatus.IN_PROGRESS, CrewRole.CREW);
-        Crews crews3 = newCrew(activity, user3, user, CrewStatus.IN_PROGRESS, CrewRole.CREW);
+        Crews crews = newCrew(activity, host, host, CrewStatus.IN_PROGRESS, CrewRole.HOST);
+        Crews crews2 = newCrew(activity, user2, host, CrewStatus.IN_PROGRESS, CrewRole.CREW);
+        Crews crews3 = newCrew(activity, user3, host, CrewStatus.IN_PROGRESS, CrewRole.CREW);
         em.persist(crews);
         em.persist(crews2);
         em.persist(crews3);
 
         OMessage message = OMessage.builder()
                 .id(99L)
-                .messageFrom(user.getNickname())
+                .messageFrom(host.getNickname())
                 .read(false)
                 .contents("asdfasdf")
-                .sender(user)
+                .sender(host)
                 .activity(activity)
                 .build();
         em.persist(message);

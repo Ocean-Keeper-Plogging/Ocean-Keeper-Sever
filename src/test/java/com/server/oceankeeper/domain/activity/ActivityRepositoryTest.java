@@ -9,11 +9,13 @@ import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import com.server.oceankeeper.domain.activity.repository.ActivityRepository;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
-import com.server.oceankeeper.domain.crew.entitiy.Crews;
+import com.server.oceankeeper.domain.blockUser.entity.BlockUser;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.Crews;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
+import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.global.config.QuerydslConfig;
 import com.server.oceankeeper.util.UUIDGenerator;
@@ -42,6 +44,8 @@ class ActivityRepositoryTest extends DummyObject {
     @Autowired
     private ActivityRepository activityRepository;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
     private EntityManager em;
 
     @BeforeEach
@@ -59,33 +63,50 @@ class ActivityRepositoryTest extends DummyObject {
         OUser park = newUserWithR("park", "naver", "parkproviderId", UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac140001"));
         em.persist(park);
 
-        Activity activityFromKim = newMockActivity(5, ActivityStatus.OPEN, LocationTag.EAST, GarbageCategory.COASTAL, 10,
+        OUser blockedUserFromLee = newUserWithR("block", "naver", "blockproviderId", UUIDGenerator.changeUuidFromString("555ea182ffcd11edbe560242ac150001"));
+        em.persist(blockedUserFromLee);
+
+        Activity activityFromKim = newMockActivity(kim, 5, ActivityStatus.OPEN, LocationTag.EAST, GarbageCategory.COASTAL, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120001"));
         em.persist(activityFromKim);
-        Activity activityFromKim2 = newMockActivity(6, ActivityStatus.CLOSED, LocationTag.EAST, GarbageCategory.ETC, 5,
+        Activity activityFromKim2 = newMockActivity(kim, 6, ActivityStatus.CLOSED, LocationTag.EAST, GarbageCategory.ETC, 5,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120002"));
         em.persist(activityFromKim2);
-        Activity activityFromKim3 = newMockActivity(15, ActivityStatus.CANCEL, LocationTag.JEJU, GarbageCategory.DEPOSITED, 10,
+        Activity activityFromKim3 = newMockActivity(kim, 15, ActivityStatus.CANCEL, LocationTag.JEJU, GarbageCategory.DEPOSITED, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120003"));
         em.persist(activityFromKim3);
-        Activity activityFromKim4 = newMockActivity(25, ActivityStatus.OPEN, LocationTag.SOUTH, GarbageCategory.FLOATING, 10,
+        Activity activityFromKim4 = newMockActivity(kim, 25, ActivityStatus.OPEN, LocationTag.SOUTH, GarbageCategory.FLOATING, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120004"));
         em.persist(activityFromKim4);
-        Activity activityFromKim5 = newMockActivity(35, ActivityStatus.OPEN, LocationTag.WEST, GarbageCategory.DEPOSITED, 10,
+        Activity activityFromKim5 = newMockActivity(kim, 35, ActivityStatus.OPEN, LocationTag.WEST, GarbageCategory.DEPOSITED, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120005"));
         em.persist(activityFromKim5);
-        Activity activityFromKim6 = newMockActivity(35, ActivityStatus.CLOSED, LocationTag.WEST, GarbageCategory.DEPOSITED, -20,
+        Activity activityFromKim6 = newMockActivity(kim, 35, ActivityStatus.CLOSED, LocationTag.WEST, GarbageCategory.DEPOSITED, -20,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120006"));
         em.persist(activityFromKim6);
-        Activity activityFromLee = newMockActivity(10, ActivityStatus.OPEN, LocationTag.JEJU, GarbageCategory.FLOATING, 10,
+        Activity activityFromLee = newMockActivity(lee, 10, ActivityStatus.OPEN, LocationTag.JEJU, GarbageCategory.FLOATING, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120011"));
         em.persist(activityFromLee);
-        Activity activityFromPark = newMockActivity(11, ActivityStatus.OPEN, LocationTag.WEST, GarbageCategory.ETC, 10,
+        Activity activityFromPark = newMockActivity(park, 11, ActivityStatus.OPEN, LocationTag.WEST, GarbageCategory.ETC, 10,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
         em.persist(activityFromPark);
-        Activity activityFromPark2 = newMockActivity(10, ActivityStatus.CANCEL, LocationTag.ETC, GarbageCategory.FLOATING, 5,
+        Activity activityFromPark2 = newMockActivity(park, 10, ActivityStatus.CANCEL, LocationTag.ETC, GarbageCategory.FLOATING, 5,
                 UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120022"));
         em.persist(activityFromPark2);
+
+        Activity activityFromBlock = newMockActivity(blockedUserFromLee, 20, ActivityStatus.OPEN, LocationTag.JEJU, GarbageCategory.FLOATING, 10,
+                UUIDGenerator.changeUuidFromString("5555a182ffcd11edbe560242ac120011"));
+        em.persist(activityFromBlock);
+        Activity activityFromBlock2 = newMockActivity(blockedUserFromLee, 31, ActivityStatus.RECRUITMENT_CLOSE, LocationTag.WEST, GarbageCategory.ETC, 0,
+                UUIDGenerator.changeUuidFromString("5555a182ffcd11edbe560242ac120021"));
+        em.persist(activityFromBlock2);
+        Activity activityFromBlock3 = newMockActivity(blockedUserFromLee, 40, ActivityStatus.CLOSED, LocationTag.ETC, GarbageCategory.FLOATING, 0,
+                UUIDGenerator.changeUuidFromString("5555a182ffcd11edbe560242ac120022"));
+        em.persist(activityFromBlock3);
+
+        BlockUser blocked = new BlockUser(null, lee, blockedUserFromLee, LocalDateTime.now(), LocalDateTime.now());
+        lee.addBlockedUser(blocked);
+        em.persist(blocked);
 
         Crews crews = newCrew(activityFromKim, kim, kim, CrewStatus.IN_PROGRESS, CrewRole.HOST);
         Crews crews1 = newCrew(activityFromKim2, kim, kim, CrewStatus.CLOSED, CrewRole.HOST);
@@ -118,6 +139,8 @@ class ActivityRepositoryTest extends DummyObject {
         em.persist(crews5);
         em.persist(crews6);
         em.persist(crews62);
+
+
     }
 
     @Test
@@ -247,31 +270,55 @@ class ActivityRepositoryTest extends DummyObject {
     @DisplayName("앱 내 전체 활동 중 열린 활동 조회한다")
     void testFindScheduleActivities() throws Exception {
         //Given
+        OUser kim = userRepository.findByNickname("kim").get();
 
         //When
         Slice<AllActivityDao> result = activityRepository
-                .getAllActivities(null, ActivityStatus.OPEN, null, null, LocalDateTime.now().plusDays(6), Pageable.ofSize(15));
+                .getAllActivities(null, ActivityStatus.OPEN, null, null, Pageable.ofSize(15), kim);
 
         //Then
         System.out.println("result = " + result.getContent());
-        assertThat(result.getContent().size()).isEqualTo(5);
+        assertThat(result.getContent().size()).isEqualTo(6);
         assertThat(result.getContent().get(0).getActivityId())
-                .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
-        assertThat(result.getContent().get(0).getHostNickname()).isEqualTo("park");
+                .isEqualTo(UUIDGenerator.changeUuidFromString("5555a182ffcd11edbe560242ac120011"));
+        assertThat(result.getContent().get(0).getHostNickname()).isEqualTo("block");
+
         assertThat(result.getContent().get(1).getActivityId())
+                .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120021"));
+        assertThat(result.getContent().get(1).getHostNickname()).isEqualTo("park");
+        assertThat(result.getContent().get(2).getActivityId())
                 .isEqualTo(UUIDGenerator.changeUuidFromString("123ea182ffcd11edbe560242ac120011"));
-        assertThat(result.getContent().get(1).getHostNickname()).isEqualTo("lee");
+        assertThat(result.getContent().get(2).getHostNickname()).isEqualTo("lee");
         assertThat(result.stream().map(AllActivityDao::getActivityId).collect(Collectors.toList())).isSortedAccordingTo(Comparator.reverseOrder());
     }
 
     @Test
-    @DisplayName("앱 내 전체 활동 중 닫힌 활동 조회한다")
-    void testFindClosedActivities() throws Exception {
+    @DisplayName("킴 입장에서 앱 내 전체 활동 중 닫힌 활동 조회한다")
+    void findClosedActivitiesFromKim() throws Exception {
         //Given
+        OUser kim = userRepository.findByNickname("kim").get();
 
         //When
         Slice<AllActivityDao> result = activityRepository
-                .getAllActivities(null, ActivityStatus.CLOSED, null, null, LocalDateTime.now().plusDays(6), Pageable.ofSize(15));
+                .getAllActivities(null, ActivityStatus.CLOSED, null, null, Pageable.ofSize(15), kim);
+
+        //Then
+        System.out.println("result = " + result.getContent());
+        assertThat(result.getContent().size()).isEqualTo(3);
+        assertThat(result.getContent().get(0).getActivityId())
+                .isEqualTo(UUIDGenerator.changeUuidFromString("5555a182ffcd11edbe560242ac120022"));
+        assertThat(result.stream().map(AllActivityDao::getActivityId).collect(Collectors.toList())).isSortedAccordingTo(Comparator.reverseOrder());
+    }
+
+    @Test
+    @DisplayName("유저를 블락한 이 입장에서 앱 내 전체 활동 중 닫힌 활동 조회한다")
+    void findClosedActivitiesFromBlocker() throws Exception {
+        //Given
+        OUser lee = userRepository.findByNickname("lee").get();
+
+        //When
+        Slice<AllActivityDao> result = activityRepository
+                .getAllActivities(null, ActivityStatus.CLOSED, null, null, Pageable.ofSize(15), lee);
 
         //Then
         System.out.println("result = " + result.getContent());
@@ -285,10 +332,10 @@ class ActivityRepositoryTest extends DummyObject {
     @DisplayName("앱 내 전체 활동 중 특정 쓰레기타입을 조회한다")
     void testFindScheduleActivitiesByGarbage() throws Exception {
         //Given
-
+        OUser kim = userRepository.findByNickname("kim").get();
         //When
         Slice<AllActivityDao> result = activityRepository
-                .getAllActivities(null, null, null, GarbageCategory.COASTAL, LocalDateTime.now().plusDays(3), Pageable.ofSize(15));
+                .getAllActivities(null, null, null, GarbageCategory.COASTAL, Pageable.ofSize(15), kim);
 
         //Then
         System.out.println("result = " + result.getContent());
@@ -301,10 +348,10 @@ class ActivityRepositoryTest extends DummyObject {
     @DisplayName("앱 내 전체 활동 중 특정 위치 활동 조회한다")
     void testFindScheduleActivitiesByLocationTag() throws Exception {
         //Given
-
+        OUser kim = userRepository.findByNickname("kim").get();
         //When
         Slice<AllActivityDao> result = activityRepository
-                .getAllActivities(null, null, LocationTag.EAST, null, LocalDateTime.now().plusDays(3), Pageable.ofSize(15));
+                .getAllActivities(null, null, LocationTag.EAST, null, Pageable.ofSize(15), kim);
 
         //Then
         System.out.println("result = " + result.getContent());
@@ -335,7 +382,7 @@ class ActivityRepositoryTest extends DummyObject {
         //given
         //when
         long result = activityRepository
-                .selectByCrewStatusAndStartAtAndUpdateCrewStatusAsDeleted(CrewStatus.CLOSED,10);
+                .selectByCrewStatusAndStartAtAndUpdateCrewStatusAsDeleted(CrewStatus.CLOSED, 10);
         //then
         assertThat(result).isEqualTo(3);
     }
@@ -346,7 +393,7 @@ class ActivityRepositoryTest extends DummyObject {
         //given
         //when
         long result = activityRepository
-                .selectByCrewStatusAndStartAtAndUpdateCrewStatusAsDeleted(CrewStatus.CLOSED,30);
+                .selectByCrewStatusAndStartAtAndUpdateCrewStatusAsDeleted(CrewStatus.CLOSED, 30);
         //then
         assertThat(result).isEqualTo(0);
     }

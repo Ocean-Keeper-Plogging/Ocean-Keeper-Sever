@@ -1,6 +1,5 @@
-package com.server.oceankeeper.domain.user.entitiy;
+package com.server.oceankeeper.domain.user.entity;
 
-import com.server.oceankeeper.domain.user.entitiy.OUser;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;

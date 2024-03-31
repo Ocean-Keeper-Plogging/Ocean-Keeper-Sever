@@ -1,4 +1,4 @@
-package com.server.oceankeeper.domain.user.entitiy;
+package com.server.oceankeeper.domain.user.entity;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

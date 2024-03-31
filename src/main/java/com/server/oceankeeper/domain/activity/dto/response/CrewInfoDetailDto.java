@@ -2,7 +2,7 @@ package com.server.oceankeeper.domain.activity.dto.response;
 
 import com.server.oceankeeper.domain.activity.dao.CrewInfoDetailDao;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
 import com.server.oceankeeper.util.UUIDGenerator;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

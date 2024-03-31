@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.activity.repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -9,12 +10,13 @@ import com.server.oceankeeper.domain.activity.dao.*;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -27,22 +29,26 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.server.oceankeeper.domain.activity.entity.QActivity.activity;
-import static com.server.oceankeeper.domain.crew.entitiy.QCrews.crews;
-import static com.server.oceankeeper.domain.user.entitiy.QOUser.oUser;
+import static com.server.oceankeeper.domain.crew.entity.QCrews.crews;
+import static com.server.oceankeeper.domain.user.entity.QOUser.oUser;
+import static com.server.oceankeeper.domain.blockUser.entity.QBlockUser.blockUser;
 
 @RequiredArgsConstructor
 @Slf4j
 public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepository {
     private final JPAQueryFactory queryFactory;
 
-    public Slice<AllActivityDao> getAllActivities(UUID activityId, ActivityStatus activityStatus, LocationTag tag, GarbageCategory category, LocalDateTime startAt, Pageable pageable) {
+    public Slice<AllActivityDao> getAllActivities(UUID activityId, ActivityStatus activityStatus,
+                                                  LocationTag tag, GarbageCategory category,
+                                                  Pageable pageable, OUser requestUser) {
+
         List<AllActivityDao> result = queryFactory.select(
                         Projections.fields(AllActivityDao.class,
                                 activity.uuid.as("activityId"),
                                 activity.title.as("title"),
                                 activity.locationTag.as("locationTag"),
                                 activity.garbageCategory.as("garbageCategory"),
-                                oUser.nickname.as("hostNickname"),
+                                activity.host.nickname.as("hostNickname"),
                                 activity.quota.as("quota"),
                                 activity.participants.as("participants"),
                                 activity.rewards.coalesce("").as("rewards"),
@@ -52,16 +58,15 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                                 activity.startAt,
                                 activity.location.address.as("location")
                         ))
-                .from(crews)
-                .innerJoin(crews.activity, activity)
-                .innerJoin(crews.user, oUser)
+                .from(activity)
+                .innerJoin(activity.host, oUser)
+                .leftJoin(oUser.blockedUser, blockUser)
                 .where(
-                        //checkActivityStatus(activityStatus, startAt),
                         condition(activityStatus, activity.activityStatus::eq),
                         activity.activityStatus.ne(ActivityStatus.CANCEL),
                         condition(tag, activity.locationTag::eq),
                         condition(category, activity.garbageCategory::eq),
-                        condition(CrewRole.HOST, crews.activityRole::eq),
+                        getNotBlockedUser(requestUser),
                         ltUuid(activityId)
                 ) //for no offset scrolling, use activity id
                 .orderBy(activity.id.desc())
@@ -69,6 +74,18 @@ public class ActivityQueryDslRepositoryImpl implements ActivityQueryDslRepositor
                 .fetch()
                 .stream().distinct().collect(Collectors.toList());
         return checkLastPage(pageable, result);
+    }
+
+    @NotNull
+    private BooleanBuilder getNotBlockedUser(OUser userParam) {
+        BooleanBuilder whereClause = new BooleanBuilder();
+        List<Long> blockedUserIds = queryFactory
+                .select(blockUser.blockedUser.id)
+                .from(blockUser)
+                .where(blockUser.blocker.eq(userParam))
+                .fetch();
+        whereClause.and(activity.host.id.notIn(blockedUserIds));
+        return whereClause;
     }
 
     @Override

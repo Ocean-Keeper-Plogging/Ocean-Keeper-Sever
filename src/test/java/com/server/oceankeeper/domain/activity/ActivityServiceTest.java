@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.activity;
 
+import com.server.oceankeeper.domain.activity.dao.HostActivityDto;
 import com.server.oceankeeper.domain.activity.dao.MyActivityDao;
 import com.server.oceankeeper.domain.activity.dto.request.*;
 import com.server.oceankeeper.domain.activity.dto.response.ApplyActivityResDto;
@@ -12,13 +13,13 @@ import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import com.server.oceankeeper.domain.activity.repository.ActivityDetailRepository;
 import com.server.oceankeeper.domain.activity.repository.ActivityRepository;
 import com.server.oceankeeper.domain.activity.service.ActivityService;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.Crews;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.Crews;
 import com.server.oceankeeper.domain.crew.repository.CrewRepository;
 import com.server.oceankeeper.domain.crew.service.CrewService;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
-import com.server.oceankeeper.domain.user.entitiy.UserRole;
-import com.server.oceankeeper.domain.user.entitiy.UserStatus;
+import com.server.oceankeeper.domain.user.entity.OUser;
+import com.server.oceankeeper.domain.user.entity.UserRole;
+import com.server.oceankeeper.domain.user.entity.UserStatus;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
@@ -286,11 +287,11 @@ class ActivityServiceTest extends DummyObject {
         ActivityDetail expectActivityDetail = request.toActivityDetailEntity();
         expectActivity.addParticipant(); //fake 참여자 넣기
         OUser expectUser = newMockUser(155L, "hostkim", "naver", "naver123", UUID.randomUUID());
+        expectActivity.setHost(expectUser);
 
         //when
         when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
         when(activityDetailRepository.findByActivity(any())).thenReturn(Optional.of(expectActivityDetail));
-        when(crewService.findOwner(any())).thenReturn(expectUser);
 
         //then
         var result = activityService.getActivityDetail(UUIDGenerator.changeUuidToString(expectActivity.getUuid()));
@@ -321,16 +322,41 @@ class ActivityServiceTest extends DummyObject {
         ModifyActivityReqDto request = getModifyActivityRequest();
         Activity expectActivity = request.toActivityEntity();
         ActivityDetail expectActivityDetail = request.toActivityDetailEntity();
+
         OUser expectUser = createUser();
+        expectActivity.setHost(expectUser);
+
+        //when
         when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
         when(activityDetailRepository.findByActivity(any())).thenReturn(Optional.of(expectActivityDetail));
-        when(crewService.findOwner(any())).thenReturn(expectUser);
         when(tokenUtil.getUserFromHeader(any())).thenReturn(expectUser);
         String activityId = UUIDGenerator.changeUuidToString(expectActivity.getUuid());
 
-        //when
         //then
         activityService.modifyActivity(activityId, request, new MockHttpServletRequest());
+    }
+
+    @Test
+    @DisplayName("오너가 아닌 사람의 활동 수정")
+    void modifyActivityFromNotOwner() {
+        //given
+        ModifyActivityReqDto request = getModifyActivityRequest();
+        Activity expectActivity = request.toActivityEntity();
+        ActivityDetail expectActivityDetail = request.toActivityDetailEntity();
+
+        OUser expectUser = createUser();
+        OUser faultUser = newMockUser(2L,UUIDGenerator.createUuid());
+        expectActivity.setHost(faultUser);
+
+        //when
+        when(activityRepository.findByUuid(any())).thenReturn(Optional.of(expectActivity));
+        when(activityDetailRepository.findByActivity(any())).thenReturn(Optional.of(expectActivityDetail));
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(expectUser);
+        String activityId = UUIDGenerator.changeUuidToString(expectActivity.getUuid());
+
+        //then
+        assertThrows(IllegalRequestException.class,
+                ()->activityService.modifyActivity(activityId, request, new MockHttpServletRequest()));
     }
 
     private Crews createCrew(Activity expectActivity, OUser expectUser) {
@@ -558,6 +584,25 @@ class ActivityServiceTest extends DummyObject {
         //then
         assertThrows(IdNotFoundException.class,
                 () -> activityService.cancelApplication(UUIDGenerator.changeUuidToString(UUID.randomUUID()), new MockHttpServletRequest()));
+    }
+
+    @Test
+    @DisplayName("요청자가 호스트인 활동 찾기")
+    void getActivityInfoFromHost() {
+        //given
+        OUser host = newMockUser(1L, UUIDGenerator.createUuid());
+        List<Activity> activities = List.of(
+                newMockActivity(host, UUIDGenerator.createUuid()),
+                newMockActivity(host, UUIDGenerator.createUuid()),
+                newMockActivity(host, UUIDGenerator.createUuid()),
+                newMockActivity(host, UUIDGenerator.createUuid()),
+                newMockActivity(host, UUIDGenerator.createUuid()));
+        //when
+        when(tokenUtil.getUserFromHeader(any())).thenReturn(host);
+        when(activityRepository.findByHost(any())).thenReturn(activities);
+        //then
+        HostActivityDto result = activityService.getHostActivityName(new MockHttpServletRequest());
+        assertThat(result.getHostActivities()).hasSize(5);
     }
 
     private RegisterActivityReqDto getRegisterActivityRequest() {

@@ -1,7 +1,7 @@
 package com.server.oceankeeper.domain.image;
 
 import com.server.oceankeeper.domain.image.dto.ProfileResDto;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
 import com.server.oceankeeper.global.exception.ResourceNotFoundException;

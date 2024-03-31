@@ -4,10 +4,10 @@ import com.server.oceankeeper.domain.activity.dao.*;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
 import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ActivityQueryDslRepository {
-    Slice<AllActivityDao> getAllActivities(UUID activityId, ActivityStatus status, LocationTag tag, GarbageCategory category, LocalDateTime startAt, Pageable pageable);
+    Slice<AllActivityDao> getAllActivities(UUID activityId, ActivityStatus status, LocationTag tag,
+                                           GarbageCategory category, Pageable pageable, OUser userParam);
 
     Slice<ActivityDao> getMyActivitiesWithoutCancel(UUID userId, UUID activityId, ActivityStatus activityStatus, CrewRole crewRole, LocalDateTime startAt, Pageable pageable);
 

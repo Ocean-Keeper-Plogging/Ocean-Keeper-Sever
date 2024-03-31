@@ -3,7 +3,7 @@ package com.server.oceankeeper.domain.activity.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.server.oceankeeper.domain.activity.dto.request.LocationDto;
 import com.server.oceankeeper.domain.activity.entity.*;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;

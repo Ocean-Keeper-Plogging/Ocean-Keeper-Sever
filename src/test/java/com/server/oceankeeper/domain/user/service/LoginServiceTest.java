@@ -1,9 +1,9 @@
 package com.server.oceankeeper.domain.user.service;
 
 import com.server.oceankeeper.domain.user.dto.*;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
-import com.server.oceankeeper.domain.user.entitiy.RefreshToken;
-import com.server.oceankeeper.domain.user.entitiy.UserRole;
+import com.server.oceankeeper.domain.user.entity.OUser;
+import com.server.oceankeeper.domain.user.entity.RefreshToken;
+import com.server.oceankeeper.domain.user.entity.UserRole;
 import com.server.oceankeeper.domain.user.repository.RedisRepository;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.global.config.SecurityConfig;

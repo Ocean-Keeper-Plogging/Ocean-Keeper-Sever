@@ -1,6 +1,6 @@
 package com.server.oceankeeper.global.config;
 
-import com.server.oceankeeper.domain.user.entitiy.UserRole;
+import com.server.oceankeeper.domain.user.entity.UserRole;
 import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.jwt.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;

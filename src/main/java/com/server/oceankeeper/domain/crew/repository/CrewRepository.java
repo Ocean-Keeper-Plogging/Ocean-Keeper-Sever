@@ -1,10 +1,10 @@
 package com.server.oceankeeper.domain.crew.repository;
 
 import com.server.oceankeeper.domain.activity.entity.Activity;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
-import com.server.oceankeeper.domain.crew.entitiy.Crews;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.Crews;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

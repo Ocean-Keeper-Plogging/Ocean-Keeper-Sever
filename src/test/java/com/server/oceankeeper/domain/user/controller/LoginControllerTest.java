@@ -2,8 +2,8 @@ package com.server.oceankeeper.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.domain.user.dto.*;
-import com.server.oceankeeper.domain.user.entitiy.LoginUser;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.LoginUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.domain.user.service.CustomUserDetailsService;
 import com.server.oceankeeper.domain.user.service.LoginService;
@@ -11,7 +11,6 @@ import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.config.SecurityConfig;
 import com.server.oceankeeper.global.handler.CustomExceptionHandler;
 import com.server.oceankeeper.global.jwt.JwtAuthenticationEntryPoint;
-import com.server.oceankeeper.util.TokenUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

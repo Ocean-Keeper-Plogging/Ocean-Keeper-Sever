@@ -1,9 +1,7 @@
 package com.server.oceankeeper.domain.activity.dao;
 
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import java.util.UUID;
 
