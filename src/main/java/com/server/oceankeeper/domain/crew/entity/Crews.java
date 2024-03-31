@@ -27,11 +27,11 @@ public class Crews extends BaseEntity {
     @JoinColumn(name = "ACTIVITY_ID")
     private Activity activity;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
     private OUser user;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "HOST_ID")
     private OUser host;
 

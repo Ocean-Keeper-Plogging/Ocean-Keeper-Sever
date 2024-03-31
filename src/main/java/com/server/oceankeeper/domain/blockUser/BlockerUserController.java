@@ -24,10 +24,10 @@ public class BlockerUserController {
     @ApiOperation(value = "특정 유저 차단하기[권한 필요]", notes = "특정한 유저를 차단합니다.",
             response = String.class)
     @PostMapping(value = "/block", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<APIResponse<String>> getActivityDetail(
+    public ResponseEntity<APIResponse<String>> blockUser(
             @ApiParam(name = "host-nickname", value = "host 닉네임", defaultValue = "kim", required = true)
             @RequestParam("host-nickname") String hostNickname, HttpServletRequest request) {
         blockUserService.blockUser(hostNickname,request);
-        return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPostResponse("차단 성공"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(APIResponse.createPostResponse("차단 성공"));
     }
 }

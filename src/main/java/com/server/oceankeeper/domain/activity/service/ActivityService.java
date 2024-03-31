@@ -192,6 +192,7 @@ public class ActivityService {
         OUser user = getUser(request.getUserId());
 
         Activity activity = request.toActivityEntity();
+        activity.setHost(user);
 
         activityRepository.save(activity);
 
@@ -341,7 +342,7 @@ public class ActivityService {
 
             publisher.emit(new MessageEvent(
                     this,
-                    getUserListDtoByActivityId(activityId, null),
+                    getUserListDtoByActivityId(activityId, CrewRole.CREW),
                     OceanKeeperEventType.ACTIVITY_CHANGED_EVENT));
         }
     }
