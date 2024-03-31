@@ -83,10 +83,11 @@ public class ActivityController {
             @ApiParam(name = "size", value = "한번에 확인할 페이지 사이즈. 디폴트 1", example = "5")
             @RequestParam(value = "size", required = false) Integer pageSize,
             @ApiParam(name = "activity-id", value = "activity 아이디")
-            @RequestParam(value = "activity-id", required = false) String activityId) {
+            @RequestParam(value = "activity-id", required = false) String activityId,
+            HttpServletRequest request){
         if (status != null)
             status = status.toLowerCase();
-        GetActivityResDto response = activityService.getActivities(activityId, status, locationTag, garbageCategory, pageSize);
+        GetActivityResDto response = activityService.getActivities(activityId, status, locationTag, garbageCategory, pageSize, request);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createGetResponse(response));
     }
 

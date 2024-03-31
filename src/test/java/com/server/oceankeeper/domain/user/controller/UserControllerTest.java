@@ -5,14 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.oceankeeper.domain.user.dto.JoinReqDto;
 import com.server.oceankeeper.domain.user.dto.JoinResDto;
 import com.server.oceankeeper.domain.user.dto.UserIdAndNicknameReqDto;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.domain.user.service.UserService;
 import com.server.oceankeeper.dummy.DummyObject;
 import com.server.oceankeeper.global.config.SecurityConfig;
 import com.server.oceankeeper.global.exception.DuplicatedResourceException;
 import com.server.oceankeeper.global.exception.ForbiddenException;
-import com.server.oceankeeper.global.handler.CustomExceptionHandler;
 import com.server.oceankeeper.global.jwt.JwtAuthenticationEntryPoint;
 import com.server.oceankeeper.global.response.APIResponse;
 import com.server.oceankeeper.global.response.ErrorResponse;
@@ -31,7 +30,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.UUID;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,10 +41,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@WebMvcTest(value = UserController.class, includeFilters = {
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class),
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class),
-})
+@WebMvcTest(value = UserController.class,
+        includeFilters = {
+                @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
+//        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CustomExceptionHandler.class),
+//}
+        }
+)
 @ActiveProfiles("test")
 public class UserControllerTest extends DummyObject {
     @Autowired
@@ -60,6 +64,37 @@ public class UserControllerTest extends DummyObject {
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @MockBean
     private AccessDeniedHandler jwtAccessDeniedHandler;
+
+    @Autowired
+    private Validator validator;
+
+    @Test
+    @DisplayName("회원가입 인자 검증")
+    public void signup_param() throws Exception{
+        JoinReqDto joinReqDto = JoinReqDto.builder()
+                .provider("naver")
+                .providerId("12345")
+                .nickname("test")
+                //.email(null)
+                .deviceToken("1")
+                .profile("profile")
+                .build();
+
+        System.out.println("request : " + joinReqDto.toEntity());
+
+        //when
+        Set<ConstraintViolation<JoinReqDto>> validate = validator.validate(joinReqDto);
+
+        //then
+        Iterator<ConstraintViolation<JoinReqDto>> iterator = validate.iterator();
+        List<String> messages = new ArrayList<>();
+        while (iterator.hasNext()) {
+            ConstraintViolation<JoinReqDto> next = iterator.next();
+            messages.add(next.getMessage());
+            System.out.println("message = " + next.getMessage());
+        }
+        assertThat(messages.size()).isZero();
+    }
 
     @Test
     @DisplayName("회원가입 정상")

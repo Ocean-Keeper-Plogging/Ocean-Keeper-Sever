@@ -14,7 +14,7 @@ import com.server.oceankeeper.domain.message.entity.OMessage;
 import com.server.oceankeeper.domain.message.repository.MessageDetailRepository;
 import com.server.oceankeeper.domain.message.repository.MessageRepository;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.IllegalRequestException;

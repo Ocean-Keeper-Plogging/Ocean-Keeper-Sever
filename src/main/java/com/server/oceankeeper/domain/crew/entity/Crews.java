@@ -1,12 +1,11 @@
-package com.server.oceankeeper.domain.crew.entitiy;
+package com.server.oceankeeper.domain.crew.entity;
 
 import com.server.oceankeeper.domain.activity.entity.Activity;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.global.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -28,11 +27,11 @@ public class Crews extends BaseEntity {
     @JoinColumn(name = "ACTIVITY_ID")
     private Activity activity;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
     private OUser user;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.DETACH)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "HOST_ID")
     private OUser host;
 

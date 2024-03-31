@@ -1,11 +1,10 @@
 package com.server.oceankeeper.domain.activity.dao;
 
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

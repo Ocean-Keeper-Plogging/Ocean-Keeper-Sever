@@ -6,8 +6,8 @@ import com.server.oceankeeper.domain.user.dto.JoinReqDto;
 import com.server.oceankeeper.domain.user.dto.JoinResDto;
 import com.server.oceankeeper.domain.user.dto.UserIdAndNicknameReqDto;
 import com.server.oceankeeper.domain.user.dto.WithdrawalReqDto;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
-import com.server.oceankeeper.domain.user.entitiy.UserRole;
+import com.server.oceankeeper.domain.user.entity.OUser;
+import com.server.oceankeeper.domain.user.entity.UserRole;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
@@ -28,7 +28,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor

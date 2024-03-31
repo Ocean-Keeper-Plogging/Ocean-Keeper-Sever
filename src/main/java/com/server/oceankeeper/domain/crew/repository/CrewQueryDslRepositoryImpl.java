@@ -1,36 +1,23 @@
 package com.server.oceankeeper.domain.crew.repository;
 
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.server.oceankeeper.domain.activity.dao.*;
 import com.server.oceankeeper.domain.activity.entity.ActivityStatus;
-import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
-import com.server.oceankeeper.domain.activity.entity.LocationTag;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
-import com.server.oceankeeper.domain.crew.param.MyActivityParam;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.server.oceankeeper.domain.activity.entity.QActivity.activity;
 import static com.server.oceankeeper.domain.activity.entity.QActivityDetail.activityDetail;
-import static com.server.oceankeeper.domain.crew.entitiy.QCrews.crews;
+import static com.server.oceankeeper.domain.crew.entity.QCrews.crews;
 import static com.server.oceankeeper.domain.statistics.entity.QActivityInfo.activityInfo;
-import static com.server.oceankeeper.domain.user.entitiy.QOUser.oUser;
+import static com.server.oceankeeper.domain.user.entity.QOUser.oUser;
 
 @RequiredArgsConstructor
 @Slf4j

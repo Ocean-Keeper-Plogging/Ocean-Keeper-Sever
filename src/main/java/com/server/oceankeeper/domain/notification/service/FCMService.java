@@ -5,7 +5,7 @@ import com.server.oceankeeper.domain.activity.dto.inner.UserListDto;
 import com.server.oceankeeper.domain.message.entity.MessageEvent;
 import com.server.oceankeeper.domain.notification.dto.FCMRequestDto;
 import com.server.oceankeeper.domain.notification.dto.MessagePreFormat;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

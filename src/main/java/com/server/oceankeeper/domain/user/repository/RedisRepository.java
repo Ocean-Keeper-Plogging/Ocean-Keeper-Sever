@@ -1,6 +1,6 @@
 package com.server.oceankeeper.domain.user.repository;
 
-import com.server.oceankeeper.domain.user.entitiy.RefreshToken;
+import com.server.oceankeeper.domain.user.entity.RefreshToken;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;

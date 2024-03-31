@@ -1,13 +1,13 @@
 package com.server.oceankeeper.dummy;
 
 import com.server.oceankeeper.domain.activity.entity.*;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
-import com.server.oceankeeper.domain.crew.entitiy.Crews;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.Crews;
 import com.server.oceankeeper.domain.statistics.entity.ActivityInfo;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
-import com.server.oceankeeper.domain.user.entitiy.UserRole;
-import com.server.oceankeeper.domain.user.entitiy.UserStatus;
+import com.server.oceankeeper.domain.user.entity.OUser;
+import com.server.oceankeeper.domain.user.entity.UserRole;
+import com.server.oceankeeper.domain.user.entity.UserStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
@@ -69,13 +69,13 @@ public class DummyObject {
     }
 
     protected OUser newMockUser(Long id, UUID uuid) {
-        String nickname ="nickname" +genRandomString();
+        String nickname = "nickname" + genRandomString();
         return OUser.builder()
                 .id(id)
                 .nickname(nickname)
                 .provider("naver")
-                .providerId(genRandomString()+genRandomString()+genRandomString())
-                .email(nickname+ "@" + "naver.com")
+                .providerId(genRandomString() + genRandomString() + genRandomString())
+                .email(nickname + "@" + "naver.com")
                 .profile("none")
                 .status(UserStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
@@ -89,7 +89,7 @@ public class DummyObject {
                 .build();
     }
 
-    protected Activity newMockActivity(int quota, ActivityStatus activityStatus,
+    protected Activity newMockActivity(OUser host, int quota, ActivityStatus activityStatus,
                                        LocationTag locationTag, GarbageCategory garbageCategory, int startAtPlusDay, UUID uuid) {
         return Activity.builder()
                 .participants(100)
@@ -99,32 +99,19 @@ public class DummyObject {
                 .garbageCategory(garbageCategory)
                 .location(new Location(123.1, 123.2, "제주" + genRandomString()))
                 .locationTag(locationTag)
-                .recruitEndAt(LocalDate.now().plusDays(5))
                 .recruitStartAt(LocalDate.now())
+                .recruitEndAt(LocalDate.now().plusDays(5))
                 .startAt(LocalDateTime.now().plusDays(startAtPlusDay))
                 .title("activity " + genRandomString())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .rewards("")
+                .host(host)
                 .build();
     }
 
-    protected Activity newMockActivity(UUID uuid) {
-        return Activity.builder()
-                .participants(1)
-                .quota(10)
-                .uuid(uuid)
-                .activityStatus(ActivityStatus.OPEN)
-                .garbageCategory(GarbageCategory.COASTAL)
-                .location(new Location(123.1, 123.2, "제주" + genRandomString()))
-                .locationTag(LocationTag.EAST)
-                .recruitEndAt(LocalDate.now().plusDays(5))
-                .recruitStartAt(LocalDate.now())
-                .startAt(LocalDateTime.now().plusDays(10))
-                .title("activity " + genRandomString())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+    protected Activity newMockActivity(OUser host, UUID uuid) {
+        return newMockActivity(host, 100, ActivityStatus.OPEN, LocationTag.EAST, GarbageCategory.COASTAL, 10, uuid);
     }
 
     private String genRandomString() {
@@ -134,7 +121,7 @@ public class DummyObject {
                 .toString();
     }
 
-    protected Crews newCrew(Activity activity, OUser user, OUser host,CrewStatus crewStatus, CrewRole role) {
+    protected Crews newCrew(Activity activity, OUser user, OUser host, CrewStatus crewStatus, CrewRole role) {
         return Crews.builder()
                 .crewStatus(crewStatus)
                 .activity(activity)

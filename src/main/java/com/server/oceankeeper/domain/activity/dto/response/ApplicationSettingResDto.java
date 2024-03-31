@@ -1,6 +1,6 @@
 package com.server.oceankeeper.domain.activity.dto.response;
 
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

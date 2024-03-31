@@ -6,7 +6,7 @@ import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.statistics.entity.ActivityInfo;
 import com.server.oceankeeper.domain.statistics.repository.ActivityInfoRepository;
 import com.server.oceankeeper.domain.user.dto.UserAndActivityDto;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import com.server.oceankeeper.global.exception.IllegalRequestException;
@@ -16,11 +16,8 @@ import com.server.oceankeeper.util.UUIDGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
 

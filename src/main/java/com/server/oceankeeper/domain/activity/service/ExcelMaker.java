@@ -1,20 +1,16 @@
 package com.server.oceankeeper.domain.activity.service;
 
-import com.server.oceankeeper.domain.activity.dto.response.CrewInfoFileDto;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.Crews;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.Crews;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 @Component

@@ -2,7 +2,7 @@ package com.server.oceankeeper.domain.message.repository;
 
 import com.server.oceankeeper.domain.message.dto.MessageDao;
 import com.server.oceankeeper.domain.message.entity.MessageType;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 

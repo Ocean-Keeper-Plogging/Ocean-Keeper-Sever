@@ -1,7 +1,7 @@
 package com.server.oceankeeper.domain.user.service;
 
-import com.server.oceankeeper.domain.user.entitiy.LoginUser;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.LoginUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

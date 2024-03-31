@@ -1,6 +1,6 @@
 package com.server.oceankeeper.util;
 
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.exception.IdNotFoundException;

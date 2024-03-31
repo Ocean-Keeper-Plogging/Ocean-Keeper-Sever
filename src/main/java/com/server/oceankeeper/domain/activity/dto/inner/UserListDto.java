@@ -1,6 +1,6 @@
 package com.server.oceankeeper.domain.activity.dto.inner;
 
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import lombok.Data;
 
 import java.util.List;

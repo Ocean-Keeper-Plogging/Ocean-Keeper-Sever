@@ -4,12 +4,12 @@ import com.server.oceankeeper.domain.activity.dao.FullApplicationDao;
 import com.server.oceankeeper.domain.activity.dto.request.ApplyApplicationReqDto;
 import com.server.oceankeeper.domain.activity.dto.response.ApplicationDto;
 import com.server.oceankeeper.domain.activity.entity.Activity;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
-import com.server.oceankeeper.domain.crew.entitiy.Crews;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.Crews;
 import com.server.oceankeeper.domain.crew.repository.CrewRepository;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
@@ -74,13 +74,6 @@ public class CrewService {
                 .build();
         crewRepository.save(crew);
         return crew;
-    }
-
-    @Transactional
-    public OUser findOwner(Activity activity) {
-        Crews host = crewRepository.findByActivityAndActivityRole(activity, CrewRole.HOST)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 활동에 호스트가 존재하지 않습니다."));
-        return host.getUser();
     }
 
     @Transactional
@@ -164,6 +157,7 @@ public class CrewService {
 
     @Transactional
     public FullApplicationDao getFullApplication(String applicationId) {
+        //TODO:querydsl 안 쓰기
         List<FullApplicationDao> result = crewRepository.getApplicationAndActivityInfoAndCrewInfo(UUIDGenerator.changeUuidFromString(applicationId));
         log.info("JBJB result:{}", result);
         if (result.size() != 1) {

@@ -11,7 +11,7 @@ import com.server.oceankeeper.domain.activity.entity.GarbageCategory;
 import com.server.oceankeeper.domain.activity.entity.LocationTag;
 import com.server.oceankeeper.domain.activity.service.ActivityMessageFacadeService;
 import com.server.oceankeeper.domain.activity.service.ActivityService;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.service.TokenProvider;
 import com.server.oceankeeper.global.aop.DtoValidationAdvice;
 import com.server.oceankeeper.global.config.SecurityConfig;

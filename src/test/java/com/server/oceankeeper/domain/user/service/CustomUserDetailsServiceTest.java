@@ -1,7 +1,7 @@
 package com.server.oceankeeper.domain.user.service;
 
-import com.server.oceankeeper.domain.user.entitiy.LoginUser;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.LoginUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.global.exception.IdNotFoundException;
 import org.junit.jupiter.api.Test;

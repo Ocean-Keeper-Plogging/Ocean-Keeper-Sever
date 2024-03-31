@@ -1,5 +1,6 @@
 package com.server.oceankeeper.domain.activity.entity;
 
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.global.BaseEntity;
 import lombok.*;
 
@@ -23,6 +24,10 @@ public class Activity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "HOST_ID")
+    private OUser host;
 
     @Embedded
     private Location location;
@@ -79,12 +84,13 @@ public class Activity extends BaseEntity {
     }
 
     @Builder
-    public Activity(UUID uuid, LocationTag locationTag, String title,
+    public Activity(UUID uuid, OUser host, LocationTag locationTag, String title,
                     String thumbnail, GarbageCategory garbageCategory, Integer quota,
                     Integer participants, LocalDate recruitStartAt, LocalDate recruitEndAt,
                     LocalDateTime startAt, ActivityStatus activityStatus, Location location,
                     LocalDateTime createdAt, LocalDateTime updatedAt, String rewards) {
         this.uuid = uuid;
+        this.host = host;
         this.locationTag = locationTag;
         this.title = title;
         this.thumbnail = thumbnail;
@@ -112,6 +118,7 @@ public class Activity extends BaseEntity {
         this.activityStatus = ActivityStatus.CANCEL;
         this.location = null;
         this.rewards = null;
+        this.host = null;
     }
 
     public void addParticipant() {

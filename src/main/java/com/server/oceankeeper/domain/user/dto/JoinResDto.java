@@ -1,6 +1,6 @@
 package com.server.oceankeeper.domain.user.dto;
 
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.util.UUIDGenerator;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

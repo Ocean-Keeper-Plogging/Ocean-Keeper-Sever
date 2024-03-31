@@ -1,6 +1,6 @@
 package com.server.oceankeeper.domain.statistics.entity;
 
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.global.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,11 +17,10 @@ import javax.validation.constraints.NotNull;
 public class ActivityInfo extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "USER_ID")
     private OUser user;
 
     @NotNull

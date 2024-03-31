@@ -1,9 +1,5 @@
 package com.server.oceankeeper.config.jwt;
 
-import com.server.oceankeeper.domain.user.entitiy.LoginUser;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
-import com.server.oceankeeper.domain.user.entitiy.UserRole;
-import com.server.oceankeeper.domain.user.dto.TokenInfo;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

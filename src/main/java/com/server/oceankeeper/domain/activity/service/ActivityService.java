@@ -11,9 +11,9 @@ import com.server.oceankeeper.domain.activity.dto.response.*;
 import com.server.oceankeeper.domain.activity.entity.*;
 import com.server.oceankeeper.domain.activity.repository.ActivityDetailRepository;
 import com.server.oceankeeper.domain.activity.repository.ActivityRepository;
-import com.server.oceankeeper.domain.crew.entitiy.CrewRole;
-import com.server.oceankeeper.domain.crew.entitiy.CrewStatus;
-import com.server.oceankeeper.domain.crew.entitiy.Crews;
+import com.server.oceankeeper.domain.crew.entity.CrewRole;
+import com.server.oceankeeper.domain.crew.entity.CrewStatus;
+import com.server.oceankeeper.domain.crew.entity.Crews;
 import com.server.oceankeeper.domain.crew.param.MyActivityParam;
 import com.server.oceankeeper.domain.crew.service.CrewService;
 import com.server.oceankeeper.domain.message.entity.MessageEvent;
@@ -21,7 +21,7 @@ import com.server.oceankeeper.domain.statistics.dto.ActivityInfoResDto;
 import com.server.oceankeeper.domain.statistics.entity.ActivityEvent;
 import com.server.oceankeeper.domain.user.dto.UserAndActivityDto;
 import com.server.oceankeeper.domain.user.dto.UserInfoDto;
-import com.server.oceankeeper.domain.user.entitiy.OUser;
+import com.server.oceankeeper.domain.user.entity.OUser;
 import com.server.oceankeeper.domain.user.repository.UserRepository;
 import com.server.oceankeeper.global.eventfilter.EventPublisher;
 import com.server.oceankeeper.global.eventfilter.OceanKeeperEventType;
@@ -38,7 +38,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -144,15 +143,18 @@ public class ActivityService {
     }
 
     @Transactional
-    public GetActivityResDto getActivities(String activityId, String status, LocationTag locationTag, GarbageCategory garbageCategory, Integer pageSize) {
+    public GetActivityResDto getActivities(String activityId, String status,
+                                           LocationTag locationTag, GarbageCategory garbageCategory,
+                                           Integer pageSize, HttpServletRequest request) {
+        OUser requester = tokenUtil.getUserFromHeader(request);
         ActivityStatus activityStatus = ActivityStatus.getStatus(status);
         Slice<AllActivityDao> response = activityRepository.getAllActivities(
                 activityId != null ? UUIDGenerator.changeUuidFromString(activityId) : null,
                 activityStatus,
                 locationTag,
                 garbageCategory,
-                LocalDateTime.now(),
-                PageRequest.ofSize(pageSize != null ? pageSize : 1));
+                PageRequest.ofSize(pageSize != null ? pageSize : 1),
+                requester);
 
         List<AllActivityResDto> activities = response.stream().map(r -> new AllActivityResDto(
                 UUIDGenerator.changeUuidToString(r.getActivityId()),
@@ -190,6 +192,7 @@ public class ActivityService {
         OUser user = getUser(request.getUserId());
 
         Activity activity = request.toActivityEntity();
+        activity.setHost(user);
 
         activityRepository.save(activity);
 
@@ -238,7 +241,7 @@ public class ActivityService {
         }
 
         activity.addParticipant();
-        OUser host = crewService.findOwner(activity);
+        OUser host = findOwner(activity);
         Crews crew = crewService.addCrew(request, activity, applyUser, host);
 
         publisher.emit(new ActivityEvent(this, applyUser, OceanKeeperEventType.ACTIVITY_PARTICIPATION_EVENT));
@@ -246,6 +249,11 @@ public class ActivityService {
         return new ApplyActivityResDto(
                 UUIDGenerator.changeUuidToString(activity.getUuid())
                 , UUIDGenerator.changeUuidToString(crew.getUuid()));
+    }
+
+    @Transactional
+    public OUser findOwner(Activity activity) {
+        return activity.getHost();
     }
 
     public Activity getActivity(String activityId) {
@@ -334,7 +342,7 @@ public class ActivityService {
 
             publisher.emit(new MessageEvent(
                     this,
-                    getUserListDtoByActivityId(activityId, null),
+                    getUserListDtoByActivityId(activityId, CrewRole.CREW),
                     OceanKeeperEventType.ACTIVITY_CHANGED_EVENT));
         }
     }
@@ -462,12 +470,12 @@ public class ActivityService {
 
     @Transactional
     public HostActivityDto getHostActivityName(HttpServletRequest servletRequest) {
-        OUser user = tokenUtil.getUserFromHeader(servletRequest);
-        List<HostActivityDao> activities = activityRepository.getHostActivityNameFromUser(user);
+        OUser host = tokenUtil.getUserFromHeader(servletRequest);
+        List<Activity> activities = activityRepository.findByHost(host);
         return new HostActivityDto(activities.stream().map(
-                        d -> new HostActivityDto.HostActivityInnerDto(
-                                UUIDGenerator.changeUuidToString(d.getUuid()),
-                                d.getTitle()))
+                        activity -> new HostActivityDto.HostActivityInnerDto(
+                                UUIDGenerator.changeUuidToString(activity.getUuid()),
+                                activity.getTitle()))
                 .collect(Collectors.toList()));
     }
 
@@ -506,11 +514,6 @@ public class ActivityService {
     }
 
     @Transactional
-    public OUser findOwner(Activity activity) {
-        return crewService.findOwner(activity);
-    }
-
-    @Transactional
     //public CrewInfoFileDto getCrewInfoFile(String activityId, HttpServletRequest request) {
     public void getCrewInfoFile(String activityId, HttpServletRequest request, HttpServletResponse response) {
         synchronized (this) {
@@ -538,7 +541,8 @@ public class ActivityService {
     }
 
     private UserListDto getUserListDtoByActivityId(String activityId, CrewRole crewRole) {
-        List<CrewDeviceTokensDao> result = activityRepository.getUserFromActivityId(UUIDGenerator.changeUuidFromString(activityId), crewRole);
+        List<CrewDeviceTokensDao> result =
+                activityRepository.getUserFromActivityId(UUIDGenerator.changeUuidFromString(activityId), crewRole);
         return new UserListDto(result.stream().map(CrewDeviceTokensDao::getUser).collect(Collectors.toList()));
     }
 
