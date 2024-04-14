@@ -2,6 +2,7 @@ package com.server.oceankeeper.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Configuration
 @EnableSwagger2
+@Profile({"!prod"})
 public class SwaggerConfig implements WebMvcConfigurer {
 
     private static final String API_NAME = "Ocean keeper API";
