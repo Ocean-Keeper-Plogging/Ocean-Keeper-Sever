@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -36,11 +35,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
     private final Logger log = LoggerFactory.getLogger(getClass());
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring()
-                .antMatchers("/h2-console/**", "/favicon.ico");
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -76,8 +70,6 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.GET,"/terms").permitAll()
                 .antMatchers("/admin/**").hasRole("" + UserRole.ADMIN)
                 //swagger
-                //TODO - prod단계에서 지워야함
-                .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/v2/api-docs/**", "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/swagger/**").permitAll()
                 .anyRequest().authenticated();
 
