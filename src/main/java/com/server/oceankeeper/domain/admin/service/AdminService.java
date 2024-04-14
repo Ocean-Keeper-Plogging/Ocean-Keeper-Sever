@@ -50,7 +50,8 @@ public class AdminService {
         Optional<RefreshToken> refreshToken = refreshTokenRepository.findByKey(id + "-9___1-admin");
         log.debug("refresh token :{}", refreshToken);
         if (refreshToken.isEmpty()) {
-            throw new IllegalRequestException("이미 로그아웃 되었습니다.");
+            //throw new IllegalRequestException("이미 로그아웃 되었습니다.");
+            return;
         }
 
         refreshTokenRepository.delete(refreshToken.get());
