@@ -88,11 +88,4 @@ public class ImageUploadController {
 
         return ResponseEntity.ok(profileResDto);
     }
-
-    @ApiOperation(value = "썸네일 등록 [권한 필요 없음]", notes = "활동 썸네일 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
-    @PostMapping("/test")
-    public ResponseEntity<ProfileResDto> test(@RequestPart("test") MultipartFile file) throws IOException {
-        ProfileResDto profileResDto = imageService.upload(file, "test");
-        return ResponseEntity.ok(profileResDto);
-    }
 }

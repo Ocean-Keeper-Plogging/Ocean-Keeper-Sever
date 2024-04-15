@@ -253,21 +253,4 @@ public class ActivityController {
         ApplicationSettingResDto response = activityMessageService.setApplicationStatus(request, servletRequest);
         return ResponseEntity.status(HttpStatus.OK).body(APIResponse.createPostResponse(response));
     }
-
-    @PostMapping(value = "/get")
-    public void test(
-            @RequestParam(value = "activity-id") String activityId, HttpServletRequest servletRequest) {
-        activityService.startActivitySoon(activityId);
-    }
-
-    @PostMapping(value = "/cal")
-    public void test2() {
-        activityService.reCalculate();
-    }
-
-    @PostMapping(value = "/del")
-    public void test3(){activityService.handleActivityInfoDeleteEvent();}
-
-    @PostMapping(value = "/close")
-    public void test4(){activityService.testCloseActivity();}
 }
