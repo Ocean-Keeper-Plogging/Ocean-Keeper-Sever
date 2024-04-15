@@ -80,7 +80,7 @@ public class ImageUploadController {
     private ResponseEntity<ProfileResDto> editFile(MultipartFile file, HttpServletRequest request, String dirName) throws IOException {
         ProfileResDto profileResDto = imageService.edit(file, request, dirName);
 
-        return new ResponseEntity<>(profileResDto, HttpStatus.OK);
+        return new ResponseEntity<>(profileResDto, HttpStatus.CREATED);
     }
 
     private ResponseEntity<ProfileResDto> uploadFile(MultipartFile file, String dirName) throws IOException {

@@ -85,7 +85,7 @@ class ImageUploadControllerTest {
         System.out.println("Response body : " + responseBody);
 
         //then
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isCreated());
     }
 
     @Test
@@ -117,7 +117,7 @@ class ImageUploadControllerTest {
         System.out.println("Response body : " + responseBody);
 
         //then
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isCreated());
     }
 
     @Test
@@ -149,7 +149,7 @@ class ImageUploadControllerTest {
         System.out.println("Response body : " + responseBody);
 
         //then
-        resultActions.andExpect(status().isOk());
+        resultActions.andExpect(status().isCreated());
     }
 
     @Test
@@ -167,25 +167,5 @@ class ImageUploadControllerTest {
 
         //then
         resultActions.andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser
-    void test() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("test","test.png","image/test.png",
-                "test".getBytes(StandardCharsets.UTF_8));
-        ResultActions resultActions = mvc.perform(multipart("/image/test")
-                .file(file));
-        ProfileResDto mockResult = new ProfileResDto("url");
-        //when(imageService.upload(any(),any())).thenReturn(mockResult);
-        when(imageService.upload(any(),any())).thenThrow(ResourceNotFoundException.class);
-
-        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
-        System.out.println("Response body : " + responseBody);
-
-        //then
-        resultActions.andExpect(status().isOk());
-//        ProfileResDto result = om.readValue(responseBody,ProfileResDto.class);
-//        assertThat(result).isEqualTo(mockResult);
     }
 }
