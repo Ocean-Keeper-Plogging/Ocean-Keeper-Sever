@@ -53,13 +53,13 @@ public class ImageUploadController {
         return uploadFile(file, PROFILE);
     }
 
-    @ApiOperation(value = "썸네일 수정 [권한 필요]", notes = "기존 활동 스토리 이미지 s3 수정 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @ApiOperation(value = "활동 스토리 수정 [권한 필요]", notes = "기존 활동 스토리 이미지 s3 수정 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
     @PostMapping("/edit/story")
     public ResponseEntity<ProfileResDto> editStory(@RequestPart(STORY) MultipartFile file, HttpServletRequest request) throws IOException {
         return editFile(file, request, STORY);
     }
 
-    @ApiOperation(value = "썸네일 등록 [권한 필요 없음]", notes = "활동 스토리 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @ApiOperation(value = "활동 스토리 등록 [권한 필요 없음]", notes = "활동 스토리 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
     @PostMapping("/story")
     public ResponseEntity<ProfileResDto> uploadStory(@RequestPart(STORY) MultipartFile file) throws IOException {
         return uploadFile(file, STORY);
