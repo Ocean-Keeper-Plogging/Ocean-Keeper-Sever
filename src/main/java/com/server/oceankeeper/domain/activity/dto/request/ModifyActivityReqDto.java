@@ -87,7 +87,6 @@ public class ModifyActivityReqDto {
             value = "활동 스토리 글",
             example = "안녕하세요. 00 활동입니다."
     )
-    @Length(max = 10)
     private final String activityStory;
 
     @ApiModelProperty(
