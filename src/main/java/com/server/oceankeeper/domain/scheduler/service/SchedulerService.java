@@ -116,7 +116,7 @@ public class SchedulerService {
     private void registerActivityCloseSchedule(ActivityEvent event) {
         log.debug("활동 종료 이벤트 등록 event:{}", event);
         RegisterActivityEventDto eventDto = (RegisterActivityEventDto) event.getObject();
-        LocalDateTime activityEndTime = eventDto.getStartAt().plusDays(1).with(LocalTime.MIDNIGHT);
+        LocalDateTime activityEndTime = eventDto.getStartAt();
         Date activityEndDate = Date.from(activityEndTime.atZone(ZoneId.systemDefault()).toInstant());
 
         TimeZone tz = Calendar.getInstance().getTimeZone();
