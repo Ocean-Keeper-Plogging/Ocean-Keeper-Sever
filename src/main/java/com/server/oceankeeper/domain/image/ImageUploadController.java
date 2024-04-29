@@ -27,13 +27,13 @@ public class ImageUploadController {
     private static final String STORY = "story";
     private static final String THUMBNAIL = "thumbnail";
 
-    @ApiOperation(value = "썸네일 수정 [권한 필요]", notes = "기존 활동 키퍼 이미지 s3 수정 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @ApiOperation(value = "키퍼 수정 [권한 필요]", notes = "기존 활동 키퍼 이미지 s3 수정 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
     @PostMapping("/edit/keeper")
     public ResponseEntity<ProfileResDto> editKeeper(@RequestPart(KEEPER) MultipartFile file, HttpServletRequest request) throws IOException {
         return editFile(file, request, KEEPER);
     }
 
-    @ApiOperation(value = "썸네일 등록 [권한 필요 없음]", notes = "활동 키퍼 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
+    @ApiOperation(value = "키퍼 등록 [권한 필요 없음]", notes = "활동 키퍼 이미지를 S3에 저장 후 저장된 url을 반환합니다.", response = ProfileResDto.class)
     @PostMapping("/keeper")
     public ResponseEntity<ProfileResDto> uploadKeeper(@RequestPart(KEEPER) MultipartFile file) throws IOException {
         return uploadFile(file, KEEPER);
@@ -85,6 +85,7 @@ public class ImageUploadController {
 
     private ResponseEntity<ProfileResDto> uploadFile(MultipartFile file, String dirName) throws IOException {
         ProfileResDto profileResDto = imageService.upload(file, dirName);
+        log.info("profile result = {}", profileResDto);
 
         return ResponseEntity.ok(profileResDto);
     }
