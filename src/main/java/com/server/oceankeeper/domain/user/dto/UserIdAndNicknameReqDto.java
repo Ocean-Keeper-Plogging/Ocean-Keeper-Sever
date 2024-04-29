@@ -21,7 +21,8 @@ public class UserIdAndNicknameReqDto {
             notes = "한글/영문/숫자로만 구성된 2~20자 이내의 닉네임 필요",
             example = "NewNickName",
             required = true)
-    @Pattern(regexp = "^[a-zA-Z0-9가-힣]{2,20}$", message="한글/영문/숫자로만 구성된 2~20자 이내의 닉네임을 사용해주세요")
+    @Pattern(regexp = "^[a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ_\\-:/()#,@\\[\\]=&;{}!$*+ ]{2,8}$",
+            message = "한글/영문/숫자/공백/특수문자 _-:/()#,@[]+=&;{}!$*로만 구성된 2~8자 이내의 닉네임을 사용해주세요")
     @NotEmpty
     private final String nickname;
 }
