@@ -13,14 +13,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.server.oceankeeper.domain.notification.entity.QNotification.notification;
+import static com.server.oceankeeper.domain.user.entity.QOUser.oUser;
 
 @RequiredArgsConstructor
 public class NotificationQueryDslRepositoryImpl implements NotificationQueryDslRepository {
     private final JPAQueryFactory queryFactory;
+
     @Override
     public Slice<Notification> getNotification(OUser user, Long id, Pageable pageable) {
-        List<Notification> result = queryFactory.selectFrom(notification)
-                .where(lessThan(id)) //for no offset scrolling, use notice id
+        List<Notification> result = queryFactory.select(notification)
+                .from(notification)
+                .innerJoin(notification.user, oUser)
+                .where(lessThan(id), //for no offset scrolling, use notice id
+                        notification.user.eq(user)
+                )
                 .orderBy(notification.id.desc())
                 .limit(pageable.getPageSize() + 1)
                 .fetch().stream().distinct().collect(Collectors.toList());
