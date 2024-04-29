@@ -12,6 +12,7 @@ import java.util.UUID;
 
 public class MultipartToImgUtil {
     private final Logger log = LoggerFactory.getLogger(getClass());
+
     public Optional<File> multipartUpload(MultipartFile multipartFile) throws IOException {
         return convertMultipartFileToFile(multipartFile);
     }
@@ -21,10 +22,12 @@ public class MultipartToImgUtil {
         File file = new File(System.getProperty("user.dir") + "/" + multipartFile.getOriginalFilename());
 
         if (file.createNewFile()) {
-            try (FileOutputStream fos = new FileOutputStream(file)){
+            try (FileOutputStream fos = new FileOutputStream(file)) {
                 fos.write(multipartFile.getBytes());
             }
             return Optional.of(file);
+        } else {
+            log.error("파일 생성 실패 file:{}", file.getName());
         }
 
         return Optional.empty();
