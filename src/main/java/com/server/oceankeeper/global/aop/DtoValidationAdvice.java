@@ -35,10 +35,9 @@ public class DtoValidationAdvice {
             if (arg instanceof BindingResult) {
                 BindingResult bindingResult = (BindingResult) arg;
                 List<ObjectError> allErrors = bindingResult.getAllErrors();
-                allErrors
-                        .forEach(error -> {
-                            log.error("error: {}", error);
-                        });
+                for (ObjectError allError : allErrors) {
+                    log.error("error: {}", allError);
+                }
                 if (bindingResult.hasErrors()) {
                     Map<String, String> errorMap = new HashMap<>();
 

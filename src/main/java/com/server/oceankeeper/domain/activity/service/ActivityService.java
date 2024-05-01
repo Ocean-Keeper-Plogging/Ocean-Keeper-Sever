@@ -680,7 +680,6 @@ public class ActivityService {
 
     @Transactional
     public void reCalculate() {
-        log.debug("JBJB recalculate dates");
         List<Activity> activities = activityRepository.findAll();
         for (Activity activity : activities) {
             if (activity.getActivityStatus().equals(ActivityStatus.CANCEL))

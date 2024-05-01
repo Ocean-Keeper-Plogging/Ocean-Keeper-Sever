@@ -150,7 +150,7 @@ public class CrewService {
 
     @Transactional
     public void deleteCrew(OUser user, Crews crew) {
-        log.info("JBJB [deleteCrew] crew:{}", crew);
+        log.info("[deleteCrew] crew:{}", crew);
         crewRepository.delete(crew);
         publisher.emit(new ActivityEvent(this, user, OceanKeeperEventType.ACTIVITY_PARTICIPATION_CANCEL_EVENT));
     }
@@ -159,7 +159,7 @@ public class CrewService {
     public FullApplicationDao getFullApplication(String applicationId) {
         //TODO:querydsl 안 쓰기
         List<FullApplicationDao> result = crewRepository.getApplicationAndActivityInfoAndCrewInfo(UUIDGenerator.changeUuidFromString(applicationId));
-        log.info("JBJB result:{}", result);
+        log.info("[getFullApplication] result:{}", result);
         if (result.size() != 1) {
             throw new ResourceNotFoundException("신청서에 해당하는 정보가 없습니다.");
         }

@@ -35,7 +35,7 @@ public class CustomExceptionHandler {
                 .body(APIResponse.createErrResponse(HttpStatus.BAD_REQUEST,
                         new ErrorResponse(
                                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                                e.getMessage() + ": " + e.getErrorMap().toString(),
+                                e.getErrorMap().toString(),
                                 ErrorCode.INVALID_REQUEST)));
     }
 

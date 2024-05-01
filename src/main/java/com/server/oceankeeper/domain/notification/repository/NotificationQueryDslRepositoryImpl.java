@@ -41,7 +41,7 @@ public class NotificationQueryDslRepositoryImpl implements NotificationQueryDslR
             result.remove(pageable.getPageSize());
         }
 
-        return new SliceImpl<T>(result, pageable, hasNext);
+        return new SliceImpl<>(result, pageable, hasNext);
     }
 
     private BooleanExpression lessThan(Long id) {

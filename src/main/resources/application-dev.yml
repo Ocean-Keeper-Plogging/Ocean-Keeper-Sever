@@ -31,6 +31,7 @@ spring:
     port: 6379
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update #create update none
     show-sql: true

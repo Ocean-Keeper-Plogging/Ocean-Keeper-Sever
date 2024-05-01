@@ -50,9 +50,7 @@ public class UserService {
         OUser user = joinReqDto.toEntity();
         user.initializePassword(passwordEncoder.encode(password)); //TODO: 더 나은 보안 방법이 없을까 고민
         OUser userSaved = userRepository.save(user);
-        log.info("JBJB before transa:{}", TransactionSynchronizationManager.getCurrentTransactionName());
         publisher.emit(new ActivityEvent(this, userSaved, OceanKeeperEventType.USER_JOINED_EVENT));
-        log.info("JBJB after transa:{}", TransactionSynchronizationManager.getCurrentTransactionName());
         return new JoinResDto(userSaved);
     }
 

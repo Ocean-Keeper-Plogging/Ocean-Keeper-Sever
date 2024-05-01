@@ -16,7 +16,6 @@ public class PrivacyPolicyDetailResDto {
     private final LocalDate createdAt;
 
     public static PrivacyPolicyDetailResDto fromEntity(PrivacyPolicy terms) {
-        log.info("JBJB term utf8로 처리함");
         ByteBuffer buffer = StandardCharsets.UTF_8.encode(terms.getContents());
 
         String utf8EncodedString = StandardCharsets.UTF_8.decode(buffer).toString();
