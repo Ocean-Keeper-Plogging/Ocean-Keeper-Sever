@@ -14,4 +14,4 @@ FROM openjdk:11
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar ./
 
-ENTRYPOINT ["java", "-jar", "./OceanKeeper-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "./OceanKeeper-0.0.1-SNAPSHOT.jar", "--spring.profiles.active=dev"]

@@ -1,5 +1,22 @@
 version: "3"
 services:
+  db:
+    platform: linux/amd64
+    image: mysql:8.0.32
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+#      MYSQL_USER: oceankeeper-admin
+#      MYSQL_PASSWORD: oceankeeper
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/data:/var/lib/mysql
+      #- ./db/conf.d:/etc/mysql/conf.d
+      - ./db/init.d:/docker-entrypoint-initdb.d
+    networks:
+      - backend
   webapp:
     build:
       context: .
@@ -8,11 +25,14 @@ services:
     ports:
       - "8080:80"
     container_name: api_server
-    env_file: .env
+    env_file: .devel.env
     environment:
         TJ: "Asia/Seoul"
     depends_on:
+      - db
       - redis
+    networks:
+      - backend
   redis:
       image: redis:alpine
       command: redis-server --port 6379
@@ -23,3 +43,7 @@ services:
         - "mode=standalone"
       ports:
         - "6379:6379"
+      networks:
+        - backend
+networks:
+  backend:
