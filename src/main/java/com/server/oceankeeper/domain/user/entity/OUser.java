@@ -16,7 +16,6 @@ import java.util.UUID;
 @Getter
 @Entity
 @NoArgsConstructor
-@ToString(callSuper = true)
 @Table(name = "users", indexes = {
         @Index(name = "i_uuid", columnList = "uuid", unique = true),
         @Index(name = "i_provider_providerid", columnList = "provider, providerId", unique = true)})
@@ -143,6 +142,21 @@ public class OUser extends BaseEntity {
     public void addBlockedUser(BlockUser blockUser) {
         this.blockedUser.add(blockUser);
         blockUser.setBlocker(this);
+    }
+
+    @Override
+    public String toString() {
+        return "OUser{" +
+                "id=" + id +
+                ", uuid=" + uuid +
+                ", provider='" + provider + '\'' +
+                ", providerId='" + providerId + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", email='" + email + '\'' +
+                ", profile='" + profile + '\'' +
+                ", deviceToken='" + deviceToken + '\'' +
+                ", alarm=" + alarm +
+                '}';
     }
 }
 
