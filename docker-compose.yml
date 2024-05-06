@@ -23,7 +23,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "8080:80"
+      - "80:8080"
     container_name: api_server
     env_file: .devel.env
     environment:
@@ -34,7 +34,7 @@ services:
     networks:
       - backend
     volumes:
-      - ./logs:/home/ubuntu/Ocean-keeper-Server/logs
+      - ./logs:/var/log/
   redis:
       image: redis:alpine
       command: redis-server --port 6379

@@ -79,7 +79,7 @@ logging:
       max-file-size: 100MB
       file-name-pattern: ${LOG_FILE}.%d{yyyy-MM-dd}-%i.log
   file:
-    name: logs/oceankeeper.log
+    name: /var/log/oceankeeper.log
   pattern:
     dateformat: yyyy-MM-dd HH:mm:ss.SSS,Asia/Seoul
 
