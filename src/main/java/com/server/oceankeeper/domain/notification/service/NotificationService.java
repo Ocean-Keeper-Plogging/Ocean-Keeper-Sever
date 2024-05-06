@@ -41,7 +41,7 @@ public class NotificationService {
         if (user.isAlarm()) {
             FCMRequestDto request = new FCMRequestDto(user.getDeviceToken(), MessagePreFormat.get(eventType).getValue());
 
-            saveNewMessage(user, MessagePreFormat.get(eventType));
+            saveNewNotification(user, MessagePreFormat.get(eventType));
             return request;
         }
         return null;
@@ -52,13 +52,13 @@ public class NotificationService {
         if (user.isAlarm()) {
             FCMRequestDto request = new FCMRequestDto(user.getDeviceToken(), MessagePreFormat.get(eventType).getValue());
 
-            saveNewMessage(user, MessagePreFormat.get(eventType));
+            saveNewNotification(user, MessagePreFormat.get(eventType));
             return request;
         }
         return null;
     }
 
-    private void saveNewMessage(OUser user, MessagePreFormat messageType) {
+    private void saveNewNotification(OUser user, MessagePreFormat messageType) {
         Notification notification = Notification.builder()
                 .isRead(false)
                 .user(user)
@@ -138,7 +138,7 @@ public class NotificationService {
         Slice<OUser> users = userService.findUsersByNotificationAlarm(true, pageable);
         log.info("[saveNotificationAndGetAlarmedUsers] users:{}", users.getContent());
         for (OUser user : users) {
-            saveNewMessage(user, MessagePreFormat.get(event.getEvent()));
+            saveNewNotification(user, MessagePreFormat.get(event.getEvent()));
         }
         return users;
     }
