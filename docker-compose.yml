@@ -33,6 +33,8 @@ services:
       - redis
     networks:
       - backend
+    volumes:
+      - ./logs:/home/ubuntu/Ocean-keeper-Server/logs
   redis:
       image: redis:alpine
       command: redis-server --port 6379
