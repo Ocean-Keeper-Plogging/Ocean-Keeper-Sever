@@ -27,6 +27,7 @@ public class FCMService {
 
     @EventListener
     @Async
+    @Transactional
     public void handle(MessageEvent event) {
         if (event.getEvent().equals(OceanKeeperEventType.MESSAGE_SENT_EVENT)) {
             handleMessageSentEvent(event);
@@ -69,11 +70,10 @@ public class FCMService {
                 .build();
         try {
             firebaseMessaging.send(message);
-            log.info("Firebase Message sent. message = {}", request.getContents());
+            log.info("Firebase Message sent. message = {}, device token = {}", request.getContents(), request.getDeviceToken());
             return "true";
         } catch (FirebaseMessagingException e) {
-            log.error("Firebase 메세지 전송 실패 : {}", e.getMessagingErrorCode().toString());
-            //throw new IOException(String.format("Firebase 메세지 전송 실패 :%s", e.getMessagingErrorCode().toString()));
+            log.error("Firebase 메세지 전송 실패 : {}", e.getMessage());
             return "false";
         }
     }
@@ -87,7 +87,7 @@ public class FCMService {
                 .setNotification(notification)
                 .addAllTokens(deviceTokenList)
                 .build();
-        log.info("JBJB device list :{}", deviceTokenList);
+        log.info("device list :{}", deviceTokenList);
         try {
             firebaseMessaging.sendEachForMulticast(multicastMessage);
             log.info("Firebase Message sent. message = {}", contents);

@@ -24,13 +24,14 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: 3MB
-      max-request-size: 1MB
+      max-file-size: 30MB
+      max-request-size: 10MB
   redis:
-    host: localhost
+    host: redis_server
     port: 6379
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update #create update none
     show-sql: true
@@ -72,6 +73,15 @@ logging:
     '[com.server.oceankeeper]': DEBUG
     '[org.hibernate.type]': TRACE
     root: INFO
+  logback:
+    rollingpolicy:
+      max-history: 30
+      max-file-size: 100MB
+      file-name-pattern: ${LOG_FILE}.%d{yyyy-MM-dd}-%i.log
+  file:
+    name: /var/log/oceankeeper.log
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss.SSS,Asia/Seoul
 
 cloud:
   aws:

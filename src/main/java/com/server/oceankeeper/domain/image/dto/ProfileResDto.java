@@ -8,6 +8,7 @@ import javax.validation.constraints.NotEmpty;
 
 @Getter
 @Setter
+@ToString
 public class ProfileResDto {
 
     @ApiModelProperty(

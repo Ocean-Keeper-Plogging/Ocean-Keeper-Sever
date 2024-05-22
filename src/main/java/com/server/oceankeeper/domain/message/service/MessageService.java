@@ -130,7 +130,7 @@ public class MessageService {
         Activity activity = null;
 
         activity = activityService.getActivity(req.getActivityId());
-        log.debug("JBJB sender user:{}", user);
+        log.debug("[sendMessage] sender user:{}", user);
 
         List<Long> messageIdList = new ArrayList<>();
         for (String nickname : req.getTargetNicknames()) {

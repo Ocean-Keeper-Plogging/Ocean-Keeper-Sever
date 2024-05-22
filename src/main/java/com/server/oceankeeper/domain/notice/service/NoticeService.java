@@ -55,7 +55,7 @@ public class NoticeService {
     public NoticeResDto post(NoticeReqDto request) {
         Notice notice = request.toEntity();
         repository.save(notice);
-        log.info("JBJB post notice ={}",notice);
+        log.info("post notice ={}",notice);
         publisher.emit(new MessageEvent(this, null, OceanKeeperEventType.NEW_NOTICE_EVENT));
         return NoticeResDto.fromEntity(notice);
     }

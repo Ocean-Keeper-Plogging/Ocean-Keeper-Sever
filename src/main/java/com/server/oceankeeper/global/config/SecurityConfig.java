@@ -35,7 +35,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
     private final Logger log = LoggerFactory.getLogger(getClass());
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.debug("디버그 : filterChain 빈 등록됨");
@@ -70,6 +69,7 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.GET,"/terms").permitAll()
                 .antMatchers("/admin/**").hasRole("" + UserRole.ADMIN)
                 //swagger
+                .antMatchers("/swagger-ui.html").permitAll()
                 .antMatchers("/v2/api-docs/**", "/swagger-ui/**", "/swagger-resources/**", "/webjars/**", "/swagger/**").permitAll()
                 .anyRequest().authenticated();
 

@@ -561,22 +561,6 @@ public class ActivityService {
     }
 
     @Transactional
-    public void testCloseActivity() {
-        List<Activity> activities = activityRepository.findAll();
-        for (Activity activity : activities) {
-            ActivityStatus status = activity.getActivityStatus();
-            List<Crews> crews = crewService.findCrews(activity);
-            if (status.equals(ActivityStatus.CLOSED)) {
-                for (Crews crew : crews)
-                    if (!(crew.getCrewStatus().equals(CrewStatus.REJECT)
-                            || crew.getCrewStatus().equals(CrewStatus.CANCEL)
-                            || crew.getCrewStatus().equals(CrewStatus.NO_SHOW)))
-                        crew.closeApplication();
-            }
-        }
-    }
-
-    @Transactional
     public void closeActivity(String activityId) {
         log.info("[closeActivity] activity id:{}", activityId);
 
@@ -696,7 +680,6 @@ public class ActivityService {
 
     @Transactional
     public void reCalculate() {
-        log.debug("JBJB recalculate dates");
         List<Activity> activities = activityRepository.findAll();
         for (Activity activity : activities) {
             if (activity.getActivityStatus().equals(ActivityStatus.CANCEL))

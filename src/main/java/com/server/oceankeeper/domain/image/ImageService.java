@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -36,11 +37,13 @@ public class ImageService {
         OUser user = tokenUtil.getUserFromHeader(request);
 
         //기존 파일 s3에서 삭제
-        removeProfile(user);
+        //TODO: remove previous profile image from s3.
+        //removeProfile(user);
 
         String url = uploadNewProfile(file, dirName);
 
-        updateProfile(user, url);
+        if(dirName.equals("profile"))
+            updateProfile(user, url);
         return ProfileResDto.builder().url(url).build();
     }
 

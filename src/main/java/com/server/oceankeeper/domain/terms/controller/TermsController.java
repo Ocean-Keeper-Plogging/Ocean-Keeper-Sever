@@ -7,7 +7,9 @@ import com.server.oceankeeper.domain.terms.service.TermsService;
 import com.server.oceankeeper.global.response.APIResponse;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,22 +22,22 @@ public class TermsController {
     @PostMapping(value = "/admin/terms",
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    public APIResponse<TermsResDto> postTerms(@RequestBody TermsReqDto request, BindingResult bindingResult) {
+    public ResponseEntity<APIResponse<TermsResDto>> postTerms(@RequestBody TermsReqDto request, BindingResult bindingResult) {
         TermsResDto response = service.post(request);
-        return APIResponse.createPostResponse(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(APIResponse.createPostResponse(response));
     }
 
     @ApiOperation(value = "이용약관 조회[권한 필요]")
     @GetMapping("/terms")
-    public APIResponse<TermsDetailResDto> getTerms() {
+    public ResponseEntity<APIResponse<TermsDetailResDto>> getTerms() {
         TermsDetailResDto response = service.get();
-        return APIResponse.createGetResponse(response);
+        return  ResponseEntity.status(HttpStatus.OK).body(APIResponse.createGetResponse(response));
     }
 
     @ApiOperation(value = "이용약관 삭제[권한 필요]")
     @DeleteMapping("/admin/terms")
-    public APIResponse<Boolean> deleteTerms(@RequestParam("id") Long id) {
+    public ResponseEntity<APIResponse<Boolean>> deleteTerms(@RequestParam("id") Long id) {
         boolean response = service.delete(id);
-        return APIResponse.createGetResponse(response);
+        return  ResponseEntity.status(HttpStatus.OK).body(APIResponse.createDeleteResponse(response));
     }
 }
