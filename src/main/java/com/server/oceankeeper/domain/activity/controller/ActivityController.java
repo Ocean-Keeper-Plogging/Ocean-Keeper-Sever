@@ -231,16 +231,12 @@ public class ActivityController {
     @ApiOperation(value = "크루원 정보 엑셀 저장하기 [권한 필요]", notes = "요청자가 특정 활동의 크루원 정보가 저장된 파일을 다운받습니다.",
             response = ByteArrayResource.class)
     @GetMapping(value = "/recruitment/host/crew-info-file"
-            //        produces = "application/vnd.ms-excel"
     )
-    //public ByteArrayResource getCrewInfoFile(
     public void getCrewInfoFile(
             @ApiParam(value = "특정 활동 id", required = true, defaultValue = "11ee2962ed293b2a869b0f30e7d4f7c1")
             @RequestParam(value = "activity-id") String activityId, HttpServletRequest request, HttpServletResponse response) throws IOException {
-//        CrewInfoFileDto response = activityService.getCrewInfoFile(activityId, request);
-//        return response.getCrewInfo();
-        response.setContentType("application/vnd.ms-excel");
-        activityService.getCrewInfoFile(activityId, request, response);
+       response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+       activityService.getCrewInfoFile(activityId, request, response);
 
     }
 

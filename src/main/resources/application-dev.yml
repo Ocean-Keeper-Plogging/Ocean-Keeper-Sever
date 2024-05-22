@@ -24,10 +24,10 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: 3MB
-      max-request-size: 1MB
+      max-file-size: 30MB
+      max-request-size: 10MB
   redis:
-    host: localhost
+    host: redis_server
     port: 6379
 
   jpa:
