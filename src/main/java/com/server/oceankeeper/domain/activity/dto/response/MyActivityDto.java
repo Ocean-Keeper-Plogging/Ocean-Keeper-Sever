@@ -70,7 +70,7 @@ public class MyActivityDto {
                 value = "활동 시작 시각",
                 required = true
         )
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm", timezone = "Asia/Seoul")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
         private final LocalDateTime startAt;
 
         @ApiModelProperty(

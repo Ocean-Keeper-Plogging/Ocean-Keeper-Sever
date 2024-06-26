@@ -62,7 +62,7 @@ public class ModifyActivityReqDto {
             value = "활동 시작일",
             example = "2023-07-20T13:00:00"
     )
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'hh:mm:ss", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private final LocalDateTime startAt;
 
     @ApiModelProperty(
